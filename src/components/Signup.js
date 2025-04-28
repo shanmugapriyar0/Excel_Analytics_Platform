@@ -55,9 +55,9 @@ const Signup = () => {
               <br></br>
               <p className="login-bottom-p">
                 have an account?
-                <a onClick={handleClick} className="navigation-button">
+                <button onClick={handleClick} className="navigation-button" style={{ background: "none", border: "none", color: "blue", textDecoration: "underline", cursor: "pointer" }}>
                   login
-                </a>
+                </button>
               </p>
             </form>
           </div>
