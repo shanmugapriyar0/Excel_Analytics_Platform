@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useEffect, useState } from "react";
 import Image from "../assets/login.png";
 import { FaEye } from "react-icons/fa6";
@@ -54,9 +55,9 @@ const Signup = () => {
               </div>
               <br></br>
               <p className="login-bottom-p">
-                have an account?
+                have an account?{" "}
                 <a onClick={handleClick} className="navigation-button">
-                  login
+                  Login
                 </a>
               </p>
             </form>

@@ -1,6 +1,7 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useEffect, useState } from "react";
 import Image from "../assets/login.png";
-import GoogleSvg from "../assets/icons8-google.svg";
+// import GoogleSvg from "../assets/icons8-google.svg";
 import { FaEye } from "react-icons/fa6";
 import { FaEyeSlash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
@@ -55,7 +56,7 @@ const Login = () => {
                     Remember for 30 days
                   </label>
                 </div>
-                <a href="#" className="forgot-pass-link">
+                <a href="/" className="forgot-pass-link">
                   Forgot password?
                 </a>
               </div>
