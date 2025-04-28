@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Image from "../assets/login.png";
 // import GoogleSvg from "../assets/icons8-google.svg";
 import { FaEye } from "react-icons/fa6";
