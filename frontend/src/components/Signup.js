@@ -1,5 +1,3 @@
-// frontend/src/components/Signup.js
-
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import Image from "../assets/login.png";
