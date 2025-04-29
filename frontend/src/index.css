@@ -1,0 +1,568 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import "tailwindcss";
+* {
+  box-sizing: border-box;
+  padding: 0px;
+  margin: 0px;
+}
+
+html {
+  font-size: 10px;
+}
+
+body {
+  font-family: "Poppins", sans-serif;
+  height: 100vh;
+}
+
+.login-main {
+  display: flex;
+}
+
+.login-left {
+  flex-grow: 3;
+  height: 100vh;
+  width: 5vh;
+  background-color: rgb(8, 153, 8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.login-left img {
+  width: 100%;
+}
+
+.login-left-flex {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-right {
+  height: 100vh;
+  flex-grow: 1;
+}
+
+.login-right-container {
+  height: 100%;
+  width: 60%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.login-right form {
+  display: flex;
+  width: 80vh;
+  flex-direction: column;
+}
+
+.login-logo {
+  align-self: center;
+  padding-top: 50px;
+}
+
+.login-center {
+  margin: auto 0;
+}
+
+.login-logo img {
+  width: 50px;
+}
+
+.login-center h2 {
+  font-size: 3.5rem;
+  margin-bottom: 10px;
+  font-weight: 800; /* Increased from default weight */
+}
+
+.login-center {
+  text-align: center;
+  color: rgb(5, 73, 5);
+}
+
+.login-center p {
+  font-weight: 400;
+  font-size: 2rem;
+  margin-bottom: 40px;
+}
+
+form input[type="email"],
+form input[type="password"],
+form input[type="text"] {
+  width: 100%;
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 0px;
+  border-bottom: 1px solid darkgreen;
+  outline: none;
+  box-sizing: border-box;
+  color: rgb(4, 80, 4);
+  font-size: 1.6rem;
+}
+
+input::placeholder {
+  color: green;
+  opacity: 0.7;
+  font-size: 1.6rem;
+}
+
+.pass-input-div {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.pass-input-div input {
+  margin-bottom: 16px;
+}
+
+.pass-input-div svg {
+  font-size: 20px;
+  position: absolute;
+  right: 10px;
+  bottom: 35px;
+  cursor: pointer;
+  outline: none;
+}
+
+/* For the signup page with two password fields */
+.pass-input-div.two-fields svg {
+    bottom: 32px; 
+}
+
+form button[type="submit"],
+form button[type="button"] {
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 30px;
+  font-size: 1.8rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.login-center-options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.remember-div {
+  display: flex;
+  align-items: center;
+  column-gap: 5px;
+}
+
+.remember-div label {
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.forgot-pass-link {
+  text-decoration: none;
+  font-size: 1.4rem;
+  color: rgb(5, 73, 5);
+}
+
+.forgot-pass-link:hover {
+  text-decoration: underline;
+}
+
+.login-center-buttons {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  row-gap: 15px;
+}
+
+.login-center-buttons button:nth-child(1) {
+  background-color: rgb(2, 29, 2);
+  color: white;
+  border: 3px solid rgb(2, 29, 2);
+  height: 55px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-center-buttons button:nth-child(1):hover {
+  color: white;
+  background-color: rgb(4, 50, 4);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.login-center-buttons button:nth-child(2) {
+  background-color: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.login-center-buttons button:nth-child(2):hover {
+  background-color: rgb(25, 78, 25);
+}
+
+.login-bottom-p {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 15px;
+}
+
+.login-bottom-p a {
+  text-decoration: none;
+  font-weight: 600;
+  color: rgb(5, 73, 5);
+}
+
+.login-bottom-p a:hover {
+  text-decoration: underline;
+}
+
+.navigation-button {
+  cursor: pointer;
+}
+
+/* Dashboard Styles */
+.dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #40b37a 0%, #1b5848 100%);
+  padding: 2rem;
+}
+
+.dashboard-card {
+  background-color: white;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.dashboard-header {
+  background: linear-gradient(90deg, #054905 0%, #107a10 100%);
+  color: white;
+  padding: 2.5rem 3rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-welcome {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+}
+
+.dashboard-user {
+  font-size: 1.8rem;
+  opacity: 0.9;
+}
+
+.dashboard-badge {
+  background-color: #ffcc00;
+  color: #333;
+  font-size: 1.2rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  margin-left: 1rem;
+  font-weight: 600;
+}
+
+.dashboard-content {
+  padding: 3rem;
+}
+
+.dashboard-section {
+  margin-bottom: 4rem;
+}
+
+.dashboard-section-title {
+  font-size: 2.2rem;
+  color: #333;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 1rem;
+}
+
+.dashboard-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.stat-card {
+  flex: 1;
+  min-width: 220px;
+  background: linear-gradient(145deg, #ffffff, #f5f5f5);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+  font-size: 3rem;
+  color: #054905;
+  margin-bottom: 1rem;
+}
+
+.stat-value {
+  font-size: 2.8rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.stat-label {
+  font-size: 1.4rem;
+  color: #777;
+}
+
+.admin-section {
+  background-color: rgba(64, 179, 122, 0.1);
+  border: 1px solid rgba(64, 179, 122, 0.3);
+  border-radius: 10px;
+  padding: 2rem;
+  margin-top: 2rem;
+}
+
+.admin-section-title {
+  font-size: 1.8rem;
+  color: #054905;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 3rem;
+  background-color: #f9f9f9;
+  border-top: 1px solid #eaeaea;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  background-color: #e53e3e;
+  color: white;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;
+  font-size: 1.6rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(229, 62, 62, 0.2);
+  border: none;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #c53030;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(229, 62, 62, 0.3);
+}
+
+.logout-icon {
+  margin-right: 1rem;
+}
+/* Dashboard text styles */
+.dashboard-text {
+  font-size: 1.6rem;
+  line-height: 1.6;
+  color: #444;
+  margin-bottom: 2rem;
+}
+
+/* Quick links styling */
+.quick-links-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.quick-link-button {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.2rem 2rem;
+  border-radius: 0.8rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.quick-link-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+}
+
+.profile-button {
+  background-color: #10b981; /* Green */
+}
+
+.profile-button:hover {
+  background-color: #059669;
+}
+
+.tasks-button {
+  background-color: #3b82f6; /* Blue */
+}
+
+.tasks-button:hover {
+  background-color: #2563eb;
+}
+
+.calendar-button {
+  background-color: #8b5cf6; /* Purple */
+}
+
+.calendar-button:hover {
+  background-color: #7c3aed;
+}
+
+.settings-button {
+  background-color: #6b7280; /* Gray */
+}
+
+.settings-button:hover {
+  background-color: #4b5563;
+}
+
+/* Admin section grid styling */
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin-card {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+.admin-card-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 1rem;
+}
+.login-heading {
+  font-size: 3.5rem !important;
+  margin-bottom: 10px !important;
+  font-weight: 800 !important; /* Extra bold */
+  color: rgb(5, 73, 5);
+}
+
+/* Override the default h2 styling */
+.login-center h2.login-heading {
+  font-weight: 800 !important;
+}
+/* Create this file at: frontend/src/notification.css */
+.notification {
+  /* ...existing styles... */
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  min-width: 300px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.notification.closing {
+  animation: slideOut 0.3s ease-out forwards;
+}
+
+.notification-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* New rule to increase the notification message text size */
+.notification-content span {
+  font-size: 1.4rem;
+}
+
+.notification-close {
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 20px;
+  margin-left: 16px;
+  opacity: 0.7;
+}
+
+.notification-close:hover {
+  opacity: 1;
+}
+
+.error {
+  background-color: #f8d7da;
+  color: #721c24;
+  border-left: 4px solid #dc3545;
+}
+
+.success {
+  background-color: #d4edda;
+  color: #155724;
+  border-left: 4px solid #28a745;
+}
+
+.info {
+  background-color: #d1ecf1;
+  color: #0c5460;
+  border-left: 4px solid #17a2b8;
+}
