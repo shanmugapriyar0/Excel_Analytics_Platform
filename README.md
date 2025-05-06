@@ -1,167 +1,59 @@
 # Excel Analytics Platform
 
-A full-stack web application for analyzing Excel data with authentication, role-based access control, and modern UI components.
+Last Updated: May 6, 2025
 
-## Tech Stack
+## Today's Updates
 
-### Frontend
-- React.js with Vite
-- Redux Toolkit for state management
-- React Router v7 for routing
-- Tailwind CSS for styling
-- Axios for API requests
-- React Icons for UI elements
+Today we implemented a new Excel file upload and parsing functionality within the dashboard. The updates include:
 
-### Backend
-- Node.js & Express.js
-- MongoDB with Mongoose
-- JWT for authentication
-- Bcrypt for password hashing
-- CORS for cross-origin resource sharing
+- Added an advanced dashboard UI with a modern sidebar layout and responsive design
+- Implemented Excel/CSV file upload with drag-and-drop functionality
+- Created backend integration using GridFS for handling large files (beyond MongoDB's 16MB limit)
+- Added preview functionality for uploaded Excel data
 
-## Features
+## Technical Implementation
 
-### Authentication & Authorization
-- User registration and login
-- JWT-based authentication
-- Role-based access (Admin/User)
-- Protected routes
-- Persistent login state
-- Password encryption
+### Frontend Changes
+- Created a new `FileUpload` component with drag-and-drop interface
+- Enhanced the Dashboard UI with modern sidebar navigation
+- Added responsive styling for mobile compatibility
+- Implemented file validation and preview capabilities
 
-### User Interface
-- Responsive design
-- Modern dashboard
-- Real-time notifications
-- Password visibility toggle
-- Loading states
-- Error handling
-- Admin-specific features
+### Backend Changes
+- Set up GridFS for storing large Excel files
+- Created API endpoints for file upload, download and retrieval
+- Implemented Excel parsing using the XLSX library
+- Added JWT authentication for secure file operations
 
-### Security
-- Protected API endpoints
-- Secure password storage
-- Token-based authentication
-- Role-based route protection
-- HTTP-only cookies
-- Input validation
+## File Structure
+The implementation follows the existing project structure:
+```
+backend/
+  ├── models/
+  │   └── ExcelFile.js (new)
+  ├── routes/
+  │   └── excelRoutes.js (new)
+  └── temp-uploads/ (new directory for temporary file storage)
 
-## Getting Started
-
-### Prerequisites
-- Node.js (v14 or higher)
-- MongoDB (local or Atlas URI)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone <repository-url>
-cd Excel_Analytics_Platform
+frontend/
+  └── src/
+      └── components/
+          ├── Dashboard.js (updated)
+          └── FileUpload.js (new)
 ```
 
-2. Install Frontend Dependencies:
-```bash
-cd frontend
-npm install
-```
+## Usage
+1. Navigate to the Dashboard
+2. Select the "File Upload" tab
+3. Drag and drop or browse for an Excel/CSV file
+4. Click "Upload & Process Data"
+5. View the parsed data preview
 
-3. Install Backend Dependencies:
-```bash
-cd ../backend
-npm install
-```
+## Known Issues
+- Files larger than 100MB should be handled with care to avoid Git repository issues
 
-4. Configure Environment Variables:
-   - Create `.env` in backend directory
-   - Add required variables:
-```env
-MONGO_URI=your_mongodb_uri
-JWT_SECRET=your_jwt_secret
-PORT=5000
-```
-
-### Running the Application
-
-1. Start Backend Server:
-```bash
-cd backend
-npm start
-```
-
-2. Start Frontend Development Server:
-```bash
-cd frontend
-npm start
-```
-
-## Project Structure
-
-```
-Excel_Analytics_Platform/
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Login.js
-│   │   │   ├── Signup.js
-│   │   │   ├── Dashboard.js
-│   │   │   └── Notification.js
-│   │   ├── redux/
-│   │   │   ├── store.js
-│   │   │   └── authSlice.js
-│   │   └── App.js
-│   └── package.json
-└── backend/
-    ├── routes/
-    │   └── authRoutes.js
-    ├── models/
-    │   └── User.js
-    ├── index.js
-    └── package.json
-```
-
-## API Endpoints
-
-### Authentication
-- `POST /api/auth/signup` - Register new user
-- `POST /api/auth/login` - User login
-- `GET /api/dashboard` - Protected dashboard route
-- `GET /api/admin` - Admin-only route
-
-## Available Scripts
-
-### Frontend
-
-```bash
-npm start      # Start development server
-npm run build  # Build for production
-npm run test   # Run tests
-```
-
-### Backend
-
-```bash
-npm start      # Start server
-npm run dev    # Start server with nodemon
-```
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- React.js Documentation
-- Redux Toolkit Documentation
-- MongoDB Documentation
-- Express.js Documentation
-- Tailwind CSS Documentation
+## Next Steps
+- Improving Dashboard and Website Ui/Ux
+- Implement data visualization for uploaded Excel files
+- Add batch processing capabilities for multiple files
+- Create user permissions for file access control
