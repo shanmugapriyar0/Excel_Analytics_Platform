@@ -22,3 +22,6 @@ yarn-debug.log*
 yarn-error.log*
 node_modules
 .env
+
+/temp-uploads/
+/uploads/
