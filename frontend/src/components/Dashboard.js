@@ -1,150 +1,194 @@
-
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { logout, reset } from '../redux/authSlice';
-import { 
-  FaSignOutAlt, 
-  FaUser, 
-  FaChartBar, 
-  FaCalendarAlt, 
-  FaTasks, 
-  FaBell,
-  FaCog
+import {
+  FaSignOutAlt, FaUser, FaChartBar, FaCalendarAlt, 
+  FaTasks, FaBell, FaCog, FaFileUpload, FaBars
 } from 'react-icons/fa';
+import FileUpload from './FileUpload';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [currentTime, setCurrentTime] = useState(new Date());
-
   const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
-    // If not authenticated, redirect to login
     if (!isAuthenticated) {
       navigate('/');
     }
     
-    // Update time every minute
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
     
-    return () => {
-      clearInterval(timer);
-    };
+    return () => clearInterval(timer);
   }, [isAuthenticated, navigate]);
 
   const handleLogout = () => {
-    dispatch(logout()); // Dispatch the logout action
-    dispatch(reset()); // Reset auth state
-    navigate('/'); // Redirect to login after logout
+    dispatch(logout());
+    dispatch(reset());
+    navigate('/');
   };
 
-  // Format date for display
   const formatDate = (date) => {
-    const options = { 
-      weekday: 'long', 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     };
     return date.toLocaleDateString('en-US', options);
   };
 
-  // Example data for dashboard stats
-  const stats = [
-    { id: 1, icon: <FaChartBar />, value: '42', label: 'Projects' },
-    { id: 2, icon: <FaCalendarAlt />, value: '8', label: 'Meetings Today' },
-    { id: 3, icon: <FaTasks />, value: '16', label: 'Tasks Pending' },
-    { id: 4, icon: <FaBell />, value: '5', label: 'Notifications' }
-  ];
-
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-card">
-        <div className="dashboard-header">
-          <h1 className="dashboard-welcome">Welcome to Your Dashboard</h1>
-          {user && (
-            <p className="dashboard-user">
-              {formatDate(currentTime)} | Logged in as: <strong>{user.username}</strong>
-              {user.role === 'admin' && (
-                <span className="dashboard-badge">Admin</span>
-              )}
-            </p>
-          )}
-        </div>
-
-        <div className="dashboard-content">
-          <div className="dashboard-section">
-            <h2 className="dashboard-section-title">Overview</h2>
-            <div className="dashboard-stats">
-              {stats.map(stat => (
-                <div key={stat.id} className="stat-card">
-                  <div className="stat-icon">{stat.icon}</div>
-                  <div className="stat-value">{stat.value}</div>
-                  <div className="stat-label">{stat.label}</div>
-                </div>
-              ))}
-            </div>
+    <div className="dashboard-layout">
+      {/* Sidebar */}
+      <div className={`dashboard-sidebar ${!sidebarOpen ? 'collapsed' : ''}`}>
+        <div className="sidebar-header">
+          <div className="app-logo">
+            <div className="logo-icon">DM</div>
+            {sidebarOpen && <span className="logo-text">DataMaster</span>}
           </div>
-
-          <div className="dashboard-section">
-            <h2 className="dashboard-section-title">Recent Activity</h2>
-            <p className="dashboard-text">
-              Your recent activity and progress will be displayed here. This section can
-              include project updates, recent tasks, or other relevant information.
-            </p>
-            
-            <div className="dashboard-section">
-              <h3 className="dashboard-section-title">Quick Links</h3>
-              <div className="quick-links-container">
-                <button className="quick-link-button profile-button">
-                  <FaUser /> Profile
-                </button>
-                <button className="quick-link-button tasks-button">
-                  <FaTasks /> My Tasks
-                </button>
-                <button className="quick-link-button calendar-button">
-                  <FaCalendarAlt /> Calendar
-                </button>
-                <button className="quick-link-button settings-button">
-                  <FaCog /> Settings
-                </button>
-              </div>
+          <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <FaBars />
+          </button>
+        </div>
+        
+        <div className="sidebar-menu">
+          <ul>
+            <li className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
+              <FaChartBar className="menu-icon" />
+              {sidebarOpen && <span>Dashboard</span>}
+            </li>
+            <li className={activeTab === 'upload' ? 'active' : ''} onClick={() => setActiveTab('upload')}>
+              <FaFileUpload className="menu-icon" />
+              {sidebarOpen && <span>File Upload</span>}
+            </li>
+            <li className={activeTab === 'tasks' ? 'active' : ''} onClick={() => setActiveTab('tasks')}>
+              <FaTasks className="menu-icon" />
+              {sidebarOpen && <span>Tasks</span>}
+            </li>
+            <li className={activeTab === 'settings' ? 'active' : ''} onClick={() => setActiveTab('settings')}>
+              <FaCog className="menu-icon" />
+              {sidebarOpen && <span>Settings</span>}
+            </li>
+          </ul>
+        </div>
+        
+        <div className="sidebar-footer">
+          <div className="user-info">
+            <div className="user-avatar">
+              <FaUser />
             </div>
-
-            {/* Admin-specific content area */}
-            {user && user.role === 'admin' && (
-              <div className="admin-section">
-                <h4 className="admin-section-title">Admin Controls</h4>
-                <p>Welcome to the admin section! Here you can manage users, view system statistics, and access admin-only features.</p>
-                <div className="admin-grid">
-                  <div className="admin-card">
-                    <h5 className="admin-card-title">User Management</h5>
-                    <p>Add, modify, or remove user accounts. Set permissions and roles.</p>
-                  </div>
-                  <div className="admin-card">
-                    <h5 className="admin-card-title">System Status</h5>
-                    <p>All systems operational. Last backup: 24 hours ago.</p>
-                  </div>
-                </div>
+            {sidebarOpen && (
+              <div className="user-details">
+                <div className="user-name">{user.username}</div>
+                <div className="user-role">{user.role}</div>
               </div>
             )}
           </div>
-        </div>
-
-        <div className="dashboard-footer">
-          <p>&copy; {new Date().getFullYear()} Your Application Name. All rights reserved.</p>
-          <button 
-            onClick={handleLogout}
-            className="logout-button"
-          >
-            <FaSignOutAlt className="logout-icon" />
-            Sign Out
+          <button className="logout-btn" onClick={handleLogout}>
+            <FaSignOutAlt />
+            {sidebarOpen && <span>Logout</span>}
           </button>
         </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="dashboard-main">
+        <header className="dashboard-header">
+          <div className="header-title">
+            <h1>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}</h1>
+            <p className="date-display">{formatDate(currentTime)}</p>
+          </div>
+          <div className="header-actions">
+            <button className="action-button notification">
+              <FaBell />
+              <span className="badge">2</span>
+            </button>
+            <div className="header-user">
+              <div className="user-avatar">
+                <FaUser />
+              </div>
+              <div className="user-name">{user.username}</div>
+            </div>
+          </div>
+        </header>
+
+        <main className="dashboard-content">
+          {activeTab === 'dashboard' && (
+            <div className="dashboard-overview">
+              <section className="stats-section">
+                <div className="section-header">
+                  <h2>Dashboard Overview</h2>
+                </div>
+                <div className="stats-grid">
+                  <div className="stat-card">
+                    <div className="stat-icon"><FaChartBar /></div>
+                    <div className="stat-value">1,245</div>
+                    <div className="stat-label">Total Views</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon"><FaUser /></div>
+                    <div className="stat-value">84</div>
+                    <div className="stat-label">Users</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon"><FaFileUpload /></div>
+                    <div className="stat-value">32</div>
+                    <div className="stat-label">Files</div>
+                  </div>
+                  <div className="stat-card">
+                    <div className="stat-icon"><FaCalendarAlt /></div>
+                    <div className="stat-value">12</div>
+                    <div className="stat-label">Events</div>
+                  </div>
+                </div>
+              </section>
+              
+              {/* Admin section */}
+              {user.role === 'admin' && (
+                <section className="admin-section">
+                  <div className="section-header">
+                    <h2>Admin Controls</h2>
+                  </div>
+                  <p className="section-desc">
+                    Welcome to the admin section! Here you can manage users, view system statistics, and access admin-only features.
+                  </p>
+                  <div className="admin-grid">
+                    <div className="admin-card">
+                      <h3 className="admin-card-title">User Management</h3>
+                      <p>Add, modify, or remove user accounts. Set permissions and roles.</p>
+                    </div>
+                    <div className="admin-card">
+                      <h3 className="admin-card-title">System Status</h3>
+                      <p>All systems operational. Last backup: 24 hours ago.</p>
+                    </div>
+                  </div>
+                </section>
+              )}
+            </div>
+          )}
+          
+          {/* File Upload Tab Content */}
+          {activeTab === 'upload' && <FileUpload />}
+          
+          {/* Placeholder for other tabs */}
+          {activeTab !== 'dashboard' && activeTab !== 'upload' && (
+            <div className="placeholder-content">
+              <h2>{activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Content</h2>
+              <p>This feature is coming soon.</p>
+            </div>
+          )}
+        </main>
+        
+        <footer className="dashboard-footer">
+          <p>© {new Date().getFullYear()} DataMaster. All rights reserved.</p>
+        </footer>
       </div>
     </div>
   );

@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes'); // Import your auth routes
 const cors = require('cors'); // Import cors
 const jwt = require('jsonwebtoken'); // Import jwt here
+const excelRoutes = require('./routes/excelRoutes'); // New: require excelRoutes
 
 dotenv.config();
 
@@ -13,6 +14,17 @@ const app = express();
 app.use(express.json()); // For parsing application/json
 app.use(cors()); // Enable CORS for all origins (adjust as needed for production)
 
+// Create uploads directory if it doesn't exist
+const fs = require('fs');
+if (!fs.existsSync('./uploads')) {
+  fs.mkdirSync('./uploads');
+}
+
+// Create temp-uploads directory if it doesn't exist
+if (!fs.existsSync('./temp-uploads')) {
+  fs.mkdirSync('./temp-uploads');
+}
+
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
@@ -20,30 +32,29 @@ mongoose.connect(process.env.MONGO_URI)
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/excel', excelRoutes); // New: mount excel routes
 
 // Simple protected route example (requires authentication)
 const protect = (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    // Get token from header
+    token = req.headers.authorization.split(' ')[1];
+    console.log("Token being verified:", token.substring(0, 20) + "...");
     try {
-      // Get token from header
-      token = req.headers.authorization.split(' ')[1];
-
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Attach user from token to the request
-      req.user = decoded; // The decoded token payload contains user info (like id and role)
+      req.user = decoded;
       next();
     } catch (error) {
-      console.error(error);
-      // If token is invalid, send 401
-      return res.status(401).json({ message: 'Not authorized, token failed' });
+      console.error("JWT Error:", error.name, error.message);
+      return res.status(401).json({ message: `Token verification failed: ${error.message}` });
     }
   }
-
-  // If no token is provided, send 401
+  
   if (!token) {
     return res.status(401).json({ message: 'Not authorized, no token' });
   }
