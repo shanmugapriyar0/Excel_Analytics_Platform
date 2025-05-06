@@ -26,3 +26,7 @@ node_modules
 #folders
 /temp-uploads/
 /uploads/
+
+# Add to .gitignore
+backend/uploads/*.csv
+backend/temp-uploads/*.csv
