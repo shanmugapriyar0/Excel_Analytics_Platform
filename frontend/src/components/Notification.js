@@ -1,6 +1,6 @@
 // Create this file at: frontend/src/components/Notification.js
 import React, { useEffect, useState } from 'react';
-import '../index.css'; // We'll create this CSS file next
+import '../css/index.css'; // Import your CSS file for styling
 
 const Notification = ({ type, message, onClose }) => {
   const [closing, setClosing] = useState(false);

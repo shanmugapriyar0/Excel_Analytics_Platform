@@ -1,0 +1,493 @@
+/* IntroPage.css with complete responsive design */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --primary-green: #2e7d32;
+  --light-green: #a5d6a7;
+  --bg-green: #e8f5e9;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+}
+
+.intro-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.intro-main {
+  display: flex;
+  flex: 1;
+  padding: 2rem;
+  max-width: 1800px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.intro-left, .intro-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.intro-left h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--primary-green);
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
+}
+
+.intro-left p {
+  font-size: 1.8rem;
+  color: #333;
+  font-weight: 500;
+}
+
+.chart-image {
+  max-width: 100%;
+  margin-bottom: 2.5rem;
+}
+
+.chart-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  object-fit: contain;
+}
+
+.intro-form {
+  background: white;
+  padding: 3rem;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.intro-form h2 {
+  font-size: 3rem;
+  text-align: center;
+  color: var(--primary-green);
+  margin-bottom: 0.5rem;
+  font-weight: 800;
+}
+
+.intro-form p {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 2.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.intro-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.login-btn, .register-btn {
+  padding: 1.2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+}
+
+.login-btn {
+  background-color: var(--primary-green);
+  color: white;
+  border: none;
+}
+
+.register-btn {
+  background-color: white;
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+}
+
+.features-section {
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.features-section h3 {
+  text-align: center;
+  font-size: 2.2rem;
+  color: var(--primary-green);
+  margin-bottom: 2rem;
+  font-weight: 700;
+}
+
+.feature-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: white;
+  margin: 0 1.5rem;
+  padding: 2rem;
+  border-radius: 12px;
+  min-width: 220px;
+  height: 180px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  justify-content: center;
+}
+
+.feature-icon {
+  font-size: 3rem;
+  color: var(--primary-green);
+  margin-bottom: 1.2rem;
+}
+
+.feature-item p {
+  font-weight: 600;
+  font-size: 1.5rem;
+  text-align: center;
+  margin: 0;
+}
+
+/* Fix for remember me and forgot password alignment */
+.login-center-options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.remember-div {
+  display: flex;
+  align-items: center;
+  column-gap: 8px;
+  position: relative;
+  z-index: 5;
+}
+
+.remember-div input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+}
+
+.remember-div label {
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.forgot-pass-link {
+  text-decoration: none;
+  font-size: 1.4rem;
+  color: rgb(5, 73, 5);
+  white-space: nowrap;
+  position: relative;
+  z-index: 5;
+}
+
+/* Large screens (2K, 3K, 4K) */
+@media (min-width: 2000px) {
+  .intro-main {
+    max-width: 2400px;
+    padding: 4rem;
+  }
+  
+  .intro-left h1 {
+    font-size: 4.2rem;
+  }
+  
+  .intro-left p {
+    font-size: 2.2rem;
+  }
+  
+  .chart-image {
+    max-width: 90%;
+  }
+  
+  .intro-form {
+    max-width: 650px;
+    padding: 4rem;
+  }
+  
+  .intro-form h2 {
+    font-size: 3.5rem;
+  }
+  
+  .intro-form p {
+    font-size: 1.8rem;
+  }
+  
+  .login-btn, .register-btn {
+    padding: 1.5rem;
+    font-size: 1.8rem;
+  }
+  
+  .feature-item {
+    min-width: 280px;
+    height: 240px;
+    padding: 2.5rem;
+  }
+  
+  .feature-icon {
+    font-size: 4rem;
+  }
+  
+  .feature-item p {
+    font-size: 2rem;
+  }
+}
+
+/* Desktop and laptop screens */
+@media (max-width: 1400px) {
+  .intro-left h1 {
+    font-size: 3rem;
+  }
+  
+  .intro-form h2 {
+    font-size: 2.5rem;
+  }
+}
+
+/* Tablets and smaller laptops */
+@media (max-width: 1024px) {
+  .intro-main {
+    flex-direction: column;
+    padding: 1.5rem;
+  }
+  
+  .intro-left {
+    align-items: center;
+    text-align: center;
+  }
+  
+  .feature-item {
+    min-width: 200px;
+    height: 160px;
+  }
+}
+
+/* Mobile landscape */
+@media (max-width: 768px) {
+  .intro-left h1 {
+    font-size: 2.5rem;
+  }
+  
+  .intro-form {
+    padding: 2rem;
+  }
+  
+  .features-section h3 {
+    font-size: 1.8rem;
+  }
+  
+  .header-logo {
+    width: 70px;    /* increased from 40px */
+    height: 70px;   /* increased from 40px */
+    top: 15px;
+    right: 15px;
+  }
+}
+
+/* Mobile portrait */
+@media (max-width: 480px) {
+  .intro-left h1 {
+    font-size: 2.2rem;
+  }
+  
+  .intro-form h2 {
+    font-size: 2rem;
+  }
+  
+  .intro-form p {
+    font-size: 1rem;
+  }
+  
+  .feature-item {
+    min-width: 150px;
+    height: 140px;
+    padding: 1rem;
+    margin: 0 0.7rem;
+  }
+  
+  .header-logo {
+    width: 60px;    /* increased from previous value */
+    height: 60px;   /* increased from previous value */
+    top: 10px;
+    right: 10px;
+  }
+
+  .login-center-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 370px) {
+  .intro-left h1 {
+    font-size: 1.8rem;
+  }
+  
+  .intro-form h2 {
+    font-size: 1.8rem;
+  }
+  
+  .intro-center-options {
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+  }
+  
+  .intro-center-buttons {
+    margin-top: 20px;
+  }
+}
+
+.intro-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-green);
+}
+
+.intro-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 100%;
+  background-color: var(--primary-green);
+  z-index: 1001;
+}
+
+.intro-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1002;
+}
+
+.intro-logo {
+  width: 120px;  /* increased from 80px */
+  height: 120px; /* increased from 80px */
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.intro-logo span {
+  color: white;
+  font-size: 3rem;
+  font-weight: 800;
+}
+
+/* New styling for logo image */
+.intro-logo img {
+  width: 120%;
+  height: 120%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.intro-content h1 {
+  font-size: 3.5rem;
+  font-weight: 800;
+  color: var(--primary-green);
+}
+
+.intro-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--bg-green);
+  overflow: hidden;
+}
+
+.intro-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  width: 10vmin;
+  height: 10vmin;
+  border-radius: 50%;
+  background-color: var(--bg-green); /* Match your page background */
+  border: none; /* Ensure no border creates gaps */
+  z-index: 1003;
+  transform-origin: center;
+}
+
+.header-logo {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 80px;   /* increased from 50px */
+  height: 80px;  /* increased from 50px */
+  z-index: 10;
+}
+
+.header-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Make the logo responsive */
+@media (max-width: 768px) {
+  .header-logo {
+    width: 70px;    /* increased from 40px */
+    height: 70px;   /* increased from 40px */
+    top: 15px;
+    right: 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-logo {
+    width: 60px;    /* increased from previous value */
+    height: 60px;   /* increased from previous value */
+    top: 10px;
+    right: 10px;
+  }
+}
+/* Add these hover effects to your existing button styles */
+.login-btn:hover {
+  background-color: rgb(9, 101, 9);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.register-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+

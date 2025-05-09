@@ -1,5 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 @import "tailwindcss";
+
+:root {
+  --primary-green: #2e7d32;
+  --light-green: #a5d6a7;
+  --bg-green: #e8f5e9;
+}
+
 * {
   box-sizing: border-box;
   padding: 0px;
@@ -43,6 +50,7 @@ body {
 .login-right {
   height: 100vh;
   flex-grow: 1;
+  background-color: var(--bg-green);
 }
 
 .login-right-container {
@@ -52,6 +60,7 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: transparent; /* Ensure container is transparent */
 }
 
 .login-right form {
@@ -67,6 +76,10 @@ body {
 
 .login-center {
   margin: auto 0;
+  text-align: center;
+  color: var(--primary-green);
+  padding: 30px;
+  border-radius: 16px;
 }
 
 .login-logo img {
@@ -77,11 +90,6 @@ body {
   font-size: 3.5rem;
   margin-bottom: 10px;
   font-weight: 800; /* Increased from default weight */
-}
-
-.login-center {
-  text-align: center;
-  color: rgb(5, 73, 5);
 }
 
 .login-center p {
@@ -97,11 +105,12 @@ form input[type="text"] {
   padding: 16px;
   margin-bottom: 16px;
   border: 0px;
-  border-bottom: 1px solid darkgreen;
+  border-bottom: 1px solid var(--primary-green);
   outline: none;
   box-sizing: border-box;
   color: rgb(4, 80, 4);
   font-size: 1.6rem;
+  background-color: transparent;
 }
 
 input::placeholder {
@@ -158,7 +167,7 @@ form button[type="button"] {
 }
 
 .remember-div label {
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   font-weight: 500;
   cursor: pointer;
   margin-top: 2px;
@@ -166,7 +175,7 @@ form button[type="button"] {
 
 .forgot-pass-link {
   text-decoration: none;
-  font-size: 1.4rem;
+  font-size: 1.6rem;
   color: rgb(5, 73, 5);
 }
 
@@ -182,30 +191,64 @@ form button[type="button"] {
 }
 
 .login-center-buttons button:nth-child(1) {
-  background-color: rgb(2, 29, 2);
+  background-color: var(--primary-green);
   color: white;
-  border: 3px solid rgb(2, 29, 2);
+  border: none;
+  border-radius: 10px;
   height: 55px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  transition: all 0.2s;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
+/* Ensure login button has the same hover effect */
 .login-center-buttons button:nth-child(1):hover {
-  color: white;
-  background-color: rgb(4, 50, 4);
+  background-color: rgb(9, 101, 9);
   transform: translateY(-2px);
   box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .login-center-buttons button:nth-child(2) {
-  background-color: #f0f0f0;
+  background-color: white;
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+  border-radius: 10px;
+  height: 55px;
+  font-size: 1.4rem;
+  font-weight: 600;
+  transition: all 0.2s;
   display: flex;
   justify-content: center;
   align-items: center;
   column-gap: 10px;
+  
+}
+
+/* Update hover effect for create account button */
+.login-center-buttons button:nth-child(2):hover {
+  background-color: white;
+  color: var(--primary-green);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Add new styles for login center buttons */
+.login-center-buttons button {
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.login-center-buttons button:nth-child(1):hover {
+  background-color: rgb(9, 101, 9) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15) !important;
 }
 
 .login-center-buttons button:nth-child(2):hover {
-  background-color: rgb(25, 78, 25);
+  background-color: white !important;
+  color: var(--primary-green) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
 }
 
 .login-bottom-p {
@@ -1092,4 +1135,10 @@ form button[type="button"] {
   .selected-file {
     flex-direction: column;
   }
+}
+/* Increase button text size for login and create account buttons */
+.login-center-buttons button:nth-child(1),
+.login-center-buttons button:nth-child(2) {
+  font-size: 1.8rem; /* Increased from previous size */
+  font-weight: 600;
 }

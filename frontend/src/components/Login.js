@@ -4,35 +4,45 @@ import Image from "../assets/login.png";
 import { FaEye } from "react-icons/fa6";
 import { FaEyeSlash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
-import { login, reset } from '../redux/authSlice';
-import Notification from './Notification'; // New import
+import { useDispatch, useSelector } from "react-redux";
+import { login, reset } from "../redux/authSlice";
+import Notification from "./Notification"; // New import
+import { gsap } from "gsap";
+import CustomCheckbox from "./CustomCheckbox";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  // New state for notifications
-  const [notification, setNotification] = useState({ show: false, type: '', message: '' });
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
+  const [rememberMe, setRememberMe] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Get state from Redux store
-  const { user, isLoading, isError, isSuccess, message, isAuthenticated } = useSelector(
-    (state) => state.auth
-  );
+  const { user, isLoading, isError, isSuccess, message, isAuthenticated } =
+    useSelector((state) => state.auth);
 
   // Effect to handle redirection and error messages
   useEffect(() => {
     if (isError) {
-      setNotification({ show: true, type: 'error', message: message });
+      setNotification({ show: true, type: "error", message: message });
     }
     if (isSuccess) {
-      setNotification({ show: true, type: 'success', message: 'Success! Redirecting...' });
-      navigate('/dashboard');
-    } else if(isAuthenticated) {
-      navigate('/dashboard');
+      setNotification({
+        show: true,
+        type: "success",
+        message: "Success! Redirecting...",
+      });
+      navigate("/dashboard");
+    } else if (isAuthenticated) {
+      navigate("/dashboard");
     }
 
     // Clean up function to reset state when component unmounts or dependencies change
@@ -40,6 +50,40 @@ const Login = () => {
       dispatch(reset());
     };
   }, [user, isError, isSuccess, message, navigate, dispatch, isAuthenticated]);
+
+  // Add gsap animation effect
+  useEffect(() => {
+    // Animation when component mounts
+    const tl = gsap.timeline();
+
+    // Animate the form entrance
+    tl.fromTo(
+      ".login-main",
+      {
+        opacity: 0,
+        y: 20,
+      },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        ease: "power3.out",
+      }
+    );
+
+    // Staggered animation for form elements
+    tl.fromTo(
+      [
+        ".login-center h2",
+        ".login-center p",
+        "form input",
+        ".login-center-buttons button",
+      ],
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" },
+      "-=0.3"
+    );
+  }, []);
 
   // Function to close notifications
   const closeNotification = () => {
@@ -81,25 +125,29 @@ const Login = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                 />
-                {showPassword ? (
-                  <FaEyeSlash onClick={() => setShowPassword(!showPassword)} />
-                ) : (
-                  <FaEye onClick={() => setShowPassword(!showPassword)} />
+                {passwordFocused && (
+                  <div onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </div>
                 )}
               </div>
 
               <div className="login-center-options">
-                <div className="remember-div">
-                  <input type="checkbox" id="remember-checkbox" />
-                  <label htmlFor="remember-checkbox">Remember for 30 days</label>
-                </div>
-                <a href="/" className="forgot-pass-link">Forgot password?</a>
+                <CustomCheckbox
+                  label="Remember for 30 days"
+                  checked={rememberMe}
+                  onChange={() => setRememberMe(!rememberMe)}
+                />
+                <a href="/" className="forgot-pass-link">
+                  Forgot password?
+                </a>
               </div>
               <div className="login-center-buttons">
                 <button type="submit" disabled={isLoading}>
-                  {isLoading ? 'Logging In...' : 'Log In'}
+                  {isLoading ? "Logging In..." : "Log In"}
                 </button>
               </div>
               <p className="login-bottom-p">
@@ -114,7 +162,7 @@ const Login = () => {
       </div>
       {/* Add Notification component */}
       {notification.show && (
-        <Notification 
+        <Notification
           type={notification.type}
           message={notification.message}
           onClose={closeNotification}

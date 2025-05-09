@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { signup, reset } from '../redux/authSlice';
 import Notification from './Notification'; // New import
+import { gsap } from "gsap";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,6 +17,9 @@ const Signup = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   // New state for notifications
   const [notification, setNotification] = useState({ show: false, type: '', message: '' });
+  // New states for focus tracking
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -41,6 +45,31 @@ const Signup = () => {
     };
   }, [user, isError, isSuccess, message, navigate, dispatch, isAuthenticated]);
 
+  // Add gsap animation effect
+  useEffect(() => {
+    // Animation when component mounts
+    const tl = gsap.timeline();
+
+    // Animate the form entrance
+    tl.fromTo(".login-main", { 
+      opacity: 0, 
+      y: 20 
+    }, { 
+      opacity: 1, 
+      y: 0, 
+      duration: 0.6,
+      ease: "power3.out" 
+    });
+
+    // Staggered animation for form elements
+    tl.fromTo(
+      [".login-center h2", ".login-center p", "form input", ".login-center-buttons button"],
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" },
+      "-=0.3"
+    );
+  }, []);
+
   // Function to close notifications
   const closeNotification = () => {
     setNotification({ ...notification, show: false });
@@ -56,7 +85,7 @@ const Signup = () => {
   };
 
   const handleLoginClick = () => {
-    navigate("/");
+    navigate("/login");
   };
 
   return (
@@ -86,28 +115,39 @@ const Signup = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
-              <div className="pass-input-div two-fields">
+              {/* Updated Password Input */}
+              <div className="pass-input-div">
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="Enter Password"
+                  placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                   required
                 />
-                {showPassword ? (
-                  <FaEyeSlash onClick={() => setShowPassword(!showPassword)} />
-                ) : (
-                  <FaEye onClick={() => setShowPassword(!showPassword)} />
+                {passwordFocused && (
+                  <div onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </div>
                 )}
               </div>
-              <div className="pass-input-div">
+              {/* Updated Confirm Password Input */}
+              <div className="pass-input-div two-fields">
                 <input
                   type={showPassword ? "text" : "password"}
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
+                  onFocus={() => setConfirmPasswordFocused(true)}
+                  onBlur={() => setConfirmPasswordFocused(false)}
                   required
                 />
+                {confirmPasswordFocused && (
+                  <div onClick={() => setShowPassword(!showPassword)}>
+                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                  </div>
+                )}
               </div>
               <div className="login-center-buttons">
                 <button type="submit" disabled={isLoading}>
