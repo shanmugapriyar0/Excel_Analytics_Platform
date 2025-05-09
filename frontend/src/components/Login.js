@@ -14,7 +14,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [passwordFocused, setPasswordFocused] = useState(false);
   const [notification, setNotification] = useState({
     show: false,
     type: "",
@@ -125,10 +124,9 @@ const Login = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setPasswordFocused(true)}
-                  onBlur={() => setPasswordFocused(false)}
                 />
-                {passwordFocused && (
+                {/* Show eye icon whenever password has content */}
+                {password.length > 0 && (
                   <div onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </div>

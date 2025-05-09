@@ -11,15 +11,12 @@ import { gsap } from "gsap";
 
 const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // Add new state for confirm password
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  // New state for notifications
   const [notification, setNotification] = useState({ show: false, type: '', message: '' });
-  // New states for focus tracking
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  const [confirmPasswordFocused, setConfirmPasswordFocused] = useState(false);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -122,30 +119,28 @@ const Signup = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  onFocus={() => setPasswordFocused(true)}
-                  onBlur={() => setPasswordFocused(false)}
                   required
                 />
-                {passwordFocused && (
+                {/* Show eye icon whenever password has content */}
+                {password.length > 0 && (
                   <div onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
                   </div>
                 )}
               </div>
-              {/* Updated Confirm Password Input */}
+              {/* Updated Confirm Password Input with separate visibility control */}
               <div className="pass-input-div two-fields">
                 <input
-                  type={showPassword ? "text" : "password"}
+                  type={showConfirmPassword ? "text" : "password"}
                   placeholder="Confirm Password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  onFocus={() => setConfirmPasswordFocused(true)}
-                  onBlur={() => setConfirmPasswordFocused(false)}
                   required
                 />
-                {confirmPasswordFocused && (
-                  <div onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
+                {/* Show eye icon whenever confirm password has content */}
+                {confirmPassword.length > 0 && (
+                  <div onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                    {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                   </div>
                 )}
               </div>
