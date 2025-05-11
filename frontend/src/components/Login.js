@@ -98,6 +98,11 @@ const Login = () => {
     navigate("/signup");
   };
 
+  // Add a function to handle forgot password link click
+  const handleForgotPasswordClick = () => {
+    navigate("/forgot-password");
+  };
+
   return (
     <div className="login-main">
       <div className="login-left">
@@ -139,7 +144,10 @@ const Login = () => {
                   checked={rememberMe}
                   onChange={() => setRememberMe(!rememberMe)}
                 />
-                <a href="/" className="forgot-pass-link">
+                <a 
+                  onClick={handleForgotPasswordClick} 
+                  className="forgot-pass-link navigation-button"
+                >
                   Forgot password?
                 </a>
               </div>

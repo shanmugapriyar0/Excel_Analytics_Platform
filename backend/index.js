@@ -1,12 +1,17 @@
+// Make sure this is at the very top of the file, before any other code
+const dotenv = require('dotenv');
+const path = require('path');
+
+// Explicitly set the path to your .env file
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+
+// Now rest of your imports
 const express = require('express');
 const mongoose = require('mongoose');
-const dotenv = require('dotenv');
 const authRoutes = require('./routes/authRoutes'); // Import your auth routes
 const cors = require('cors'); // Import cors
 const jwt = require('jsonwebtoken'); // Import jwt here
 const excelRoutes = require('./routes/excelRoutes'); // New: require excelRoutes
-
-dotenv.config();
 
 const app = express();
 
