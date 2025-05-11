@@ -22,7 +22,8 @@ yarn-debug.log*
 yarn-error.log*
 node_modules
 .env
- 
+backend/.env
+backend/.env.example
 #folders
 /temp-uploads/
 /uploads/
