@@ -1,21 +1,42 @@
 # Excel Analytics Platform
 
-Last Updated: May 11, 2025
+Last Updated: May 13, 2025
 
-## Today's Updates
+A full-stack web application for analyzing Excel data with authentication, role-based access control, and modern UI components.
 
-Today we implemented a new Excel file upload and parsing functionality within the dashboard. The updates include:
+## Tech Stack
 
-- Added an advanced dashboard UI with a modern sidebar layout and responsive design
-- Implemented Excel/CSV file upload with drag-and-drop functionality
-- Created backend integration using GridFS for handling large files (beyond MongoDB's 16MB limit)
-- Added preview functionality for uploaded Excel data
+### Frontend
+- React.js with Vite
+- Redux Toolkit for state management
+- React Router v7 for routing
+- Tailwind CSS for styling
+- Axios for API requests
+- React Icons for UI elements
+- GSAP for animations
 
-## Week 2 Progress
+### Backend
+- Node.js & Express.js
+- MongoDB with Mongoose
+- JWT for authentication
+- Bcrypt for password hashing
+- CORS for cross-origin resource sharing
+- SendGrid for email communications
+- GridFS for handling large files
 
+## Features
+
+### Week 1 Progress
+- Basic authentication setup
+- Initial dashboard layout
+- Project structure establishment
+- Database connectivity
+- Environment configuration
+
+### Week 2 Progress
 This week we've made significant additions to the platform:
 
-### Authentication & Security
+#### Authentication & Security
 - Implemented complete authentication flow (login, signup, logout)
 - Added password reset functionality with email integration
 - Created JWT-based authentication for secure API access
@@ -23,71 +44,69 @@ This week we've made significant additions to the platform:
 - Protected routes on both frontend and backend
 - Added responsive notifications for user actions
 
-### UI/UX Improvements
+#### UI/UX Improvements
 - Created engaging intro animation sequence with GSAP
 - Designed responsive layouts for mobile and tablet devices
 - Added custom form components (checkbox, input fields with toggle visibility)
 - Implemented drag-and-drop file upload with validation and progress tracking
 - Created admin-specific dashboard sections with role-based UI
 
-### Backend Enhancements
+#### Backend Enhancements
 - Integrated SendGrid for email communications (password reset)
 - Improved Excel file handling with GridFS for large files
 - Added secure file upload validation and processing
 - Enhanced error handling across all API endpoints
 - Implemented secure password handling with bcrypt
 
-## Technical Implementation
+### Today's Updates
+Today we implemented a new Excel file upload and parsing functionality within the dashboard. The updates include:
 
-### Frontend Changes
-- Created a new `FileUpload` component with drag-and-drop interface
-- Enhanced the Dashboard UI with modern sidebar navigation
-- Added responsive styling for mobile compatibility
-- Implemented file validation and preview capabilities
-- Added Redux state management for authentication
-- Created custom notification system for user feedback
-- Implemented password reset flow with secure token
+- Added an advanced dashboard UI with a modern sidebar layout and responsive design
+- Implemented Excel/CSV file upload with drag-and-drop functionality
+- Created backend integration using GridFS for handling large files (beyond MongoDB's 16MB limit)
+- Added preview functionality for uploaded Excel data
 
-### Backend Changes
-- Set up GridFS for storing large Excel files
-- Created API endpoints for file upload, download and retrieval
-- Implemented Excel parsing using the XLSX library
-- Added JWT authentication for secure file operations
-- Created password reset token generation and validation
-- Integrated email service for communication
+### Additional Features
+- User registration and login
+- Persistent login state
+- Real-time notifications
+- Password visibility toggle
+- Loading states
+- Error handling
+- Admin-specific features
+- Protected API endpoints
+- HTTP-only cookies
+- Input validation
 
-## File Structure
-The implementation follows the existing project structure:
-```
-backend/
-  ├── models/
-  │   ├── ExcelFile.js (new)
-  │   └── User.js (updated)
-  ├── routes/
-  │   ├── authRoutes.js (updated)
-  │   └── excelRoutes.js (new)
-  └── temp-uploads/ (new directory for temporary file storage)
+## Getting Started
 
-frontend/
-  └── src/
-      ├── components/
-      │   ├── Dashboard.js (updated)
-      │   ├── FileUpload.js (new)
-      │   ├── IntroAnimation.js (new)
-      │   ├── Notification.js (new)
-      │   ├── CustomCheckbox.js (new)
-      │   ├── ForgotPassword.js (new)
-      │   └── ResetPassword.js (new)
-      ├── redux/
-      │   ├── store.js
-      │   └── authSlice.js (updated)
-      └── css/
-          └── responsive.css (updated)
-```
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas URI)
+- npm or yarn
 
-## Environment Setup
+### Installation
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd Excel_Analytics_Platform
+   ```
 
-### Setting Up .env File
+2. Install Frontend Dependencies:
+   ```
+   cd frontend
+   npm install
+   ```
+
+3. Install Backend Dependencies:
+   ```
+   cd ../backend
+   npm install
+   ```
+
+### Environment Setup
+
+#### Setting Up .env File
 1. Create a `.env` file in the root of the backend directory
 2. Add the following environment variables:
 
@@ -115,7 +134,7 @@ NODE_ENV=development
    node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
    ```
 
-### SendGrid Account Setup
+#### SendGrid Account Setup
 1. **Create a SendGrid Account**:
    - Go to [SendGrid's website](https://sendgrid.com/) and sign up for a free account
    - Verify your account through the confirmation email
@@ -137,7 +156,7 @@ NODE_ENV=development
    - Paste your API key as the value for `SENDGRID_API_KEY` in your .env file
    - Set `SENDGRID_FROM_EMAIL` to your verified email address
 
-### MongoDB Setup
+#### MongoDB Setup
 1. **Local Development**:
    - Install MongoDB on your machine or use MongoDB Atlas
    - Create a database named 'myauthdb' (or choose your own name)
