@@ -1,25 +1,347 @@
-@media (max-width: 900px) {
-  .login-left {
-    display: none;
+/* Complete responsive design for login pages */
+
+/* Large desktop screens */
+@media (min-width: 1441px) {
+  .login-main {
+    max-width: 100%;
+  }
+  
+  .login-right-container {
+    width: 80%;
+    max-width: 800px;
+  }
+  
+  .login-center h2 {
+    font-size: 4rem;
+  }
+  
+  .login-center p {
+    font-size: 2.2rem;
+  }
+  
+  form input[type="email"],
+  form input[type="password"],
+  form input[type="text"] {
+    padding: 18px;
+    font-size: 1.8rem;
+  }
+  
+  .login-center-buttons button {
+    font-size: 2rem;
+    padding: 18px;
+    height: 65px;
+  }
+  
+  .login-bottom-p {
+    font-size: 1.8rem;
   }
 }
 
-@media (max-width: 370px) {
-  .login-center-options {
+/* Large desktop and 2K+ screens - reduce image size */
+@media (min-width: 1921px) {
+  .login-left {
+    flex: 2;
+    max-width: 55%;
+  }
+  
+  .login-right {
+    flex: 3;
+    min-width: 45%;
+  }
+  
+  .login-left img {
+    max-width: 100%;
+    object-fit: contain;
+  }
+}
+
+/* Standard desktop and larger tablets */
+@media (max-width: 1440px) {
+  .login-right-container {
+    width: 70%;
+  }
+  
+  .login-center h2 {
+    font-size: 3.5rem;
+  }
+  
+  .login-left {
+    flex: 1;
+    max-width: 50%;
+  }
+  
+  .login-right {
+    flex: 1;
+    min-width: 50%;
+  }
+}
+
+/* Tablets and small laptops */
+@media (max-width: 1200px) {
+  .login-left {
+    flex-grow: 2;
+  }
+  
+  .login-right {
+    flex-grow: 2;
+  }
+  
+  .login-right-container {
+    width: 80%;
+  }
+  
+  .login-center h2 {
+    font-size: 3.2rem;
+  }
+  
+  .login-center p {
+    font-size: 1.8rem;
+  }
+}
+
+/* Tablets */
+@media (max-width: 992px) {
+  .login-right-container {
+    width: 90%;
+  }
+  
+  .login-center {
+    padding: 20px;
+  }
+  
+  .login-right form {
+    width: 100%;
+  }
+}
+
+/* Small tablets and mobile devices */
+@media (max-width: 900px) {
+  .login-main {
     flex-direction: column;
-    align-items: center;
-    row-gap: 10px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+    background-color: #f8fcf8; /* Consistent background */
+  }
+  
+  .login-left {
+    flex: 0 0 auto;
+    max-width: 100%;
+    height: 35vh;
+    min-height: 200px;
+    order: 1;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    width: 100%; /* Ensure full width */
+  }
+  
+  .login-left img {
+    width: 100%; /* Changed from 90% to 100% to fill container */
+    height: 100%;
+    object-fit: cover;
+    object-position: center top;
+    max-width: none;
+    max-height: none;
+    display: block;
+  }
+  
+  /* Adding a subtle shadow to separate image from content */
+  .login-left::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(
+      to top,
+      rgba(248, 252, 248, 1), /* Match the intro page background */
+      transparent
+    );
+    z-index: 5;
+  }
+  
+  .login-right {
+    flex: 1;
+    width: 100%;
+    max-width: 100%;
+    order: 2;
+    height: auto;
+    min-height: 65vh;
+    padding: 20px 0;
+  }
+  
+  .login-right-container {
+    width: 85%;
+    max-width: 550px;
+    padding: 20px 0;
   }
 
-  .login-center-buttons {
+  .login-center {
+    background-color: rgba(255, 255, 255, 0.25);
     margin-top: 20px;
   }
+}
 
-  .login-center h2 {
-    font-size: 3rem;
+/* Large phones */
+@media (max-width: 767px) {
+  .login-right-container {
+    width: 90%;
   }
+  
+  .login-center {
+    padding: 15px;
+  }
+  
+  .login-center h2 {
+    font-size: 2.8rem;
+  }
+  
+  .login-center p {
+    font-size: 1.6rem;
+    margin-bottom: 30px;
+  }
+  
+  .login-center-buttons {
+    margin-top: 30px;
+  }
+  
+  form input[type="email"],
+  form input[type="password"],
+  form input[type="text"] {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+  
+  .pass-input-div svg {
+    bottom: 32px;
+  }
+}
 
+/* Mobile phones */
+@media (max-width: 576px) {
+  .login-left {
+    height: 30vh;
+    min-height: 180px;
+  }
+  
+  .login-right-container {
+    width: 90%;
+    padding: 15px 0;
+  }
+  
+  .login-center h2 {
+    font-size: 2.5rem;
+  }
+  
   .login-center p {
     font-size: 1.5rem;
+    margin-bottom: 25px;
   }
+  
+  .login-center-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .login-center-buttons button {
+    font-size: 1.6rem;
+    height: 50px;
+  }
+  
+  .forgot-pass-link {
+    font-size: 1.4rem;
+  }
+  
+  .remember-div label {
+    font-size: 1.4rem;
+  }
+  
+  .login-left {
+    height: 25vh;
+    min-height: 150px;
+    max-height: 200px;
+  }
+}
+
+/* Small mobile phones */
+@media (max-width: 400px) {
+  .login-left {
+    height: 25vh;
+    min-height: 150px;
+  }
+}
+
+/* Very small phones */
+@media (max-width: 370px) {
+  .login-right-container {
+    width: 100%;
+    padding: 0 15px;
+  }
+  
+  .login-center h2 {
+    font-size: 2rem;
+  }
+  
+  .login-center p {
+    font-size: 1.3rem;
+  }
+  
+  .login-center-buttons button {
+    font-size: 1.4rem;
+    height: 40px;
+  }
+  
+  .pass-input-div svg {
+    font-size: 16px;
+    bottom: 30px;
+  }
+  
+  input::placeholder {
+    font-size: 1.4rem;
+  }
+}
+
+/* Add after your other @media queries */
+
+/* Color consistency across all pages */
+:root {
+  --bg-green: #f8fcf8; /* Update this value to match intro page */
+}
+
+/* Update all instances of var(--bg-green) to use this consistent color */
+@media (min-width: 901px) {
+  .login-right {
+    background-color: var(--bg-green);
+  }
+}
+
+/* Add to end of responsive.css to ensure form elements look good on gradient */
+.login-center {
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+  border-radius: 16px;
+  padding: 30px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust text color for better contrast */
+.login-center h2,
+.login-center p {
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.login-bottom-p {
+  margin-top: 20px;
+  font-size: 1.6rem;
+  color: var(--dark-green);
+}
+
+.login-bottom-p a {
+  color: var(--primary-green);
+  font-weight: 600;
+  text-decoration: none;
 }

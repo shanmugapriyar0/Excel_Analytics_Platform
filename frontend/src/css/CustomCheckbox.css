@@ -1,7 +1,8 @@
-/* Custom checkbox styling */
+/* Custom checkbox styling with improved mobile compatibility */
 .custom-checkbox-container {
   display: flex;
   align-items: center;
+  margin-bottom: 5px;
 }
 
 .custom-checkbox {
@@ -28,11 +29,12 @@
   position: absolute;
   top: 0;
   left: 0;
-  height: 20px;
-  width: 20px;
+  height: 22px;
+  width: 22px;
   background-color: #fff;
   border: 2px solid var(--primary-green);
   border-radius: 4px;
+  transition: all 0.2s ease;
 }
 
 /* On mouse-over, add a light green background */
@@ -59,10 +61,10 @@
 
 /* Style the checkmark */
 .custom-checkbox .checkmark:after {
-  left: 6px;
+  left: 7px;
   top: 3px;
-  width: 4px;
-  height: 8px;
+  width: 5px;
+  height: 10px;
   border: solid white;
   border-width: 0 3px 3px 0;
   transform: rotate(45deg);
@@ -71,4 +73,50 @@
 .checkbox-label {
   margin-left: 5px;
   font-size: 1.6rem;
+}
+
+/* Make checkbox more touch-friendly on mobile */
+@media (max-width: 576px) {
+  .custom-checkbox {
+    padding-left: 30px;
+  }
+  
+  .checkmark {
+    height: 20px;
+    width: 20px;
+  }
+  
+  .custom-checkbox .checkmark:after {
+    left: 6px;
+    top: 2px;
+    width: 4px;
+    height: 9px;
+  }
+  
+  .checkbox-label {
+    font-size: 1.4rem;
+  }
+}
+
+@media (max-width: 370px) {
+  .custom-checkbox {
+    padding-left: 28px;
+  }
+  
+  .checkmark {
+    height: 18px;
+    width: 18px;
+  }
+  
+  .custom-checkbox .checkmark:after {
+    left: 5px;
+    top: 2px;
+    width: 4px;
+    height: 8px;
+    border-width: 0 2px 2px 0;
+  }
+  
+  .checkbox-label {
+    font-size: 1.3rem;
+  }
 }

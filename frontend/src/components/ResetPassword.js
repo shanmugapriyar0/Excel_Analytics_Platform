@@ -6,9 +6,9 @@ import Notification from "./Notification";
 import { gsap } from "gsap";
 import Image from "../assets/login.png";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
+import axios from 'axios';
 
 const ResetPassword = () => {
-  // Updated to extract both id and token from URL
   const { id, token } = useParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -20,19 +20,32 @@ const ResetPassword = () => {
     message: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isValidating, setIsValidating] = useState(true);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  // Get state from Redux store
   const { isLoading, isError, isSuccess, message } = useSelector(
     (state) => state.auth
   );
 
-  // Effect to handle notifications and navigation
+  useEffect(() => {
+    const validateToken = async () => {
+      setIsValidating(true);
+      try {
+        await axios.get(`http://localhost:5000/api/auth/validate-token/${id}/${token}`);
+        setIsValidating(false);
+      } catch (error) {
+        console.error('Token validation error:', error);
+        navigate('/expired-reset-link');
+      }
+    };
+
+    validateToken();
+  }, [id, token, navigate]);
+
   useEffect(() => {
     if (isError) {
-      // Check if the error is about using the same password
       if (message && message.includes('same as your current password')) {
         setNotification({
           show: true,
@@ -56,12 +69,10 @@ const ResetPassword = () => {
         message: "Password reset successful! Redirecting to login...",
       });
       
-      // Clear the form
       setPassword("");
       setConfirmPassword("");
       setIsSubmitted(false);
       
-      // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate("/login");
       }, 3000);
@@ -72,47 +83,45 @@ const ResetPassword = () => {
     };
   }, [isError, isSuccess, message, navigate, dispatch, isSubmitted]);
 
-  // Animation effect
   useEffect(() => {
-    const tl = gsap.timeline();
+    if (!isValidating) {
+      const tl = gsap.timeline();
 
-    tl.fromTo(
-      ".login-main",
-      {
-        opacity: 0,
-        y: 20,
-      },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 0.6,
-        ease: "power3.out",
-      }
-    );
+      tl.fromTo(
+        ".login-main",
+        {
+          opacity: 0,
+          y: 20,
+        },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.6,
+          ease: "power3.out",
+        }
+      );
 
-    tl.fromTo(
-      [
-        ".login-center h2",
-        ".login-center p",
-        "form input",
-        ".login-center-buttons button",
-      ],
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" },
-      "-=0.3"
-    );
-  }, []);
+      tl.fromTo(
+        [
+          ".login-center h2",
+          ".login-center p",
+          "form input",
+          ".login-center-buttons button",
+        ],
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, stagger: 0.1, duration: 0.4, ease: "power2.out" },
+        "-=0.3"
+      );
+    }
+  }, [isValidating]);
 
-  // Close notification
   const closeNotification = () => {
     setNotification({ ...notification, show: false });
   };
 
-  // Handle form submission - updated to include user id
   const handleResetPassword = (e) => {
     e.preventDefault();
 
-    // Form validation
     if (!password || !confirmPassword) {
       setNotification({
         show: true,
@@ -141,9 +150,17 @@ const ResetPassword = () => {
     }
 
     setIsSubmitted(true);
-    // Pass both id and token along with the password
     dispatch(resetPasswordConfirm({ id, token, password }));
   };
+
+  if (isValidating) {
+    return (
+      <div className="validation-loading">
+        <div className="loading-spinner"></div>
+        <p>Validating your reset link...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="login-main">
@@ -158,7 +175,6 @@ const ResetPassword = () => {
             <h2 className="login-heading">Reset Password</h2>
             <p>Please enter your new password</p>
             <form onSubmit={handleResetPassword}>
-              {/* Password field */}
               <div className="pass-input-div">
                 <input
                   type={showPassword ? "text" : "password"}
@@ -174,7 +190,6 @@ const ResetPassword = () => {
                 )}
               </div>
 
-              {/* Confirm Password field */}
               <div className="pass-input-div">
                 <input
                   type={showConfirmPassword ? "text" : "password"}

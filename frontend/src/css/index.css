@@ -22,23 +22,36 @@ body {
   height: 100vh;
 }
 
+/* Update login container with consistent background color */
 .login-main {
   display: flex;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+  flex-direction: row;
 }
 
+/* Improve image display across all screen sizes */
 .login-left {
-  flex-grow: 3;
+  flex: 3;
+  max-width: 60%;
   height: 100vh;
-  width: 5vh;
   background-color: rgb(8, 153, 8);
   display: flex;
   justify-content: center;
   align-items: center;
   text-align: center;
+  overflow: hidden;
+  position: relative;
 }
 
 .login-left img {
   width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  max-height: 100vh;
+  display: block; /* Ensure image always displays */
 }
 
 .login-left-flex {
@@ -47,25 +60,32 @@ body {
   align-items: center;
 }
 
+/* Update the right side background to match intro page gradient */
 .login-right {
+  flex: 2;
   height: 100vh;
-  flex-grow: 1;
-  background-color: var(--bg-green);
+  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  min-width: 40%;
 }
 
+/* Add a subtle pattern to enhance the background */
 .login-right-container {
-  height: 100%;
-  width: 60%;
-  margin: 0 auto;
+  width: 75%;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: transparent; /* Ensure container is transparent */
+  background-color: transparent;
+  height: 100%;
+  max-width: 600px;
 }
 
 .login-right form {
   display: flex;
-  width: 80vh;
+  width: 100%;
   flex-direction: column;
 }
 
@@ -78,8 +98,9 @@ body {
   margin: auto 0;
   text-align: center;
   color: var(--primary-green);
-  padding: 30px;
+  padding: 20px 30px;
   border-radius: 16px;
+  width: 100%;
 }
 
 .login-logo img {
@@ -89,7 +110,7 @@ body {
 .login-center h2 {
   font-size: 3.5rem;
   margin-bottom: 10px;
-  font-weight: 800; /* Increased from default weight */
+  font-weight: 800;
 }
 
 .login-center p {
@@ -98,6 +119,7 @@ body {
   margin-bottom: 40px;
 }
 
+/* Login form elements with transparent background */
 form input[type="email"],
 form input[type="password"],
 form input[type="text"] {
@@ -110,12 +132,31 @@ form input[type="text"] {
   box-sizing: border-box;
   color: rgb(4, 80, 4);
   font-size: 1.6rem;
-  background-color: transparent;
+  background-color: transparent; /* Remove white background */
+  border-radius: 0;
+  transition: all 0.3s ease;
 }
 
+/* Add subtle hover effect */
+form input[type="email"]:hover,
+form input[type="password"]:hover,
+form input[type="text"]:hover {
+  border-bottom: 1px solid rgb(9, 101, 9);
+  background-color: rgba(255, 255, 255, 0.1); /* Very subtle hover background */
+}
+
+/* Add focus effect */
+form input[type="email"]:focus,
+form input[type="password"]:focus,
+form input[type="text"]:focus {
+  border-bottom: 2px solid var(--primary-green);
+  background-color: rgba(255, 255, 255, 0.15); /* Slightly more visible when focused */
+}
+
+/* Update placeholder color for better visibility on gradient */
 input::placeholder {
-  color: green;
-  opacity: 0.7;
+  color: rgba(5, 73, 5, 0.7); /* More visible green placeholder text */
+  opacity: 0.8;
   font-size: 1.6rem;
 }
 
@@ -154,23 +195,27 @@ form button[type="button"] {
   transition: all 0.3s ease;
 }
 
+/* Fix the remember me and forgot password section */
 .login-center-options {
   display: flex;
   justify-content: space-between;
   margin-bottom: 20px;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .remember-div {
   display: flex;
   align-items: center;
-  column-gap: 5px;
+  column-gap: 8px;
 }
 
 .remember-div label {
   font-size: 1.6rem;
   font-weight: 500;
   cursor: pointer;
-  margin-top: 2px;
+  margin-left: 5px;
 }
 
 .forgot-pass-link {
@@ -196,9 +241,9 @@ form button[type="button"] {
   border: none;
   border-radius: 10px;
   height: 55px;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -215,14 +260,13 @@ form button[type="button"] {
   border: 2px solid var(--primary-green);
   border-radius: 10px;
   height: 55px;
-  font-size: 1.4rem;
+  font-size: 1.8rem;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
   display: flex;
   justify-content: center;
   align-items: center;
   column-gap: 10px;
-  
 }
 
 /* Update hover effect for create account button */
@@ -1141,4 +1185,190 @@ form button[type="button"] {
 .login-center-buttons button:nth-child(2) {
   font-size: 1.8rem; /* Increased from previous size */
   font-weight: 600;
+}
+
+/* Expired Reset Link Page Styles */
+.reset-expired-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%); /* Updated to gradient */
+  padding: 2rem;
+}
+
+.expired-link-container {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 3rem;
+  max-width: 500px;
+  text-align: center;
+}
+
+.expired-icon {
+  font-size: 6rem;
+  color: #e53e3e;
+  margin-bottom: 2rem;
+}
+
+.expired-link-container h2 {
+  font-size: 2.4rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.expired-link-container p {
+  font-size: 1.6rem;
+  color: #666;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+.expired-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.new-link-button {
+  background-color: var(--primary-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1.2rem 2rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.new-link-button:hover {
+  background-color: rgb(9, 101, 9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-login {
+  background-color: transparent;
+  color: var(--primary-green);
+  border: 1px solid var(--primary-green);
+  border-radius: 8px;
+  padding: 1.2rem 2rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-to-login:hover {
+  background-color: rgba(46, 125, 50, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Add Validation Loading Styles */
+.validation-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%); /* Updated to gradient */
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(46, 125, 50, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-green);
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+
+.validation-loading p {
+  font-size: 1.8rem;
+  color: var(--primary-green);
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Add to your existing CSS */
+.reset-link-reasons {
+  text-align: left;
+  margin: 1rem auto 2rem;
+  max-width: 80%;
+  font-size: 1.4rem;
+  color: #555;
+}
+
+.reset-link-reasons li {
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+
+/* Enhanced image treatment for better visual appeal */
+.login-left {
+  position: relative;
+}
+
+.login-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to right,
+    rgba(8, 153, 8, 0.2),
+    rgba(8, 153, 8, 0)
+  );
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .login-main {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%);
+  }
+
+  .login-left::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(
+      to top,
+      var(--light-green),
+      transparent
+    );
+    z-index: 5;
+  }
+
+  .login-left img {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Add this smooth transition between image and content */
+  .login-main {
+    background-color: var(--bg-green);
+  }
+}
+
+@media (min-width: 901px) {
+  /* The gradient for login-right is already defined in the main styles */
 }

@@ -23,6 +23,7 @@ const userSchema = mongoose.Schema({
   },
   resetPasswordToken: String,       // New field for token
   resetPasswordExpires: Date,       // New field for token expiration
+  resetTokenId: String,             // Add this new field
 }, {
   timestamps: true, // Adds createdAt and updatedAt timestamps
 });

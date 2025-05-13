@@ -106,15 +106,22 @@ router.post('/forgot-password', async (req, res) => {
       });
     }
 
-    // Create a secret key using JWT_SECRET and the user's hashed password
-    // This ensures tokens become invalid if the user changes their password
-    const secret = process.env.JWT_SECRET + user.password;
+    // Generate a unique token ID to invalidate previous reset links
+    const resetTokenId = crypto.randomBytes(32).toString('hex');
     
-    // Create a JWT token with user email and ID that expires in 15 minutes
+    // Save the resetTokenId to the user document
+    user.resetTokenId = resetTokenId;
+    await user.save();
+
+    // Create a secret key using JWT_SECRET and the user's hashed password
+    // Now also including the resetTokenId
+    const secret = process.env.JWT_SECRET + user.password + resetTokenId;
+    
+    // Create a JWT token with user email and ID that expires in 3 minutes
     const token = jwt.sign(
-      { email: user.email, id: user._id },
+      { email: user.email, id: user._id, resetTokenId },
       secret,
-      { expiresIn: '15m' }
+      { expiresIn: '3m' }
     );
     
     // Create reset URL with user ID and token
@@ -129,14 +136,14 @@ router.post('/forgot-password', async (req, res) => {
     // Configure SendGrid email
     const msg = {
       to: user.email,
-      from: process.env.SENDGRID_FROM_EMAIL, // Verified sender email in SendGrid
+      from: process.env.SENDGRID_FROM_EMAIL,
       subject: 'Password Reset - Excel Analytics Platform',
       html: `
         <h1>Password Reset Request</h1>
         <p>You requested a password reset for your Excel Analytics Platform account.</p>
         <p>Please click the link below to reset your password:</p>
         <a href="${resetUrl}" style="display:inline-block;padding:10px 20px;background:#4CAF50;color:#fff;text-decoration:none;border-radius:5px;">Reset Password</a>
-        <p>This link will expire in 15 minutes.</p>
+        <p>This link will expire in 3 minutes.</p>
         <p>If you didn't request this, please ignore this email.</p>
       `
     };
@@ -185,8 +192,23 @@ router.post('/reset-password/:id/:token', async (req, res) => {
       });
     }
     
-    // Recreate the secret using JWT_SECRET and user's current password
-    const secret = process.env.JWT_SECRET + user.password;
+    // Get payload without verification to extract resetTokenId
+    const decoded = jwt.decode(token);
+    if (!decoded || !decoded.resetTokenId) {
+      return res.status(400).json({
+        message: 'Invalid reset link. Please request a new one.'
+      });
+    }
+    
+    // Check if resetTokenId in token matches the one in user document
+    if (decoded.resetTokenId !== user.resetTokenId) {
+      return res.status(400).json({
+        message: 'This reset link has been superseded by a newer request. Please use the most recent link or request a new one.'
+      });
+    }
+    
+    // Now verify with the same secret used to sign
+    const secret = process.env.JWT_SECRET + user.password + user.resetTokenId;
     
     // Verify the token
     const verified = jwt.verify(token, secret);
@@ -197,7 +219,7 @@ router.post('/reset-password/:id/:token', async (req, res) => {
       });
     }
     
-    // NEW: Check if the new password is the same as the current password
+    // Check if the new password is the same as the current password
     const isSamePassword = await bcrypt.compare(password, user.password);
     if (isSamePassword) {
       return res.status(400).json({
@@ -205,8 +227,11 @@ router.post('/reset-password/:id/:token', async (req, res) => {
       });
     }
     
-    // Set the new password (bcrypt hashing happens in the User model pre-save hook)
+    // Set the new password
     user.password = password;
+    
+    // Invalidate all reset tokens by clearing resetTokenId
+    user.resetTokenId = undefined;
     
     // Save the user with new password
     await user.save();
@@ -216,6 +241,63 @@ router.post('/reset-password/:id/:token', async (req, res) => {
     });
   } catch (error) {
     console.error('Reset password error:', error);
+    
+    // Check if error is due to token expiration or invalid signature
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ message: 'Reset link has expired. Please request a new one.' });
+    } else if (error.name === 'JsonWebTokenError') {
+      return res.status(400).json({ message: 'Invalid reset link. Please request a new one.' });
+    }
+    
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// @desc    Validate reset token without changing password
+// @route   GET /api/auth/validate-token/:id/:token
+// @access  Public
+router.get('/validate-token/:id/:token', async (req, res) => {
+  const { id, token } = req.params;
+  
+  try {
+    // Find user by ID
+    const user = await User.findById(id);
+    
+    if (!user) {
+      return res.status(400).json({ 
+        message: 'Invalid reset request'
+      });
+    }
+    
+    // Get payload without verification to extract resetTokenId
+    // (This doesn't validate the token yet)
+    const decoded = jwt.decode(token);
+    if (!decoded || !decoded.resetTokenId) {
+      return res.status(400).json({
+        message: 'Invalid reset link. Please request a new one.'
+      });
+    }
+    
+    // Check if resetTokenId in token matches the one in user document
+    if (decoded.resetTokenId !== user.resetTokenId) {
+      return res.status(400).json({
+        message: 'This reset link has been superseded by a newer request. Please use the most recent link or request a new one.'
+      });
+    }
+    
+    // Now verify with the same secret used to sign
+    const secret = process.env.JWT_SECRET + user.password + user.resetTokenId;
+    
+    // Verify the token
+    const verified = jwt.verify(token, secret);
+    
+    // If we get here, token is valid
+    res.status(200).json({
+      message: 'Token is valid',
+      userId: id
+    });
+  } catch (error) {
+    console.error('Token validation error:', error);
     
     // Check if error is due to token expiration or invalid signature
     if (error.name === 'TokenExpiredError') {
