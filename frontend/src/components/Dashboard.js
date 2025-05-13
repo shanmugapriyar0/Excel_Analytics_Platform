@@ -6,7 +6,7 @@ import {
   FaSignOutAlt, FaUser, FaChartBar, FaCalendarAlt, 
   FaTasks, FaBell, FaCog, FaFileUpload, FaBars
 } from 'react-icons/fa';
-import FileUpload from './Fileupload';
+import FileUpload from './FileUpload';
 
 const Dashboard = () => {
   const navigate = useNavigate();
