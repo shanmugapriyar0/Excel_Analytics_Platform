@@ -4,9 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { logout, reset } from '../redux/authSlice';
 import {
   FaSignOutAlt, FaUser, FaChartBar, FaCalendarAlt, 
-  FaTasks, FaBell, FaCog, FaFileUpload, FaBars
+  FaTasks, FaBell, FaCog, FaFileUpload, FaBars,
+  FaChevronDown, FaUserCircle, FaKey, FaQuestion
 } from 'react-icons/fa';
 import FileUpload from './FileUpload';
+// Import Excel logo
+import excelLogo from "../assets/logo.png";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -34,6 +37,10 @@ const Dashboard = () => {
     navigate('/');
   };
 
+  const navigateToForgotPassword = () => {
+    navigate('/forgot-password');
+  };
+
   const formatDate = (date) => {
     const options = {
       weekday: 'long',
@@ -50,8 +57,10 @@ const Dashboard = () => {
       <div className={`dashboard-sidebar ${!sidebarOpen ? 'collapsed' : ''}`}>
         <div className="sidebar-header">
           <div className="app-logo">
-            <div className="logo-icon">DM</div>
-            {sidebarOpen && <span className="logo-text">DataMaster</span>}
+            <div className="logo-icon">
+              <img src={excelLogo} alt="ExcelInsights Logo" />
+            </div>
+            {sidebarOpen && <span className="logo-text">ExcelInsights</span>}
           </div>
           <button className="sidebar-toggle" onClick={() => setSidebarOpen(!sidebarOpen)}>
             <FaBars />
@@ -113,8 +122,41 @@ const Dashboard = () => {
             <div className="header-user">
               <div className="user-avatar">
                 <FaUser />
+                <div className="user-status"></div>
               </div>
               <div className="user-name">{user.username}</div>
+              <FaChevronDown className="user-dropdown-icon" />
+              
+              {/* User dropdown menu */}
+              <div className="user-dropdown">
+                <div className="user-dropdown-header">
+                  <div className="user-dropdown-name">{user.username}</div>
+                  <div className="user-dropdown-role">{user.role || 'User'}</div>
+                </div>
+                <div className="user-dropdown-items">
+                  <div className="user-dropdown-item">
+                    <FaUserCircle className="user-dropdown-icon" />
+                    <span>My Profile</span>
+                  </div>
+                  <div className="user-dropdown-item">
+                    <FaCog className="user-dropdown-icon" />
+                    <span>Settings</span>
+                  </div>
+                  <div className="user-dropdown-item" onClick={navigateToForgotPassword}>
+                    <FaKey className="user-dropdown-icon" />
+                    <span>Change Password</span>
+                  </div>
+                  <div className="user-dropdown-divider"></div>
+                  <div className="user-dropdown-item">
+                    <FaQuestion className="user-dropdown-icon" />
+                    <span>Help & Support</span>
+                  </div>
+                  <div className="user-dropdown-item" onClick={handleLogout}>
+                    <FaSignOutAlt className="user-dropdown-icon" />
+                    <span>Logout</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </header>
@@ -187,7 +229,7 @@ const Dashboard = () => {
         </main>
         
         <footer className="dashboard-footer">
-          <p>© {new Date().getFullYear()} DataMaster. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} ExcelInsights. All rights reserved.</p>
         </footer>
       </div>
     </div>

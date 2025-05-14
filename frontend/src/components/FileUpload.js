@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { FaFileExcel, FaFileUpload, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaFileExcel, FaCheck, FaTimes, FaCloudUploadAlt, FaArrowLeft } from 'react-icons/fa';
 
 const FileUpload = () => {
   const { user } = useSelector(state => state.auth);
@@ -68,10 +68,6 @@ const FileUpload = () => {
     const formData = new FormData();
     formData.append('excelFile', file);
     
-    // Debug log to see user object structure
-    console.log("User for auth:", user);
-    
-    // Get token from proper location in user object (adjust this based on what you see in the console)
     const token = user?.token || user?.accessToken || (user?.data?.token);
     
     if (!token) {
@@ -96,6 +92,14 @@ const FileUpload = () => {
         success: true,
         message: 'File uploaded and processed successfully!'
       });
+      
+      // Auto-dismiss success message after 4 seconds
+      setTimeout(() => {
+        if (setUploadStatus) { // Check component is still mounted
+          setUploadStatus(null);
+        }
+      }, 4000);
+      
     } catch (error) {
       console.error("Upload error details:", error.response || error);
       setUploadStatus({
@@ -114,91 +118,97 @@ const FileUpload = () => {
     const i = Math.floor(Math.log(bytes) / Math.log(k));
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
+  
+  const handleBackToProjects = () => {
+    // You can implement navigation to projects page here
+    console.log("Back to projects clicked");
+  };
 
   return (
     <div className="file-upload-container">
-      <section className="upload-section">
-        <div className="section-header">
-          <h2>Excel Data Upload</h2>
-          <p>Upload Excel or CSV files for parsing and database storage</p>
+      <div className="file-upload-header">
+        <div className="file-upload-title">
+          <h2>Upload Data for project</h2>
+          <p>Upload multiple Excel or CSV files for analysis</p>
         </div>
+        <button className="back-button" onClick={handleBackToProjects}>
+          <FaArrowLeft style={{ marginRight: '8px' }} /> Back to Projects
+        </button>
+      </div>
+      
+      <div 
+        className={`upload-area ${dragActive ? 'drag-active' : ''} ${file ? 'has-file' : ''}`}
+        onDragEnter={handleDrag}
+        onDragOver={handleDrag}
+        onDragLeave={handleDrag}
+        onDrop={handleDrop}
+      >
+        <input 
+          ref={fileInputRef}
+          type="file" 
+          id="file-upload" 
+          onChange={handleFileChange}
+          accept=".xlsx,.xls,.csv"
+          className="file-input" 
+        />
         
-        <div 
-          className={`upload-area ${dragActive ? 'drag-active' : ''} ${file ? 'has-file' : ''}`}
-          onDragEnter={handleDrag}
-          onDragOver={handleDrag}
-          onDragLeave={handleDrag}
-          onDrop={handleDrop}
-        >
-          <input 
-            ref={fileInputRef}
-            type="file" 
-            id="file-upload" 
-            onChange={handleFileChange}
-            accept=".xlsx,.xls,.csv"
-            className="file-input" 
-          />
-          
-          {!file ? (
-            <div className="upload-prompt">
-              <div className="upload-icon">
-                <FaFileUpload />
-              </div>
-              <h3>Drag & Drop your Excel file here</h3>
-              <p>or</p>
-              <button 
-                type="button" 
-                className="browse-button" 
-                onClick={() => fileInputRef.current.click()}
-              >
-                Browse Files
-              </button>
-              <p className="file-types">Supports: .xlsx, .xls, .csv</p>
-            </div>
-          ) : (
-            <div className="selected-file">
-              <div className="file-icon">
-                <FaFileExcel />
-              </div>
-              <div className="file-info">
-                <h3>{file.name}</h3>
-                <p>{formatFileSize(file.size)}</p>
-              </div>
-              <div className="file-actions">
-                <button 
-                  type="button" 
-                  className="remove-file-btn" 
-                  onClick={() => setFile(null)}
-                >
-                  <FaTimes />
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        
-        {file && (
-          <div className="upload-actions">
+        {!file ? (
+          <div className="upload-prompt">
+            <FaCloudUploadAlt className="upload-icon" />
+            <h3>Drag and drop your Excel or CSV files here</h3>
+            <p>or</p>
             <button 
               type="button" 
-              className="upload-button"
-              onClick={handleUpload}
-              disabled={uploading}
+              className="browse-button" 
+              onClick={() => fileInputRef.current.click()}
             >
-              {uploading ? 'Uploading...' : 'Upload & Process Data'}
+              Browse Files
             </button>
+            {/* Removed the file size limit text as requested */}
           </div>
-        )}
-        
-        {uploadStatus && (
-          <div className={`upload-status ${uploadStatus.success ? 'success' : 'error'}`}>
-            <div className="status-icon">
-              {uploadStatus.success ? <FaCheck /> : <FaTimes />}
+        ) : (
+          <div className="selected-file">
+            <div className="file-icon">
+              <FaFileExcel />
             </div>
-            <div className="status-message">{uploadStatus.message}</div>
+            <div className="file-info">
+              <h3>{file.name}</h3>
+              <p>{formatFileSize(file.size)}</p>
+            </div>
+            <div className="file-actions">
+              <button 
+                type="button" 
+                className="remove-file-btn" 
+                onClick={() => setFile(null)}
+              >
+                <FaTimes />
+              </button>
+            </div>
           </div>
         )}
-      </section>
+      </div>
+      
+      {file && (
+        <div className="upload-actions">
+          <button 
+            type="button" 
+            className="upload-button"
+            onClick={handleUpload}
+            disabled={uploading}
+          >
+            {uploading ? 'Uploading...' : 'Upload & Process Data'}
+          </button>
+        </div>
+      )}
+      
+      {uploadStatus && (
+        <div className={`upload-status ${uploadStatus.success ? 'success' : 'error'}`}>
+          <div className="status-icon">
+            {uploadStatus.success ? <FaCheck /> : <FaTimes />}
+          </div>
+          <div className="status-message">{uploadStatus.message}</div>
+        </div>
+      )}
       
       {parsedData && (
         <section className="preview-section">
