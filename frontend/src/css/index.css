@@ -1073,6 +1073,200 @@ form button[type="button"] {
   color: #d32f2f;
 }
 
+/* Multiple file upload styling */
+.selected-files {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+.files-header {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  width: 100%;
+  text-align: left;
+  padding-left: 5%;
+}
+
+.files-list {
+  width: 100%;
+  max-height: 320px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 10px;
+  padding-right: 5px;
+}
+
+.files-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.files-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.files-list::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 10px;
+}
+
+.files-list::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+.selected-file {
+  display: flex;
+  align-items: center;
+  background-color: white;
+  border-radius: 8px;
+  padding: 12px 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  width: 90%;
+  margin: 0 auto;
+  border: 1px solid rgba(46, 125, 50, 0.15);
+  transition: all 0.2s ease;
+}
+
+.selected-file:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.file-info h4 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 4px;
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-progress {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  min-width: 80px;
+}
+
+.progress-bar {
+  height: 8px;
+  width: 60px;
+  background-color: #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-right: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: var(--primary-green);
+  transition: width 0.3s ease;
+}
+
+.progress-text {
+  font-size: 1.2rem;
+  color: #555;
+  min-width: 36px;
+  text-align: right;
+}
+
+.progress-complete {
+  color: var(--primary-green);
+  font-size: 2rem;
+}
+
+.progress-failed {
+  color: #d32f2f;
+  font-size: 2rem;
+}
+
+.complete-icon,
+.failed-icon {
+  margin-left: auto;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  font-size: 1.8rem;
+  color: #666;
+  margin-left: auto;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+.add-more-files {
+  margin: 20px 0 5px;
+}
+
+.add-files-button {
+  background-color: transparent;
+  color: var(--primary-green);
+  border: 1px dashed var(--primary-green);
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 1.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-files-button:hover {
+  background-color: rgba(46, 125, 50, 0.05);
+  transform: translateY(-2px);
+}
+
+.upload-status.partial {
+  background-color: #fff8e1;
+  color: #f57c00;
+  border-left: 4px solid #f57c00;
+}
+
+.uploaded-files-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 20px;
+  width: 100%;
+}
+
+.uploaded-file-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  display: flex;
+  align-items: center;
+}
+
+.file-card-icon {
+  font-size: 3rem;
+  color: var(--primary-green);
+  margin-right: 16px;
+}
+
+.file-card-details h4 {
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+.file-card-details p {
+  font-size: 1.4rem;
+  color: #666;
+  margin: 4px 0;
+}
+
 /* Dashboard Layout */
 .dashboard-layout {
   display: flex;
@@ -1426,6 +1620,35 @@ form button[type="button"] {
   margin: 0.5rem 0;
 }
 
+/* Fix dropdown menu icons orientation */
+.user-dropdown-items .user-dropdown-icon {
+  font-size: 1.6rem;
+  color: #555;
+  margin-right: 10px;
+  transform: none !important; /* Override any inherited transformations */
+  transition: none !important; /* Prevent any hover animations from parent elements */
+}
+
+/* Keep the hover color effect for both icon and text */
+.user-dropdown-item:hover .user-dropdown-icon {
+  color: var(--primary-green);
+  transform: none !important; /* Maintain proper orientation on hover */
+  animation: none !important; /* Prevent any animations */
+}
+
+/* Rename the chevron dropdown icon class to be more specific */
+.header-user .chevron-icon {
+  font-size: 1.2rem;
+  color: #666;
+  margin-left: 0.5rem;
+  transition: transform 0.3s ease;
+}
+
+/* Keep the chevron arrow rotation effect */
+.header-user:hover .chevron-icon {
+  transform: rotate(180deg);
+}
+
 .section-header {
   margin-bottom: 2.5rem;
 }
@@ -1745,4 +1968,38 @@ form button[type="button"] {
 
 .action-button.notification:hover svg {
   animation: bellShake 0.5s ease;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.upload-status.fade-out {
+  animation: fadeOut 0.5s forwards;
+}
+
+/* Footer copyright text styling */
+.dashboard-footer {
+  width: 100%;
+  padding: 1.5rem 0;
+  text-align: center;
+  margin-top: auto;
+  background-color: transparent;
+}
+
+.dashboard-footer p {
+  font-size: 1.4rem;
+  color: #555;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* For the copyright text specifically */
+.copyright-text {
+  display: inline-block;
 }
