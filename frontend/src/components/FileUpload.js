@@ -1,18 +1,27 @@
 // components/FileUpload.js
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { FaFileExcel, FaCheck, FaTimes, FaCloudUploadAlt, FaArrowLeft, FaSpinner } from 'react-icons/fa';
+import { FaFileExcel, FaFileCsv, FaCheck, FaTimes, FaCloudUploadAlt, FaArrowLeft, FaSpinner } from 'react-icons/fa';
 
-const FileUpload = () => {
+const FileUpload = ({
+  files,
+  setFiles,
+  uploadStatus,
+  setUploadStatus,
+  uploadProgress,
+  setUploadProgress,
+  parsedData,
+  setParsedData,
+  uploading,
+  setUploading,
+  onSwitchTab // Add onSwitchTab prop
+}) => {
   const { user } = useSelector(state => state.auth);
-  const [files, setFiles] = useState([]); // Changed from single file to array of files
   const [dragActive, setDragActive] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState(null);
-  const [uploadProgress, setUploadProgress] = useState({});
-  const [parsedData, setParsedData] = useState([]);
   const fileInputRef = useRef(null);
+  const [fadeTimeoutId, setFadeTimeoutId] = useState(null);
+  const [removeTimeoutId] = useState(null);
 
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
@@ -57,13 +66,16 @@ const FileUpload = () => {
     if (invalidFiles.length > 0) {
       setUploadStatus({
         success: false,
-        message: `Invalid file type(s): ${invalidFiles.join(', ')}. Please upload Excel or CSV files only.`
+        message: `Invalid file type(s): ${invalidFiles.join(', ')}. Please upload Excel or CSV files only.`,
+        timestamp: Date.now()
       });
       
-      // Auto-dismiss error message after 4 seconds
-      setTimeout(() => {
+      // Clear existing timeouts
+      if (fadeTimeoutId) clearTimeout(fadeTimeoutId);
+      const newTimeout = setTimeout(() => {
         setUploadStatus(null);
       }, 4000);
+      setFadeTimeoutId(newTimeout);
     }
   };
 
@@ -105,7 +117,8 @@ const FileUpload = () => {
     if (!token) {
       setUploadStatus({
         success: false,
-        message: 'Authentication token not found. Please log in again.'
+        message: 'Authentication token not found. Please log in again.',
+        timestamp: Date.now()
       });
       setUploading(false);
       return;
@@ -183,21 +196,22 @@ const FileUpload = () => {
       if (successfulUploads.length === files.length) {
         setUploadStatus({
           success: true,
-          message: `All ${files.length} files uploaded successfully!`
+          message: `All ${files.length} files uploaded successfully!`,
+          timestamp: Date.now()
         });
         
-        // Auto-dismiss success message after 4 seconds with fade animation
-        setTimeout(() => {
-          // First add the fade-out class
-          document.querySelector('.upload-status').classList.add('fade-out');
-          
-          // Then remove the element after the animation completes
-          setTimeout(() => {
-            setUploadStatus(null);
-          }, 500);
-        }, 3500); // Start fading at 3.5s, total duration will be 4s
+        // Clear any existing timeouts to prevent memory leaks
+        if (fadeTimeoutId) clearTimeout(fadeTimeoutId);
+        if (removeTimeoutId) clearTimeout(removeTimeoutId);
         
-        // Only save parsed data from the first file for preview
+        // Auto-dismiss success message after 4 seconds with fade animation
+        const fadeTimeout = setTimeout(() => {
+          setUploadStatus(null);
+        }, 4000); // Simplified - just clear the status after 4 seconds
+        
+        setFadeTimeoutId(fadeTimeout);
+        
+        // Only save parsed data from successful uploads
         if (uploadResults.length > 0 && uploadResults[0].data) {
           setParsedData(uploadResults.map(result => result.data));
         }
@@ -207,12 +221,14 @@ const FileUpload = () => {
       } else if (successfulUploads.length === 0) {
         setUploadStatus({
           success: false,
-          message: 'All file uploads failed. Please try again.'
+          message: 'All file uploads failed. Please try again.',
+          timestamp: Date.now()
         });
       } else {
         setUploadStatus({
           success: 'partial',
-          message: `${successfulUploads.length} of ${files.length} files uploaded successfully.`
+          message: `${successfulUploads.length} of ${files.length} files uploaded successfully.`,
+          timestamp: Date.now()
         });
         
         // Auto-dismiss partial success message after 4 seconds too
@@ -255,6 +271,33 @@ const FileUpload = () => {
     // You can implement navigation to projects page here
     console.log("Back to projects clicked");
   };
+
+  // Check if there's an uploadStatus that hasn't been cleared yet
+  useEffect(() => {
+    if (uploadStatus && uploadStatus.timestamp) {
+      const messageAge = Date.now() - uploadStatus.timestamp;
+      const maxAge = 4000; // 4 seconds in milliseconds
+      
+      // If the message has been displayed longer than maxAge, clear it
+      if (messageAge > maxAge) {
+        setUploadStatus(null);
+      } else {
+        // Set a new timeout to clear the message after the remaining time
+        const remainingTime = maxAge - messageAge;
+        const newFadeTimeout = setTimeout(() => {
+          setUploadStatus(null);
+        }, remainingTime);
+        
+        setFadeTimeoutId(newFadeTimeout);
+      }
+    }
+    
+    // Clean up function
+    return () => {
+      if (fadeTimeoutId) clearTimeout(fadeTimeoutId);
+      if (removeTimeoutId) clearTimeout(removeTimeoutId);
+    };
+  }, [uploadStatus, fadeTimeoutId, removeTimeoutId, setUploadStatus]);
 
   return (
     <div className="file-upload-container">
@@ -405,7 +448,10 @@ const FileUpload = () => {
               {parsedData.map((data, index) => (
                 <div key={index} className="uploaded-file-card">
                   <div className="file-card-icon">
-                    <FaFileExcel />
+                    {data.metadata?.fileName.toLowerCase().endsWith('.csv') ? 
+                      <FaFileCsv className="csv-icon" /> : 
+                      <FaFileExcel />
+                    }
                   </div>
                   <div className="file-card-details">
                     <h4>{data.metadata?.fileName || `File ${index + 1}`}</h4>
@@ -417,6 +463,35 @@ const FileUpload = () => {
             </div>
           </div>
         </section>
+      )}
+      
+      {parsedData.length > 0 && (
+        <div className="analyze-actions">
+          <button 
+            type="button"
+            className="browse-button analyze-button"
+            onClick={() => {
+              // Store the most recently uploaded file's ID in localStorage
+              // We'll take the first file from parsedData if there are multiple
+              if (parsedData.length > 0) {
+                // Check where the fileId might be located in the response structure
+                const fileId = parsedData[0].fileId || 
+                              (parsedData[0].data && parsedData[0].data.fileId) || 
+                              (parsedData[0]._id);
+                
+                if (fileId) {
+                  localStorage.setItem('selectedFileId', fileId);
+                  console.log("Saved file ID for auto-selection:", fileId);
+                }
+              }
+              
+              // Navigate to the analyze tab
+              onSwitchTab("analyze");
+            }}
+          >
+            Analyze Files
+          </button>
+        </div>
       )}
     </div>
   );

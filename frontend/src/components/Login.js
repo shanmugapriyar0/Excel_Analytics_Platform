@@ -1,14 +1,14 @@
 /* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
-import Image from "../assets/login.png";
 import { FaEye } from "react-icons/fa6";
 import { FaEyeSlash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login, reset } from "../redux/authSlice";
-import Notification from "./Notification"; // New import
+import Notification from "./Notification";
 import { gsap } from "gsap";
 import CustomCheckbox from "./CustomCheckbox";
+import ImageSlider from "./ImageSlider"; // Import the new component
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -107,7 +107,8 @@ const Login = () => {
     <div className="login-main">
       <div className="login-left">
         <div className="login-left-flex">
-          <img src={Image} alt="" />
+          {/* Replace the static image with the ImageSlider component */}
+          <ImageSlider />
         </div>
       </div>
       <div className="login-right">
@@ -130,7 +131,6 @@ const Login = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
-                {/* Show eye icon whenever password has content */}
                 {password.length > 0 && (
                   <div onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <FaEyeSlash /> : <FaEye />}
@@ -166,7 +166,6 @@ const Login = () => {
           </div>
         </div>
       </div>
-      {/* Add Notification component */}
       {notification.show && (
         <Notification
           type={notification.type}

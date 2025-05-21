@@ -1,170 +1,121 @@
 # Excel Analytics Platform
 
-Last Updated: May 14, 2025
+Last Updated: May 21, 2025
 
 ## Week 3 Progress
 
-This week we've enhanced the platform with several improvements:
+During Week 3, we focused on improving file handling, fixing critical bugs, and enhancing the user experience:
 
-### Excel File Handling Enhancements
-- Improved multiple file upload capabilities with simultaneous file processing
-- Added advanced file validation and more detailed error handling
-- Enhanced the upload progress tracking with per-file progress indicators
-- Implemented partial upload success handling for batch file uploads
-- Added better metadata extraction from Excel files (headers, row count)
+### Backend Improvements
+- Fixed critical ObjectId constructor error in excelRoutes.js by properly using `new` keyword when creating MongoDB ObjectId instances
+- Improved error handling for file deletion and download operations
+- Enhanced GridFS integration for better file storage operations
+- Added more robust token verification for file operations
+
+### File Analysis Enhancements
+- Implemented automatic file selection in analysis view for newly uploaded files
+- Added persistent file selection using localStorage to maintain state between sessions
+- Improved file metadata display with better formatting
+- Created unified handling of both CSV and Excel files with appropriate icons
 
 ### User Interface Improvements
-- Redesigned file upload component with drag-and-drop area and file list
-- Added animated notifications for upload status (success, partial, error)
-- Enhanced responsive design for dashboard components on all device sizes
-- Added subtle animations for better user feedback during interactions
-- Improved user dropdown menu in dashboard header with new options
+- Added distinctive styling for CSV files with orange icon to differentiate from Excel files (green)
+- Enhanced dropdown menu functionality in the AnalyzeData component
+- Added better empty state handling when no files are available
+- Improved responsive design for file analysis on various screen sizes
+- Added "No selection" messaging when files exist but none selected
 
-### Backend Optimizations
-- Optimized GridFS integration for better performance with large files
-- Enhanced JWT authentication with more robust token verification
-- Improved error handling in file upload routes for better diagnostics
-- Added temporary file cleanup to prevent storage issues
-- Implemented better file type detection for Excel and CSV formats
+### User Experience Flow
+- Created seamless transition between file upload and analysis by:
+  - Auto-saving the most recently uploaded file ID to localStorage
+  - Automatically selecting this file when navigating to analysis view
+  - Adding a direct "Analyze Files" button after successful upload
+- Fixed console error messages for better debugging
 
-### Security Enhancements
-- Strengthened authentication flow with better token validation
-- Added more secure password reset functionality
-- Improved user data protection and validation
-- Enhanced error reporting without exposing sensitive information
-- Better environment variable handling for sensitive configuration
+### Styling Improvements
+- Enhanced image responsiveness across all device sizes
+- Improved container sizing for better display on larger screens
+- Added responsive adjustments for 2K+ displays
+- Fixed image scaling on mobile and smaller screens
 
-## Technical Implementation
+## Next Steps for Week 4
+- Implement data visualization for the selected files
+- Add data filtering capabilities
+- Create data export functionality
+- Add user file management (rename, delete, organize)
+- Implement collaborative features for team analysis
 
-### Frontend Changes
-- Created a new `FileUpload` component with drag-and-drop interface
-- Enhanced the Dashboard UI with modern sidebar navigation
-- Added responsive styling for mobile compatibility
-- Implemented file validation and preview capabilities
-- Added Redux state management for authentication
-- Created custom notification system for user feedback
-- Implemented password reset flow with secure token
+## Technical Details
 
-### Backend Changes
-- Set up GridFS for storing large Excel files
-- Created API endpoints for file upload, download and retrieval
-- Implemented Excel parsing using the XLSX library
-- Added JWT authentication for secure file operations
-- Created password reset token generation and validation
-- Integrated email service for communication
+The key bug fix implemented was addressing the MongoDB ObjectId constructor issue:
 
-## File Structure
-The implementation follows the existing project structure:
-```
-backend/
-  ├── models/
-  │   ├── ExcelFile.js (new)
-  │   └── User.js (updated)
-  ├── routes/
-  │   ├── authRoutes.js (updated)
-  │   └── excelRoutes.js (new)
-  └── temp-uploads/ (new directory for temporary file storage)
+```javascript
+// Previous code with error
+await bucket.delete(mongoose.Types.ObjectId(existingFile.fileId));
 
-frontend/
-  └── src/
-      ├── components/
-      │   ├── Dashboard.js (updated)
-      │   ├── FileUpload.js (new)
-      │   ├── IntroAnimation.js (new)
-      │   ├── Notification.js (new)
-      │   ├── CustomCheckbox.js (new)
-      │   ├── ForgotPassword.js (new)
-      │   └── ResetPassword.js (new)
-      ├── redux/
-      │   ├── store.js
-      │   └── authSlice.js (updated)
-      └── css/
-          └── responsive.css (updated)
+// Fixed code
+await bucket.delete(new mongoose.Types.ObjectId(existingFile.fileId));
 ```
 
-## Environment Setup
+The file selection persistence was implemented using localStorage:
 
-### Setting Up .env File
-1. Create a `.env` file in the root of the backend directory
-2. Add the following environment variables:
+```javascript
+// Save file selection to localStorage
+localStorage.setItem('selectedFileId', file._id);
 
-```
-# MongoDB Connection
-MONGO_URI=mongodb://localhost:27017/myauthdb
-
-# Authentication
-JWT_SECRET=your_very_long_and_secure_secret_key
-
-# SendGrid Configuration
-SENDGRID_API_KEY=your_sendgrid_api_key
-SENDGRID_FROM_EMAIL=your_verified_email@example.com
-
-# Frontend URL (for password reset links)
-FRONTEND_URL=http://localhost:3000
-
-# Node Environment
-NODE_ENV=development
+// Retrieve and use saved selection on component load
+const savedFileId = localStorage.getItem('selectedFileId');
+if (savedFileId && response.data.length > 0) {
+  const savedFile = response.data.find(file => file._id === savedFileId);
+  if (savedFile) {
+    setSelectedFile(savedFile);
+  }
+}
 ```
 
-3. Replace placeholder values with your actual credentials
-4. Generate a secure JWT secret using:
-   ```
-   node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-   ```
+## Image Slider Implementation
 
-### SendGrid Account Setup
-1. **Create a SendGrid Account**:
-   - Go to [SendGrid's website](https://sendgrid.com/) and sign up for a free account
-   - Verify your account through the confirmation email
+### Login Page Enhancement
+- Replaced static login image with an interactive image slider to improve user engagement
+- Added the ability to showcase multiple images with automatic rotation
+- Implemented indicator dots for manual navigation between slides
 
-2. **Verify a Sender Identity**:
-   - Navigate to Settings → Sender Authentication
-   - Choose either "Single Sender Verification" or "Domain Authentication"
-   - For testing, use Single Sender Verification by adding your email address
-   - Complete the verification process by clicking the link sent to your email
+### Technical Details
+- Created a new reusable `ImageSlider` component for displaying rotating images
+- Added responsive styles to ensure proper display across all device sizes
+- Integrated smooth transition effects between images
+- Ensured proper scaling on mobile devices and large screens
 
-3. **Create an API Key**:
-   - Go to Settings → API Keys
-   - Click "Create API Key"
-   - Name your key (e.g., "Excel Analytics Platform")
-   - Select "Full Access" or "Restricted Access" with at least "Mail Send" permissions
-   - Copy the generated API key immediately (it won't be shown again)
+### CSS Enhancements
+- Added slider-specific styles in responsive.css:
+  ```css
+  .image-slider {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
 
-4. **Add API Key to .env File**:
-   - Paste your API key as the value for `SENDGRID_API_KEY` in your .env file
-   - Set `SENDGRID_FROM_EMAIL` to your verified email address
+  .slider-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    z-index: 10;
+  }
+  ```
 
-### MongoDB Setup
-1. **Local Development**:
-   - Install MongoDB on your machine or use MongoDB Atlas
-   - Create a database named 'myauthdb' (or choose your own name)
-   - Update the MONGO_URI in .env with your connection string
+- Updated the Login component to utilize the new ImageSlider:
+  ```javascript
+  <div className="login-left-flex">
+    <ImageSlider />
+  </div>
+  ```
 
-2. **Production**:
-   - Use MongoDB Atlas or other cloud database service
-   - Update the MONGO_URI with your production connection string
-   - Set NODE_ENV=production in your environment variables
-
-## Usage
-1. Navigate to the Dashboard
-2. Select the "File Upload" tab
-3. Drag and drop or browse for an Excel/CSV file
-4. Click "Upload & Process Data"
-5. View the parsed data preview
-
-## Authentication Flow
-1. Users can register with username, email, and password
-2. Login with email and password
-3. Reset password via email if forgotten
-4. Role-based access to features (admin vs regular users)
-
-## Known Issues
-- Files larger than 100MB should be handled with care to avoid Git repository issues
-- Email service requires proper SendGrid API key configuration in production
-
-## Next Steps
-- Improving Dashboard and Website UI/UX
-- Implement data visualization for uploaded Excel files
-- Add batch processing capabilities for multiple files
-- Create user permissions for file access control
-- Add analytics dashboard with charts and graphs
+### User Experience Benefits
+- Provides a more visually appealing login experience
+- Allows showcasing product features and benefits through rotating images
+- Maintains responsive design across all device sizes from mobile to large desktop screens

@@ -677,11 +677,7 @@ form button[type="button"] {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  margin-bottom: 2rem;
-}
+
 
 .section-icon {
   font-size: 2.4rem;
@@ -865,7 +861,7 @@ form button[type="button"] {
   padding: 60px 20px;  /* Increased padding to make it taller */
   text-align: center;
   margin-bottom: 25px;
-  position: relative;
+  position: static;
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
@@ -1233,7 +1229,7 @@ form button[type="button"] {
 
 .uploaded-files-summary {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(269px, 1fr));
   gap: 20px;
   width: 100%;
 }
@@ -1254,7 +1250,7 @@ form button[type="button"] {
 }
 
 .file-card-details h4 {
-  font-size: 1.6rem;
+  font-size: 1.5rem;
   font-weight: 500;
   color: #333;
   margin-bottom: 8px;
@@ -1649,19 +1645,15 @@ form button[type="button"] {
   transform: rotate(180deg);
 }
 
-.section-header {
-  margin-bottom: 2.5rem;
-}
+
 .section-header h2 {
   font-size: 2.2rem;
   font-weight: 700;
   color: #333;
   margin-bottom: 0.8rem;
 }
-.section-header p {
-  font-size: 1.5rem;
-  color: #666;
-}
+
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -1684,6 +1676,56 @@ form button[type="button"] {
   background-color: rgba(255, 255, 255, 0.8);
 }
 
+/* Add this to your index.css file */
+
+.analyze-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 25px;
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+.analyze-button {
+  background-color: var(--primary-green);
+  color: white;
+  padding: 15px 40px;
+  font-size: 1.8rem;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
+  transition: all 0.3s ease;
+}
+
+.analyze-button:hover {
+  background-color: #228B22;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
+}
+.dashboard-sidebar.collapsed .sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem 0;
+}
+.dashboard-sidebar.collapsed .logout-btn {
+  display: flex;
+  justify-content: center;
+  padding: 1.2rem;
+  width: 48px;
+  margin: 0 auto;
+  border-radius: 50%;
+}
+
+/* Keep the icon visible when sidebar is collapsed */
+.dashboard-sidebar.collapsed .logout-btn span {
+  display: none;
+}
+
+.dashboard-sidebar.collapsed .logout-btn svg,
+.dashboard-sidebar.collapsed .logout-btn i {
+  margin: 0;
+  font-size: 2.2rem;
+}
 /* Responsiveness */
 @media (max-width: 992px) {
   .dashboard-sidebar {
@@ -1691,6 +1733,20 @@ form button[type="button"] {
   }
   .logo-text, .sidebar-menu li span, .user-details, .logout-btn span {
     display: none;
+  }
+  .logout-btn {
+    display: flex !important;
+    justify-content: center !important;
+    padding: 1.2rem !important;
+    width: 48px !important;
+    margin: 0 auto !important;
+    border-radius: 50% !important;
+  }
+  
+  .logout-btn svg,
+  .logout-btn i {
+    margin: 0 !important;
+    font-size: 2.2rem !important;
   }
 }
 @media (max-width: 768px) {
@@ -1706,300 +1762,4 @@ form button[type="button"] {
     grid-template-columns: 1fr;
   }
   
-}
-/* Increase button text size for login and create account buttons */
-.login-center-buttons button:nth-child(1),
-.login-center-buttons button:nth-child(2) {
-  font-size: 1.8rem; /* Increased from previous size */
-  font-weight: 600;
-}
-
-/* Expired Reset Link Page Styles */
-.reset-expired-page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%); /* Updated to gradient */
-  padding: 2rem;
-}
-
-.expired-link-container {
-  background-color: white;
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  padding: 3rem;
-  max-width: 500px;
-  text-align: center;
-}
-
-.expired-icon {
-  font-size: 6rem;
-  color: #e53e3e;
-  margin-bottom: 2rem;
-}
-
-.expired-link-container h2 {
-  font-size: 2.4rem;
-  color: #333;
-  margin-bottom: 1.5rem;
-  font-weight: 700;
-}
-
-.expired-link-container p {
-  font-size: 1.6rem;
-  color: #666;
-  margin-bottom: 3rem;
-  line-height: 1.6;
-}
-
-.expired-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.new-link-button {
-  background-color: var(--primary-green);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 1.2rem 2rem;
-  font-size: 1.6rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.new-link-button:hover {
-  background-color: rgb(9, 101, 9);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-.back-to-login {
-  background-color: transparent;
-  color: var(--primary-green);
-  border: 1px solid var(--primary-green);
-  border-radius: 8px;
-  padding: 1.2rem 2rem;
-  font-size: 1.6rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.back-to-login:hover {
-  background-color: rgba(46, 125, 50, 0.05);
-  transform: translateY(-2px);
-}
-
-/* Add Validation Loading Styles */
-.validation-loading {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
-  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%); /* Updated to gradient */
-}
-
-.loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid rgba(46, 125, 50, 0.2);
-  border-radius: 50%;
-  border-top-color: var(--primary-green);
-  animation: spin 1s ease-in-out infinite;
-  margin-bottom: 20px;
-}
-
-.validation-loading p {
-  font-size: 1.8rem;
-  color: var(--primary-green);
-  font-weight: 500;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Add to your existing CSS */
-.reset-link-reasons {
-  text-align: left;
-  margin: 1rem auto 2rem;
-  max-width: 80%;
-  font-size: 1.4rem;
-  color: #555;
-}
-
-.reset-link-reasons li {
-  margin-bottom: 0.8rem;
-  line-height: 1.4;
-}
-
-/* Enhanced image treatment for better visual appeal */
-.login-left {
-  position: relative;
-}
-
-.login-left::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    to right,
-    rgba(8, 153, 8, 0.2),
-    rgba(8, 153, 8, 0)
-  );
-  pointer-events: none;
-}
-
-@media (max-width: 900px) {
-  .login-main {
-    flex-direction: column;
-    overflow-x: hidden;
-    overflow-y: auto;
-    height: auto;
-    min-height: 100vh;
-    background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%);
-  }
-
-  .login-left::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: linear-gradient(
-      to top,
-      var(--light-green),
-      transparent
-    );
-    z-index: 5;
-  }
-
-  .login-left img {
-    position: relative;
-    z-index: 1;
-  }
-
-  /* Add this smooth transition between image and content */
-  .login-main {
-    background-color: var(--bg-green);
-  }
-}
-
-@media (min-width: 901px) {
-  /* The gradient for login-right is already defined in the main styles */
-}
-
-/* Update placeholder content */
-.placeholder-content {
-  background-color: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(10px);
-  border-radius: 16px;
-  padding: 3rem;
-  text-align: center;
-  margin: 2rem auto;
-  max-width: 800px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-/* Enhanced notification bell styling */
-.action-button.notification {
-  background-color: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(8px);
-  color: #555;
-  font-size: 1.8rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  position: relative;
-  transition: all 0.3s ease;
-}
-
-.action-button.notification:hover {
-  background-color: rgba(255, 255, 255, 0.9);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-.action-button.notification:hover svg {
-  transform: scale(1.1);
-  color: var(--primary-green);
-}
-
-.action-button.notification .badge {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  background-color: #e53e3e;
-  color: white;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 2px solid white;
-  font-weight: 700;
-  transition: all 0.3s ease;
-}
-
-.action-button.notification:hover .badge {
-  transform: scale(1.1);
-  box-shadow: 0 0 8px rgba(229, 62, 62, 0.3);
-}
-
-/* Add subtle bell animation on hover */
-@keyframes bellShake {
-  0% { transform: rotate(0); }
-  20% { transform: rotate(8deg); }
-  40% { transform: rotate(-8deg); }
-  60% { transform: rotate(4deg); }
-  80% { transform: rotate(-4deg); }
-  100% { transform: rotate(0); }
-}
-
-.action-button.notification:hover svg {
-  animation: bellShake 0.5s ease;
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-  to {
-    opacity: 0;
-  }
-}
-
-.upload-status.fade-out {
-  animation: fadeOut 0.5s forwards;
-}
-
-/* Footer copyright text styling */
-.dashboard-footer {
-  width: 100%;
-  padding: 1.5rem 0;
-  text-align: center;
-  margin-top: auto;
-  background-color: transparent;
-}
-
-.dashboard-footer p {
-  font-size: 1.4rem;
-  color: #555;
-  font-weight: 400;
-  margin: 0;
-}
-
-/* For the copyright text specifically */
-.copyright-text {
-  display: inline-block;
 }

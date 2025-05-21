@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout, reset } from "../redux/authSlice";
@@ -17,6 +17,7 @@ import {
   FaQuestion,
 } from "react-icons/fa";
 import FileUpload from "./FileUpload";
+import AnalyzeData from './AnalyzeData'; // Add this import at the top
 // Import Excel logo
 import excelLogo from "../assets/logo.png";
 
@@ -27,6 +28,13 @@ const Dashboard = () => {
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  // Add file upload state at Dashboard level
+  const [uploadFiles, setUploadFiles] = useState([]);
+  const [uploadStatus, setUploadStatus] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState({});
+  const [parsedData, setParsedData] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -257,8 +265,27 @@ const Dashboard = () => {
             </div>
           )}
 
-          {/* File Upload Tab Content */}
-          {activeTab === "upload" && <FileUpload />}
+          {/* File Upload Tab Content - Pass state and setters as props */}
+          {activeTab === "upload" && (
+            <FileUpload 
+              files={uploadFiles}
+              setFiles={setUploadFiles}
+              uploadStatus={uploadStatus}
+              setUploadStatus={setUploadStatus}
+              uploadProgress={uploadProgress}
+              setUploadProgress={setUploadProgress}
+              parsedData={parsedData}
+              setParsedData={setParsedData}
+              uploading={isUploading}
+              setUploading={setIsUploading}
+              onSwitchTab={setActiveTab} // Add this prop
+            />
+          )}
+
+          {/* Analyze Data Tab Content - Replace with AnalyzeData component */}
+          {activeTab === "analyze" && (
+            <AnalyzeData />
+          )}
 
           {/* Placeholder for other tabs */}
           {activeTab !== "dashboard" && activeTab !== "upload" && activeTab !== "analyze" && (
@@ -267,14 +294,6 @@ const Dashboard = () => {
                 {activeTab === "analyze" ? "Data Analysis" : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Content
               </h2>
               <p>This feature is coming soon.</p>
-            </div>
-          )}
-
-          {/* Add placeholder specifically for analyze section */}
-          {activeTab === "analyze" && (
-            <div className="placeholder-content">
-              <h2>Data Analysis</h2>
-              <p>The data analysis tools are coming soon. Here you'll be able to create visualizations, apply statistical methods, and gain insights from your uploaded files.</p>
             </div>
           )}
         </main>

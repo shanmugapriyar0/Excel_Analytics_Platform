@@ -345,3 +345,277 @@
   font-weight: 600;
   text-decoration: none;
 }
+/* Enhanced container sizing for 2K+ displays */
+
+/* Increase base container sizes */
+.file-upload-container,
+.analyze-data-container {
+  max-width: 1200px; /* Increased from 1000px */
+  width: 85%;        /* Adjusted for better proportions */
+  padding: 35px;     /* Slightly more padding for better spacing */
+}
+
+/* Add responsive adjustments for different screen sizes */
+@media (min-width: 1440px) {
+  .file-upload-container,
+  .analyze-data-container {
+    max-width: 1300px;
+  }
+}
+
+/* For 2K displays (2560px width and above) */
+@media (min-width: 2560px) {
+  .file-upload-container,
+  .analyze-data-container {
+    max-width: 1500px;
+    width: 75%;
+  }
+  
+  /* Increase inner section spacing too */
+  .file-selection-section,
+  .analysis-options-section,
+  .upload-area,
+  .preview-section {
+    padding: 30px;
+  }
+}
+
+/* Additional adjustments to make content look balanced in larger containers */
+.file-selector {
+  max-width: 800px; /* Increase from 600px */
+}
+
+.analysis-options {
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); /* Slightly larger cards */
+  gap: 25px; /* Increased from 20px */
+}
+
+.upload-area {
+  min-height: 300px; /* Slightly taller upload area */
+}
+
+/* Add to your CSS file */
+.no-selection-message {
+  background-color: #fffbea;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 25px;
+  text-align: center;
+  border-left: 4px solid #f9a825;
+}
+
+.no-selection-message p {
+  color: #795548;
+  font-size: 1.6rem;
+  margin: 0;
+}
+/* CSV File Icon Styling */
+.csv-icon {
+  color: #ff6f00; /* Orange color for CSV files */
+}
+
+.excel-icon {
+  color: var(--primary-green); /* Keep existing green color for Excel files */
+}
+
+/* Make sure both icons look good in all contexts */
+.file-card-icon .csv-icon,
+.dropdown-item-content .csv-icon,
+.selected-file-info .csv-icon {
+  color: #ff6f00; /* Orange color for CSV files */
+}
+
+/* Ensure consistent sizing */
+.file-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.file-card-icon .file-icon {
+  font-size: 3.5rem;
+}
+
+/* Image responsiveness fixes */
+
+/* Better image handling for all screen sizes */
+.login-left {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background-color: rgb(56, 165, 46);
+}
+
+.login-left-flex {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain; /* Changed from 'cover' to 'contain' for better proportions */
+  max-height: 100vh;
+}
+
+/* Large screens - prevent image from being too large */
+@media (min-width: 1440px) {
+  .login-left {
+    flex: 1;
+    max-width: 50%;
+  }
+  
+  .login-right {
+    flex: 1;
+    min-width: 50%;
+  }
+  
+  .login-left img {
+    object-fit: contain;
+    max-width: 100%; /* Prevent image from stretching too much */
+    max-height: 100vh;
+  }
+}
+
+/* Very large screens (2K and 4K displays) */
+@media (min-width: 1921px) {
+  .login-left {
+    flex: 1;
+    max-width: 45%;
+  }
+  
+  .login-right {
+    flex: 1.2;
+    min-width: 55%;
+  }
+  
+  .login-left img {
+    max-width: 100%; /* Further constrain on very large displays */
+    max-height: 100vh;
+    object-fit: contain;
+  }
+}
+
+/* Mobile view improvements */
+@media (max-width: 900px) {
+  .login-main {
+    flex-direction: column;
+  }
+  
+    .login-left {
+    width: 100%;
+    max-width: 100%;
+    height: 45vh; /* Increased from 40vh to show more image */
+    min-height: 280px; /* Increased for better display */
+    display: flex;
+    background-color: rgb(56, 165, 46); /* Keep consistent green background */
+    overflow: hidden;
+    position: relative;
+  }
+  
+  .login-left-flex {
+    width: 100%;
+    height: 100%;
+    padding: 0; /* Remove padding to allow image to fill space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .login-left img {
+    width: 55%; /* Better than auto for most mobile cases */
+    height: 140%;
+    max-height: none; /* Remove height constraints */
+    object-fit: contain;
+    object-position: center;
+    display: block;
+  }
+}
+
+@media (max-width: 576px) {
+  .login-left {
+    height: 40vh; /* Still provide good height on smaller screens */
+    min-height: 240px;
+  }
+  
+  .login-left-flex {
+    padding: 0;
+  }
+  
+  .login-left img {
+    width: 95%; /* Allow image to use more space */
+    max-width: 400px; /* Prevent extreme stretching */
+  }
+}
+
+/* Very small phones */
+@media (max-width: 400px) {
+  .login-left {
+    height: 38vh;
+    min-height: 220px;
+  }
+  
+  .login-left img {
+    width: 90%;
+    max-width: 350px;
+  }
+}
+/* Image Slider Styling */
+.image-slider {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.image-slider img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Indicator dots */
+.slider-indicators {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  z-index: 10;
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.active {
+  background-color: white;
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* Mobile responsiveness for slider */
+@media (max-width: 900px) {
+  .slider-indicators {
+    bottom: 10px;
+  }
+  
+  .indicator {
+    width: 8px;
+    height: 8px;
+  }
+}

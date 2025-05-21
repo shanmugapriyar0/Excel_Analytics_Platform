@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const multer = require('multer');
-const { GridFSBucket } = require('mongodb');
+const { GridFSBucket, ObjectId } = require('mongodb');
 const XLSX = require('xlsx');
 const fs = require('fs');
 const ExcelFile = require('../models/ExcelFile');
@@ -72,64 +72,90 @@ router.post('/upload', protect, upload.single('excelFile'), async (req, res) => 
   }
 
   try {
-    // Get file data and parse headers
+    // Parse file data
     const workbook = XLSX.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    
-    // Just read the headers and count rows instead of full data
     const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
     const headers = jsonData[0];
-    const rowCount = jsonData.length - 1; // Subtract 1 for header row
+    const rowCount = jsonData.length - 1;
+    
+    // Check if file already exists
+    const existingFile = await ExcelFile.findOne({
+      filename: req.file.originalname,
+      'metadata.uploadedBy': req.user.id
+    });
     
     // Connect to GridFS
     const bucket = new GridFSBucket(mongoose.connection.db, {
       bucketName: 'excelFiles'
     });
     
-    // Upload file to GridFS
+    // Delete old file from GridFS if exists
+    if (existingFile) {
+      try {
+        await bucket.delete(ObjectId.createFromHexString(existingFile.fileId.toString()));
+      } catch (err) {
+        console.log("Error deleting old file:", err);
+      }
+    }
+    
+    // Upload new file to GridFS
     const uploadStream = bucket.openUploadStream(req.file.originalname);
     const fileId = uploadStream.id;
     
-    // Create metadata record
-    const excelFile = new ExcelFile({
-      filename: req.file.originalname,
-      fileId: fileId,
-      metadata: {
+    // Create or update file record
+    if (existingFile) {
+      existingFile.fileId = fileId;
+      existingFile.uploadDate = new Date();
+      existingFile.metadata = {
         uploadedBy: req.user.id,
         headers: headers,
         rowCount: rowCount,
         originalName: req.file.originalname
+      };
+      await existingFile.save();
+    } else {
+      const excelFile = new ExcelFile({
+        filename: req.file.originalname,
+        fileId: fileId,
+        metadata: {
+          uploadedBy: req.user.id,
+          headers: headers,
+          rowCount: rowCount,
+          originalName: req.file.originalname
+        }
+      });
+      await excelFile.save();
+    }
+    
+    // Pipe file to GridFS
+    const pipePromise = new Promise((resolve, reject) => {
+      fs.createReadStream(req.file.path)
+        .pipe(uploadStream)
+        .on('error', reject)
+        .on('finish', resolve);
+    });
+    
+    await pipePromise;
+    
+    // Delete temp file
+    fs.unlinkSync(req.file.path);
+    
+    // Return success response
+    return res.status(200).json({
+      message: existingFile ? 'File updated successfully' : 'File uploaded successfully',
+      fileId: fileId,
+      metadata: {
+        headers: headers,
+        rowCount: rowCount,
+        fileName: req.file.originalname
       }
     });
     
-    await excelFile.save();
-    
-    // Create read stream from the temp file and pipe to GridFS
-    fs.createReadStream(req.file.path)
-      .pipe(uploadStream)
-      .on('error', (error) => {
-        console.error(error);
-        return res.status(500).json({ message: 'Error uploading file to GridFS' });
-      })
-      .on('finish', () => {
-        // Delete the temp file
-        fs.unlinkSync(req.file.path);
-        
-        // Return success response with data preview
-        return res.status(200).json({
-          message: 'File uploaded successfully',
-          fileId: fileId,
-          metadata: {
-            headers: headers,
-            rowCount: rowCount,
-            fileName: req.file.originalname
-          }
-        });
-      });
   } catch (error) {
     console.error('Error processing Excel file:', error);
-    // Clean up the temporary file
+    // Clean up temp file
     if (req.file && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
@@ -166,7 +192,7 @@ router.get('/download/:fileId', protect, async (req, res) => {
     res.set('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.set('Content-Disposition', `attachment; filename="${file.filename}"`);
     
-    bucket.openDownloadStream(mongoose.Types.ObjectId(req.params.fileId))
+    bucket.openDownloadStream(ObjectId.createFromHexString(req.params.fileId))
       .pipe(res);
   } catch (error) {
     console.error('Error downloading file:', error);

@@ -1,4 +1,9 @@
 /* Custom checkbox styling with improved mobile compatibility */
+:root {
+  --primary-green: #2e7d32;
+  --light-green: #a5d6a7;
+  --bg-green: #f8fcf8;
+}
 .custom-checkbox-container {
   display: flex;
   align-items: center;
@@ -118,5 +123,607 @@
   
   .checkbox-label {
     font-size: 1.3rem;
+  }
+}
+/* Increase button text size for login and create account buttons */
+.login-center-buttons button:nth-child(1),
+.login-center-buttons button:nth-child(2) {
+  font-size: 1.8rem; /* Increased from previous size */
+  font-weight: 600;
+}
+
+/* Expired Reset Link Page Styles */
+.reset-expired-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%); /* Updated to gradient */
+  padding: 2rem;
+}
+
+.expired-link-container {
+  background-color: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 3rem;
+  max-width: 500px;
+  text-align: center;
+}
+
+.expired-icon {
+  font-size: 6rem;
+  color: #e53e3e;
+  margin-bottom: 2rem;
+}
+
+.expired-link-container h2 {
+  font-size: 2.4rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+}
+
+.expired-link-container p {
+  font-size: 1.6rem;
+  color: #666;
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+.expired-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.new-link-button {
+  background-color: var(--primary-green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 1.2rem 2rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.new-link-button:hover {
+  background-color: rgb(9, 101, 9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.back-to-login {
+  background-color: transparent;
+  color: var(--primary-green);
+  border: 1px solid var(--primary-green);
+  border-radius: 8px;
+  padding: 1.2rem 2rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-to-login:hover {
+  background-color: rgba(46, 125, 50, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Add Validation Loading Styles */
+.validation-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%); /* Updated to gradient */
+}
+
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid rgba(46, 125, 50, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--primary-green);
+  animation: spin 1s ease-in-out infinite;
+  margin-bottom: 20px;
+}
+
+.validation-loading p {
+  font-size: 1.8rem;
+  color: var(--primary-green);
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Add to your existing CSS */
+.reset-link-reasons {
+  text-align: left;
+  margin: 1rem auto 2rem;
+  max-width: 80%;
+  font-size: 1.4rem;
+  color: #555;
+}
+
+.reset-link-reasons li {
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+
+/* Enhanced image treatment for better visual appeal */
+.login-left {
+  position: relative;
+}
+
+.login-left::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    to right,
+    rgba(8, 153, 8, 0.2),
+    rgba(8, 153, 8, 0)
+  );
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .login-main {
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    height: auto;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg-green) 0%, var(--light-green) 100%);
+  }
+
+  .login-left::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: linear-gradient(
+      to top,
+      var(--light-green),
+      transparent
+    );
+    z-index: 5;
+  }
+
+  .login-left img {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Add this smooth transition between image and content */
+  .login-main {
+    background-color: var(--bg-green);
+  }
+}
+
+@media (min-width: 901px) {
+  /* The gradient for login-right is already defined in the main styles */
+}
+
+/* Update placeholder content */
+.placeholder-content {
+  background-color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 3rem;
+  text-align: center;
+  margin: 2rem auto;
+  max-width: 800px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced notification bell styling */
+.action-button.notification {
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  color: #555;
+  font-size: 1.8rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.action-button.notification:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.action-button.notification:hover svg {
+  transform: scale(1.1);
+  color: var(--primary-green);
+}
+
+.action-button.notification .badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #e53e3e;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid white;
+  font-weight: 700;
+  transition: all 0.3s ease;
+}
+
+.action-button.notification:hover .badge {
+  transform: scale(1.1);
+  box-shadow: 0 0 8px rgba(229, 62, 62, 0.3);
+}
+
+/* Add subtle bell animation on hover */
+@keyframes bellShake {
+  0% { transform: rotate(0); }
+  20% { transform: rotate(8deg); }
+  40% { transform: rotate(-8deg); }
+  60% { transform: rotate(4deg); }
+  80% { transform: rotate(-4deg); }
+  100% { transform: rotate(0); }
+}
+
+.action-button.notification:hover svg {
+  animation: bellShake 0.5s ease;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.upload-status {
+  opacity: 1;
+  transition: opacity 0.5s ease-out;
+}
+
+.upload-status.fade-out {
+  opacity: 0;
+}
+
+/* Footer copyright text styling */
+.dashboard-footer {
+  width: 100%;
+  padding: 1.5rem 0;
+  text-align: center;
+  margin-top: auto;
+  background-color: transparent;
+}
+
+.dashboard-footer p {
+  font-size: 1.4rem;
+  color: #555;
+  font-weight: 400;
+  margin: 0;
+}
+
+/* For the copyright text specifically */
+.copyright-text {
+  display: inline-block;
+}
+/* Add to your index.css file */
+
+/* Analyze Data Section Styles */
+.analyze-data-container {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  padding: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+  width: 90%;
+}
+
+.analyze-header {
+  margin-bottom: 25px;
+}
+
+.analyze-title h2 {
+  font-size: 2.4rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.analyze-title p {
+  font-size: 1.6rem;
+  color: #666;
+}
+
+.analyze-content {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.file-selection-section,
+.analysis-options-section {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 25px;
+}
+
+.section-header {
+  margin-bottom: 25px;
+}
+
+.section-header h3 {
+  font-size: 1.9rem; /* Slightly larger */
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2.3em; /* Increased spacing between heading and description */
+  padding-bottom: 5px; /* Add some padding at bottom of heading */
+}
+
+.section-header p {
+  font-size: 1.5rem; /* Slightly larger */
+  color: #666;
+  text-align: center;
+}
+
+/* File Selector Dropdown */
+.file-selector {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.file-dropdown {
+  position: relative;
+}
+
+.dropdown-button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 15px 20px;
+  font-size: 1.6rem;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.dropdown-button:hover {
+  border-color: var(--primary-green);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-button:disabled {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.dropdown-icon {
+  font-size: 1.4rem;
+  color: #666;
+  transition: transform 0.3s ease;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+.selected-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  overflow: hidden;
+}
+
+.file-icon {
+  font-size: 2rem;
+  color: var(--primary-green);
+  flex-shrink: 0;
+}
+
+.file-name {
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.placeholder-text {
+  color: #999;
+}
+
+.loading-text {
+  color: #666;
+  font-style: italic;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #eee;
+}
+
+.dropdown-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: small;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background-color: #f5f5f5;
+}
+
+.dropdown-item.active {
+  background-color: rgba(76, 175, 80, 0.1);
+  border-left: 3px solid var(--primary-green);
+}
+
+.dropdown-item-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.file-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.file-meta {
+  font-size: 1.2rem;
+  color: #777;
+  margin-top: 4px;
+}
+
+/* Error and No Files Messages */
+.error-message,
+.no-files-message {
+  background-color: #fff8f8;
+  border-radius: 8px;
+  padding: 15px 20px;
+  margin-top: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.error-message {
+  border-left: 4px solid #d32f2f;
+  color: #d32f2f;
+}
+
+.no-files-message {
+  background-color: #fff8e1;
+  border-left: 4px solid #f57c00;
+  color: #f57c00;
+}
+
+.retry-button {
+  background-color: transparent;
+  border: 1px solid #d32f2f;
+  color: #d32f2f;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+  background-color: rgba(211, 47, 47, 0.1);
+}
+
+/* Analysis Options */
+.analysis-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.option-card {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.option-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--light-green);
+}
+
+.option-icon {
+  background-color: rgba(76, 175, 80, 0.1);
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.4rem;
+  color: var(--primary-green);
+  margin-bottom: 15px;
+}
+
+.option-details h4 {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.option-details p {
+  font-size: 1.3rem;
+  color: #666;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .analysis-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .analysis-options {
+    grid-template-columns: 1fr;
+  }
+  
+  .analyze-data-container {
+    padding: 20px;
+    width: 95%;
   }
 }
