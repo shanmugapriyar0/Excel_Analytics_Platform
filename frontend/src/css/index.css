@@ -332,14 +332,148 @@ form button[type="button"] {
   margin: 0 auto;
 }
 
+/* Improve header and user dropdown responsiveness */
 .dashboard-header {
-  background-color: rgba(255, 255, 255, 0.8);
-  padding: 1.5rem 3rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-  backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 2rem;
+  background-color: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Responsive adjustments for the header */
+@media (max-width: 992px) {
+  .dashboard-main {
+    width: 100%;
+    margin-left: 0; /* Remove the margin for main content */
+  }
+  
+  .dashboard-header {
+    padding: 1.5rem;
+  }
+  
+  .header-title h1 {
+    font-size: 2rem;
+  }
+  
+  /* Fix header actions alignment */
+  .header-actions {
+    gap: 1.5rem;
+  }
+  
+  /* Improve header user dropdown on mobile */
+  .header-user {
+    max-width: 180px;
+  }
+  
+  .header-user .user-name {
+    max-width: 80px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  /* Fix dropdown menu positioning */
+  .user-dropdown {
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    width: 220px; /* Consistent width */
+    z-index: 1050; /* Ensure it's above other elements */
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    gap: 1.5rem;
+  }
+  
+  .header-title {
+    width: 100%;
+  }
+  
+  .header-actions {
+    margin-left: auto; /* Push to the right */
+  }
+  
+  /* Simplified user dropdown for smaller screens */
+  .header-user {
+    background: transparent;
+    padding: 0.5rem;
+    box-shadow: none;
+  }
+  
+  .header-user .user-name {
+    display: none;
+  }
+  
+  .user-dropdown-icon {
+    display: none;
+  }
+  
+  /* Ensure dropdown appears in the right place */
+  .user-dropdown {
+    right: 0;
+    width: 200px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 576px) {
+  .dashboard-header {
+    padding: 1.2rem;
+  }
+  
+  .header-title h1 {
+    font-size: 1.8rem;
+  }
+  
+  .date-display {
+    font-size: 1.2rem;
+  }
+  
+  .action-button {
+    font-size: 1.8rem;
+  }
+  
+  /* Position dropdown relative to viewport */
+  .user-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    width: 100%;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(0);
+    animation: slideUpDropdown 0.3s ease;
+  }
+  
+  @keyframes slideUpDropdown {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+  
+  /* Dim background when dropdown is open */
+  .header-user:hover::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1040;
+    animation: fadeBackground 0.3s ease;
+  }
+  
+  @keyframes fadeBackground {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 }
 
 .dashboard-welcome {
@@ -1676,65 +1810,42 @@ form button[type="button"] {
   background-color: rgba(255, 255, 255, 0.8);
 }
 
-/* Add this to your index.css file */
-
-.analyze-actions {
-  display: flex;
-  justify-content: center;
-  margin-top: 25px;
-  margin-bottom: 10px;
-  width: 100%;
-}
-
-.analyze-button {
-  background-color: var(--primary-green);
-  color: white;
-  padding: 15px 40px;
-  font-size: 1.8rem;
-  font-weight: 600;
-  box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
-  transition: all 0.3s ease;
-}
-
-.analyze-button:hover {
-  background-color: #228B22;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(46, 125, 50, 0.3);
-}
-.dashboard-sidebar.collapsed .sidebar-footer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 1.5rem 0;
-}
-.dashboard-sidebar.collapsed .logout-btn {
-  display: flex;
-  justify-content: center;
-  padding: 1.2rem;
-  width: 48px;
-  margin: 0 auto;
-  border-radius: 50%;
-}
-
-/* Keep the icon visible when sidebar is collapsed */
-.dashboard-sidebar.collapsed .logout-btn span {
-  display: none;
-}
-
-.dashboard-sidebar.collapsed .logout-btn svg,
-.dashboard-sidebar.collapsed .logout-btn i {
-  margin: 0;
-  font-size: 2.2rem;
-}
-/* Responsiveness */
+/* Update the responsive media query for the sidebar */
 @media (max-width: 992px) {
-  .dashboard-sidebar {
-    width: 80px;
+  /* Dashboard layout adjustments for small screens */
+  .dashboard-layout {
+    overflow-x: hidden;
+    position: relative; /* Add this to create positioning context */
   }
-  .logo-text, .sidebar-menu li span, .user-details, .logout-btn span {
+  
+  /* Fixed position sidebar on mobile */
+  .dashboard-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 80px;
+    z-index: 1000; /* Higher z-index to ensure it's above everything */
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  /* Main content should take full width and not shift */
+  .dashboard-main {
+    width: 100%;
+    margin-left: 80px; /* Consistent margin matching collapsed sidebar width */
+    transition: margin-left 0.3s ease;
+  }
+  
+  /* Hide text elements in collapsed state */
+  .dashboard-sidebar .logo-text, 
+  .dashboard-sidebar .sidebar-menu li span, 
+  .dashboard-sidebar .user-details, 
+  .dashboard-sidebar .logout-btn span {
     display: none;
   }
-  .logout-btn {
+  
+  .dashboard-sidebar .logout-btn {
     display: flex !important;
     justify-content: center !important;
     padding: 1.2rem !important;
@@ -1743,23 +1854,61 @@ form button[type="button"] {
     border-radius: 50% !important;
   }
   
-  .logout-btn svg,
-  .logout-btn i {
+  .dashboard-sidebar .logout-btn svg,
+  .dashboard-sidebar .logout-btn i {
     margin: 0 !important;
     font-size: 2.2rem !important;
   }
-}
-@media (max-width: 768px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .dashboard-content {
-    padding: 2rem;
-  }
-}
-@media (max-width: 576px) {
-  .stats-grid {
-    grid-template-columns: 1fr;
+  
+  /* When expanded on mobile - overlay the content properly */
+  .dashboard-sidebar:not(.collapsed) {
+    width: 280px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
   }
   
+  .dashboard-sidebar:not(.collapsed) .logo-text,
+  .dashboard-sidebar:not(.collapsed) .sidebar-menu li span,
+  .dashboard-sidebar:not(.collapsed) .user-details {
+    display: block;
+  }
+  
+  .dashboard-sidebar:not(.collapsed) .logout-btn {
+    width: calc(100% - 40px) !important;
+    border-radius: 8px !important;
+    padding: 1.2rem 2rem !important;
+    display: flex !important;
+    justify-content: flex-start !important;
+    margin: 0 auto !important;
+  }
+  
+  .dashboard-sidebar:not(.collapsed) .logout-btn span {
+    display: block;
+    margin-left: 1.5rem;
+  }
+}
+
+/* Additional adjustments for very small screens */
+@media (max-width: 576px) {
+  .dashboard-sidebar:not(.collapsed) {
+    width: 250px;
+  }
+  
+  /* Add backdrop/overlay when sidebar is expanded on mobile */
+  .dashboard-layout.sidebar-expanded::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+    pointer-events: all;
+  }
+  
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout, reset } from "../redux/authSlice";
@@ -27,14 +27,20 @@ const Dashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
-  // Add file upload state at Dashboard level
+  
+  // Set initial sidebar state based on screen width
+  const [sidebarOpen, setSidebarOpen] = useState(() => {
+    return window.innerWidth >= 992; // Open by default only on larger screens
+  });
+  
   const [uploadFiles, setUploadFiles] = useState([]);
   const [uploadStatus, setUploadStatus] = useState(null);
   const [uploadProgress, setUploadProgress] = useState({});
   const [parsedData, setParsedData] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
+
+  // Add this state for dropdown visibility
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -68,8 +74,26 @@ const Dashboard = () => {
     return date.toLocaleDateString("en-US", options);
   };
 
+  // Add resize listener to handle screen size changes
+  useEffect(() => {
+    const handleResize = () => {
+      // Auto-collapse sidebar on small screens when resizing
+      if (window.innerWidth < 992) {
+        setSidebarOpen(false);
+      }
+    };
+    
+    // Set up event listener
+    window.addEventListener('resize', handleResize);
+    
+    // Clean up
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
-    <div className="dashboard-layout">
+    <div className={`dashboard-layout ${!sidebarOpen ? '' : 'sidebar-expanded'}`}>
       {/* Sidebar */}
       <div className={`dashboard-sidebar ${!sidebarOpen ? "collapsed" : ""}`}>
         <div className="sidebar-header">
@@ -151,7 +175,7 @@ const Dashboard = () => {
               <FaBell />
               <span className="badge">2</span>
             </button>
-            <div className="header-user">
+            <div className={`header-user ${dropdownOpen ? 'dropdown-active' : ''}`} onClick={() => setDropdownOpen(!dropdownOpen)}>
               <div className="user-avatar">
                 <FaUser />
                 <div className="user-status"></div>
@@ -160,40 +184,42 @@ const Dashboard = () => {
               <FaChevronDown className="user-dropdown-icon" />
 
               {/* User dropdown menu */}
-              <div className="user-dropdown">
-                <div className="user-dropdown-header">
-                  <div className="user-dropdown-name">{user.username}</div>
-                  <div className="user-dropdown-role">
-                    {user.role || "User"}
+              {dropdownOpen && (
+                <div className="user-dropdown">
+                  <div className="user-dropdown-header">
+                    <div className="user-dropdown-name">{user.username}</div>
+                    <div className="user-dropdown-role">
+                      {user.role || "User"}
+                    </div>
+                  </div>
+                  <div className="user-dropdown-items">
+                    <div className="user-dropdown-item">
+                      <FaUserCircle className="user-dropdown-icon" />
+                      <span>My Profile</span>
+                    </div>
+                    <div className="user-dropdown-item">
+                      <FaCog className="user-dropdown-icon" />
+                      <span>Settings</span>
+                    </div>
+                    <div
+                      className="user-dropdown-item"
+                      onClick={navigateToForgotPassword}
+                    >
+                      <FaKey className="user-dropdown-icon" />
+                      <span>Change Password</span>
+                    </div>
+                    <div className="user-dropdown-divider"></div>
+                    <div className="user-dropdown-item">
+                      <FaQuestion className="user-dropdown-icon" />
+                      <span>Help & Support</span>
+                    </div>
+                    <div className="user-dropdown-item" onClick={handleLogout}>
+                      <FaSignOutAlt className="user-dropdown-icon" />
+                      <span>Logout</span>
+                    </div>
                   </div>
                 </div>
-                <div className="user-dropdown-items">
-                  <div className="user-dropdown-item">
-                    <FaUserCircle className="user-dropdown-icon" />
-                    <span>My Profile</span>
-                  </div>
-                  <div className="user-dropdown-item">
-                    <FaCog className="user-dropdown-icon" />
-                    <span>Settings</span>
-                  </div>
-                  <div
-                    className="user-dropdown-item"
-                    onClick={navigateToForgotPassword}
-                  >
-                    <FaKey className="user-dropdown-icon" />
-                    <span>Change Password</span>
-                  </div>
-                  <div className="user-dropdown-divider"></div>
-                  <div className="user-dropdown-item">
-                    <FaQuestion className="user-dropdown-icon" />
-                    <span>Help & Support</span>
-                  </div>
-                  <div className="user-dropdown-item" onClick={handleLogout}>
-                    <FaSignOutAlt className="user-dropdown-icon" />
-                    <span>Logout</span>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </header>
