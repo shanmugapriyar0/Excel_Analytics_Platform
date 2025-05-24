@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
-import { FaChartBar, FaFileExcel, FaFileCsv, FaChevronDown, FaFilter, FaTable, FaSearch } from 'react-icons/fa';
+import { 
+  FaChartBar, 
+  FaFileExcel, 
+  FaFileCsv, 
+  FaChevronDown, 
+  FaFilter, 
+  FaTable, 
+  FaSearch, 
+  FaRobot // Replace FaLightbulb with FaRobot
+} from 'react-icons/fa';
 
 const AnalyzeData = () => {
   const { user } = useSelector(state => state.auth);
@@ -289,6 +298,16 @@ const AnalyzeData = () => {
                 <div className="option-details">
                   <h4>Advanced Analysis</h4>
                   <p>Statistical analysis and insights</p>
+                </div>
+              </div>
+
+              <div className="option-card">
+                <div className="option-icon">
+                  <FaRobot />
+                </div>
+                <div className="option-details">
+                  <h4>AI Insights</h4>
+                  <p>Get smart data summarization and recommendations</p>
                 </div>
               </div>
             </div>

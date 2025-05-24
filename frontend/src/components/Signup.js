@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
 import ImageSlider from "./ImageSlider"; // Add this import
 import { FaEye } from "react-icons/fa6";

@@ -115,18 +115,29 @@ const Dashboard = () => {
       {/* Sidebar */}
       <div className={`dashboard-sidebar ${!sidebarOpen ? "collapsed" : ""}`}>
         <div className="sidebar-header">
-          <div className="app-logo">
-            <div className="logo-icon">
-              <img src={excelLogo} alt="ExcelInsights Logo" />
+          {sidebarOpen ? (
+            <div className="app-logo">
+              <div className="logo-icon">
+                <img src={excelLogo} alt="ExcelInsights Logo" />
+              </div>
+              <span className="logo-text">ExcelInsights</span>
             </div>
-            {sidebarOpen && <span className="logo-text">ExcelInsights</span>}
-          </div>
-          <button
-            className="sidebar-toggle"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          >
-            <FaBars />
-          </button>
+          ) : (
+            <div className="app-logo-collapsed">
+              <FaBars 
+                onClick={() => setSidebarOpen(!sidebarOpen)}
+                className="sidebar-hamburger"
+              />
+            </div>
+          )}
+          {sidebarOpen && (
+            <button
+              className="sidebar-toggle"
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+            >
+              <FaBars />
+            </button>
+          )}
         </div>
 
         <div className="sidebar-menu">

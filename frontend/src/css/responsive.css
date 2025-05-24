@@ -1131,3 +1131,211 @@
     to { opacity: 1; }
   }
 }
+/* Add these specific styles for the logout button in collapsed mode */
+.dashboard-sidebar.collapsed .logout-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1.2rem;
+  width: 48px;
+  height: 48px;
+  margin: 0 auto;
+  border-radius: 50%;
+}
+
+/* Fix SVG icon visibility when collapsed */
+.dashboard-sidebar.collapsed .logout-btn svg {
+  margin: 0;
+  font-size: 2.2rem;
+  display: block; /* Ensure SVG is displayed */
+  visibility: visible; /* Force visibility */
+}
+
+/* Fix hover state for collapsed logout button */
+.dashboard-sidebar.collapsed .logout-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+/* Add styles for collapsed sidebar hamburger menu */
+.app-logo-collapsed {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 1.5rem 0;
+}
+
+.sidebar-hamburger {
+  font-size: 2.4rem;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.3s ease;
+}
+
+.sidebar-hamburger:hover {
+  transform: scale(1.1);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* Keep sidebar header properly sized in collapsed mode */
+.dashboard-sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+/* Fix spacing between logo text and hamburger menu on small screens */
+@media (max-width: 564px) {
+  /* Make the sidebar header more flexible on small screens */
+  .dashboard-sidebar:not(.collapsed) .sidebar-header {
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: space-between;
+  }
+
+  /* Adjust the app logo to take appropriate space */
+  .dashboard-sidebar:not(.collapsed) .app-logo {
+    max-width: 85%;
+    flex-wrap: nowrap;
+  }
+  
+  /* Make logo text shorter to prevent overflow */
+  .dashboard-sidebar:not(.collapsed) .logo-text {
+    font-size: 1.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    max-width: 130px;
+  }
+  
+  /* Make sure the toggle button has proper spacing */
+  .dashboard-sidebar:not(.collapsed) .sidebar-toggle {
+    margin-left: auto;
+    font-size: 1.8rem;
+    padding: 5px;
+  }
+}
+
+/* Extra small screens need even more adjustment */
+@media (max-width: 360px) {
+  .dashboard-sidebar:not(.collapsed) .logo-text {
+    font-size: 1.6rem;
+    max-width: 100px;
+  }
+  
+  .dashboard-sidebar:not(.collapsed) .logo-icon {
+    width: 30px;
+    height: 30px;
+  }
+}
+/* Enhanced mobile responsiveness for Upload section */
+@media (max-width: 768px) {
+  .file-upload-container {
+    padding: 20px 15px;
+    width: 95%;
+    margin: 0 auto;
+  }
+
+  .file-upload-header {
+    flex-direction: column-reverse;
+    align-items: flex-start;
+    gap: 15px;
+  }
+  
+  .back-button {
+    align-self: flex-start;
+    margin-bottom: 5px;
+  }
+  
+  .file-upload-title h2 {
+    font-size: 1.9rem;
+    line-height: 1.2;
+  }
+  
+  .file-upload-title p {
+    font-size: 1.3rem;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 576px) {
+  .file-upload-container {
+    width: 96%;
+    padding: 16px 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .file-upload-title h2 {
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+  }
+  
+  .file-upload-title p {
+    font-size: 1.2rem;
+  }
+  
+  .upload-area {
+    padding: 25px 12px;
+    min-height: 200px;
+  }
+  
+  .upload-icon-container {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 12px;
+  }
+  
+  .upload-icon {
+    font-size: 3rem;
+  }
+  
+  .upload-prompt h3 {
+    font-size: 1.4rem;
+  }
+  
+  .upload-prompt p {
+    font-size: 1.2rem;
+    margin: 6px 0;
+    padding: 0 10px;
+  }
+  
+  .browse-button {
+    padding: 8px 20px;
+    font-size: 1.3rem;
+    margin: 10px 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .file-upload-container {
+    width: 98%;
+    padding: 15px 10px;
+  }
+  
+  .file-upload-title h2 {
+    font-size: 1.6rem;
+  }
+  
+  .file-upload-title p {
+    font-size: 1.1rem;
+  }
+  
+  .back-button {
+    padding: 5px 10px;
+    font-size: 1rem;
+  }
+  
+  .upload-area {
+    padding: 20px 10px;
+    min-height: 180px;
+    margin-top: 10px;
+  }
+  
+  /* Fix for "or" text in upload area */
+  .upload-area .or-text {
+    font-size: 1.2rem;
+    margin: 8px 0;
+  }
+  
+  /* Make text wrap properly on very small screens */
+  .upload-prompt p {
+    max-width: 220px;
+    margin: 5px auto;
+  }
+}
