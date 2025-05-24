@@ -1,7 +1,6 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
-import Image from "../assets/login.png";
-import { useNavigate } from "react-router-dom";
+import ImageSlider from "./ImageSlider"; 
+import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetPassword, reset } from "../redux/authSlice";
 import Notification from "./Notification";
@@ -16,7 +15,6 @@ const ForgotPassword = () => {
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
   // Get state from Redux store
@@ -175,15 +173,11 @@ const ForgotPassword = () => {
     dispatch(resetPassword({ email }));
   };
 
-  const handleLoginClick = () => {
-    navigate("/login");
-  };
-
   return (
     <div className="login-main">
       <div className="login-left">
         <div className="login-left-flex">
-          <img src={Image} alt="" />
+          <ImageSlider /> {/* Replace the static image with ImageSlider */}
         </div>
       </div>
       <div className="login-right">
@@ -206,9 +200,9 @@ const ForgotPassword = () => {
               </div>
               <p className="login-bottom-p">
                 Remember your password?{" "}
-                <a onClick={handleLoginClick} className="navigation-button">
+                <Link to="/login" className="navigation-button">
                   Login
-                </a>
+                </Link>
               </p>
             </form>
           </div>

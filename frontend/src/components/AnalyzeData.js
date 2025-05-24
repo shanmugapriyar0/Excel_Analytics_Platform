@@ -103,23 +103,17 @@ const AnalyzeData = () => {
           
           // Get the saved file ID
           const savedFileId = localStorage.getItem('selectedFileId');
-          console.log("Looking for saved file ID:", savedFileId);
 
           if (savedFileId && response.data.length > 0) {
             // Find the file with matching ID
             const savedFile = response.data.find(file => 
               file._id === savedFileId || file.fileId === savedFileId
             );
-            
-            console.log("Found matching file:", savedFile ? savedFile.filename : "None");
-            
-            // Select it if found
             if (savedFile) {
               setSelectedFile(savedFile);
             } else {
               // If not found, select the most recent file (first in the list)
               setSelectedFile(response.data[0]);
-              console.log("Using most recent file instead:", response.data[0].filename);
               // Update localStorage with this ID
               localStorage.setItem('selectedFileId', response.data[0]._id);
             }

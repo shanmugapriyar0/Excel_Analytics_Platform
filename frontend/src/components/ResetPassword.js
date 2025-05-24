@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { resetPasswordConfirm, reset } from "../redux/authSlice";
 import Notification from "./Notification";
 import { gsap } from "gsap";
-import Image from "../assets/login.png";
+import ImageSlider from "./ImageSlider";
 import { FaEye, FaEyeSlash } from "react-icons/fa6";
 import axios from 'axios';
 
@@ -166,7 +166,7 @@ const ResetPassword = () => {
     <div className="login-main">
       <div className="login-left">
         <div className="login-left-flex">
-          <img src={Image} alt="" />
+          <ImageSlider />
         </div>
       </div>
       <div className="login-right">

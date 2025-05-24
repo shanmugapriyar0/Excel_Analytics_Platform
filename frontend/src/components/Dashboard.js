@@ -92,6 +92,24 @@ const Dashboard = () => {
     };
   }, []);
 
+  // Add this useEffect to handle outside clicks correctly
+  useEffect(() => {
+    // Only add the listener if the dropdown is open
+    if (dropdownOpen) {
+      const handleClickOutside = (e) => {
+        // Close dropdown if click is outside of it
+        if (!e.target.closest('.header-user')) {
+          setDropdownOpen(false);
+        }
+      };
+      
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [dropdownOpen]);
+
   return (
     <div className={`dashboard-layout ${!sidebarOpen ? '' : 'sidebar-expanded'}`}>
       {/* Sidebar */}
@@ -175,7 +193,12 @@ const Dashboard = () => {
               <FaBell />
               <span className="badge">2</span>
             </button>
-            <div className={`header-user ${dropdownOpen ? 'dropdown-active' : ''}`} onClick={() => setDropdownOpen(!dropdownOpen)}>
+            <div 
+              className={`header-user ${dropdownOpen ? 'dropdown-active' : ''}`} 
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              onMouseEnter={() => window.innerWidth >= 992 && setDropdownOpen(true)}
+              onMouseLeave={() => window.innerWidth >= 992 && setDropdownOpen(false)}
+            >
               <div className="user-avatar">
                 <FaUser />
                 <div className="user-status"></div>
@@ -183,43 +206,41 @@ const Dashboard = () => {
               <div className="user-name">{user.username}</div>
               <FaChevronDown className="user-dropdown-icon" />
 
-              {/* User dropdown menu */}
-              {dropdownOpen && (
-                <div className="user-dropdown">
-                  <div className="user-dropdown-header">
-                    <div className="user-dropdown-name">{user.username}</div>
-                    <div className="user-dropdown-role">
-                      {user.role || "User"}
-                    </div>
-                  </div>
-                  <div className="user-dropdown-items">
-                    <div className="user-dropdown-item">
-                      <FaUserCircle className="user-dropdown-icon" />
-                      <span>My Profile</span>
-                    </div>
-                    <div className="user-dropdown-item">
-                      <FaCog className="user-dropdown-icon" />
-                      <span>Settings</span>
-                    </div>
-                    <div
-                      className="user-dropdown-item"
-                      onClick={navigateToForgotPassword}
-                    >
-                      <FaKey className="user-dropdown-icon" />
-                      <span>Change Password</span>
-                    </div>
-                    <div className="user-dropdown-divider"></div>
-                    <div className="user-dropdown-item">
-                      <FaQuestion className="user-dropdown-icon" />
-                      <span>Help & Support</span>
-                    </div>
-                    <div className="user-dropdown-item" onClick={handleLogout}>
-                      <FaSignOutAlt className="user-dropdown-icon" />
-                      <span>Logout</span>
-                    </div>
+              {/* Always render the dropdown, let CSS control visibility */}
+              <div className="user-dropdown">
+                <div className="user-dropdown-header">
+                  <div className="user-dropdown-name">{user.username}</div>
+                  <div className="user-dropdown-role">
+                    {user.role || "User"}
                   </div>
                 </div>
-              )}
+                <div className="user-dropdown-items">
+                  <div className="user-dropdown-item">
+                    <FaUserCircle className="user-dropdown-icon" />
+                    <span>My Profile</span>
+                  </div>
+                  <div className="user-dropdown-item">
+                    <FaCog className="user-dropdown-icon" />
+                    <span>Settings</span>
+                  </div>
+                  <div
+                    className="user-dropdown-item"
+                    onClick={navigateToForgotPassword}
+                  >
+                    <FaKey className="user-dropdown-icon" />
+                    <span>Change Password</span>
+                  </div>
+                  <div className="user-dropdown-divider"></div>
+                  <div className="user-dropdown-item">
+                    <FaQuestion className="user-dropdown-icon" />
+                    <span>Help & Support</span>
+                  </div>
+                  <div className="user-dropdown-item" onClick={handleLogout}>
+                    <FaSignOutAlt className="user-dropdown-icon" />
+                    <span>Logout</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </header>

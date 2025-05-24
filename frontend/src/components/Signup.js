@@ -1,12 +1,11 @@
-/* eslint-disable jsx-a11y/anchor-is-valid */
 import React, { useState, useEffect } from "react";
-import Image from "../assets/login.png";
+import ImageSlider from "./ImageSlider"; // Add this import
 import { FaEye } from "react-icons/fa6";
 import { FaEyeSlash } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
 import { signup, reset } from '../redux/authSlice';
-import Notification from './Notification'; // New import
+import Notification from './Notification';
 import { gsap } from "gsap";
 
 const Signup = () => {
@@ -89,7 +88,7 @@ const Signup = () => {
     <div className="login-main">
       <div className="login-left">
         <div className="login-left-flex">
-          <img src={Image} alt="" />
+          <ImageSlider /> {/* Replace the static image with ImageSlider */}
         </div>
       </div>
       <div className="login-right">
