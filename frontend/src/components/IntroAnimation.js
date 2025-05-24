@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import excelLogo from "../assets/logo.png";
 
@@ -8,8 +8,26 @@ const IntroAnimation = ({ onComplete }) => {
   const textRef = useRef(null);
   const circleRef = useRef(null);
   const animationContainerRef = useRef(null);
+  const [elementsReady, setElementsReady] = useState(false);
 
+  // First useEffect - check if elements exist and set ready state
   useEffect(() => {
+    if (
+      overlayRef.current && 
+      logoRef.current && 
+      textRef.current && 
+      circleRef.current && 
+      animationContainerRef.current
+    ) {
+      setElementsReady(true);
+    }
+  }, []); // This runs once after initial render
+
+  // Second useEffect - only run animations when elements are confirmed ready
+  useEffect(() => {
+    // Only proceed if elements are ready
+    if (!elementsReady) return;
+
     const tl = gsap.timeline();
     
     // Initial setup
@@ -47,10 +65,10 @@ const IntroAnimation = ({ onComplete }) => {
       duration: 0.3,
       onComplete: onComplete
     });
-  }, [onComplete]);
+  }, [elementsReady, onComplete]);
 
   return (
-    <div className="intro-animation">
+    <div ref={animationContainerRef} className="intro-animation">
       <div ref={overlayRef} className="intro-overlay"></div>
       <div className="intro-content">
         <div ref={logoRef} className="intro-logo">
