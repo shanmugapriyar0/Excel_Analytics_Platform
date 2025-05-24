@@ -200,6 +200,64 @@ router.get('/download/:fileId', protect, async (req, res) => {
   }
 });
 
+// Get file data for analysis
+router.get('/data/:fileId', protect, async (req, res) => {
+  try {
+    const file = await ExcelFile.findOne({ _id: req.params.fileId });
+    
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+    
+    const bucket = new GridFSBucket(mongoose.connection.db, {
+      bucketName: 'excelFiles'
+    });
+    
+    // Create a temporary file path for downloading
+    const tempFilePath = path.join('./temp-uploads', `${Date.now()}-${file.filename}`);
+    
+    // Download the file from GridFS to the temporary location
+    const downloadStream = bucket.openDownloadStream(file.fileId);
+    const writeStream = fs.createWriteStream(tempFilePath);
+    
+    await new Promise((resolve, reject) => {
+      downloadStream.pipe(writeStream)
+        .on('error', reject)
+        .on('finish', resolve);
+    });
+    
+    // Read the Excel file with proper encoding options
+    const workbook = XLSX.readFile(tempFilePath, {
+      type: 'binary',
+      codepage: 65001, // UTF-8 encoding
+      cellStyles: true
+    });
+    
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet, {
+      raw: false, // Convert all values to strings to preserve formatting
+      defval: '' // Default empty cells to empty string
+    });
+    
+    // Clean up temp file
+    fs.unlinkSync(tempFilePath);
+    
+    // Ensure proper content type for handling UTF-8
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    
+    // Return data as JSON
+    res.json({ 
+      filename: file.filename, 
+      data: data 
+    });
+    
+  } catch (error) {
+    console.error('Error fetching file data:', error);
+    res.status(500).json({ message: 'Server error: ' + error.message });
+  }
+});
+
 // New route for token verification
 router.get('/verify-token', protect, (req, res) => {
   res.status(200).json({ message: 'Token is valid', user: req.user });

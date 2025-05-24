@@ -20,6 +20,16 @@ const AnalyzeData = () => {
   const [error, setError] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   
+  // Add these new state variables
+  const [selectedOption, setSelectedOption] = useState(null); // 'preview', 'visualization', 'filtering', 'advanced', 'ai'
+  const [fileData, setFileData] = useState(null);
+  const [dataLoading, setDataLoading] = useState(false);
+  const [dataError, setDataError] = useState(null);
+  
+  // Add these state variables after your other state declarations
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage] = useState(50); // Fixed at 75 rows
+  
   // Memoize fetchFiles with useCallback
   const fetchFiles = useCallback(async () => {
     try {
@@ -171,6 +181,228 @@ const AnalyzeData = () => {
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
+  // Memoize fetchFileData with useCallback to prevent unnecessary rerenders
+  // Update the fetch function to properly handle Unicode data
+  const fetchFileData = useCallback(async () => {
+    if (!selectedFile) return;
+    
+    try {
+      setDataLoading(true);
+      setDataError(null);
+      
+      const token = user?.token || user?.accessToken || (user?.data?.token);
+      
+      if (!token) {
+        setDataError('Authentication token not found. Please log in again.');
+        setDataLoading(false);
+        return;
+      }
+      
+      const response = await axios.get(`http://localhost:5000/api/excel/data/${selectedFile._id}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Accept': 'application/json; charset=utf-8'
+        }
+      });
+      
+      // Process data if needed
+      const processedData = response.data;
+      
+      // Set state with the data
+      setFileData(processedData);
+      setDataLoading(false);
+      
+      // Reset to first page when loading new data
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error fetching file data:', error);
+      setDataError('Failed to load file data. Please try again later.');
+      setDataLoading(false);
+    }
+  }, [selectedFile, user]);
+  
+  // Fix the useEffect dependency array
+  useEffect(() => {
+    // Reset file data when selected file changes
+    if (selectedFile) {
+      setFileData(null);
+      setDataError(null);
+      
+      // If preview is already selected, fetch the new file data
+      if (selectedOption === 'preview') {
+        fetchFileData();
+      }
+    }
+  }, [selectedFile, selectedOption, fetchFileData]); // Remove selectedFile?._id and add selectedFile
+  
+  const handleOptionSelect = (option) => {
+    if (selectedFile) {
+      setSelectedOption(option);
+      
+      // For preview option, fetch file data
+      if (option === 'preview' && !fileData) {
+        fetchFileData();
+      }
+    }
+  };
+  
+  // Add this function to render the data preview
+  const renderDataPreview = () => {
+    if (dataLoading) {
+      return (
+        <div className="data-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading data...</p>
+        </div>
+      );
+    }
+    
+    if (dataError) {
+      return (
+        <div className="data-error">
+          <p>{dataError}</p>
+          <button onClick={fetchFileData} className="retry-button">Try Again</button>
+        </div>
+      );
+    }
+    
+    if (!fileData || !fileData.data || fileData.data.length === 0) {
+      return <div className="no-data-message">No data available for this file.</div>;
+    }
+    
+    // Get headers from first row
+    const headers = Object.keys(fileData.data[0]);
+    const totalRows = fileData.data.length;
+    const totalPages = Math.ceil(totalRows / rowsPerPage);
+    
+    // Calculate start and end index for current page
+    const startIndex = (currentPage - 1) * rowsPerPage;
+    const endIndex = Math.min(startIndex + rowsPerPage, totalRows);
+    
+    // Get current page data
+    const currentPageData = fileData.data.slice(startIndex, endIndex);
+    
+    // Functions to handle pagination
+    const goToNextPage = () => {
+      if (currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+      }
+    };
+    
+    const goToPrevPage = () => {
+      if (currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+      }
+    };
+    
+    return (
+      <div className="data-preview-container">
+        <div className="data-preview-header">
+          <h3>
+            Data Preview: <span className="filename-text">{selectedFile.filename}</span>
+          </h3>
+          <div className="data-stats">
+            <span>{totalRows} rows</span>
+            <span>{headers.length} columns</span>
+          </div>
+        </div>
+        
+        <div className="data-table-container">
+          <table className="data-table">
+            <thead>
+              <tr>
+                {headers.map((header, index) => (
+                  <th key={index}>{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {currentPageData.map((row, rowIndex) => (
+                <tr key={rowIndex + startIndex}>
+                  {headers.map((header, colIndex) => (
+                    <td key={colIndex} title="Click to view full content">
+                      {row[header] !== undefined && row[header] !== null ? row[header].toString() : ''}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          
+          <div className="pagination-controls">
+            <div className="pagination-info">
+              Showing rows {startIndex + 1} to {endIndex} of {totalRows} total rows
+            </div>
+            <div className="pagination-buttons">
+              <button 
+                className="pagination-button"
+                onClick={goToPrevPage}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <span className="page-indicator">
+                Page {currentPage} of {totalPages}
+              </span>
+              <button 
+                className="pagination-button"
+                onClick={goToNextPage}
+                disabled={currentPage === totalPages}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  useEffect(() => {
+    const setupCellExpansion = () => {
+      const cells = document.querySelectorAll('.data-table td');
+      
+      cells.forEach(cell => {
+        // Check if content is truncated
+        if (cell.scrollWidth > cell.clientWidth) {
+          cell.classList.add('has-more');
+          
+          cell.addEventListener('click', function() {
+            const columnName = cell.closest('table').querySelector('th:nth-child(' + (Array.from(cell.parentNode.children).indexOf(cell) + 1) + ')').textContent;
+            const cellContent = cell.textContent;
+            
+            // Set modal content
+            document.getElementById('cellColumnName').textContent = columnName + ':';
+            document.getElementById('cellContent').textContent = cellContent;
+            
+            // Show modal
+            document.getElementById('cellContentModal').style.display = 'flex';
+          });
+        }
+      });
+      
+      // Close modal when clicking outside
+      document.getElementById('cellContentModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.style.display = 'none';
+        }
+      });
+    };
+    
+    // Wait for table to render completely
+    if (fileData && fileData.data && fileData.data.length > 0) {
+      setTimeout(setupCellExpansion, 100);
+    }
+    
+    // Cleanup
+    return () => {
+      const cells = document.querySelectorAll('.data-table td');
+      cells.forEach(cell => {
+        cell.removeEventListener('click', () => {});
+      });
+    };
+  }, [fileData, currentPage, rowsPerPage]);
+  
   return (
     <div className="analyze-data-container">
       <div className="analyze-header">
@@ -261,7 +493,10 @@ const AnalyzeData = () => {
             </div>
             
             <div className="analysis-options">
-              <div className="option-card">
+              <div 
+                className={`option-card ${selectedOption === 'preview' ? 'active' : ''}`} 
+                onClick={() => handleOptionSelect('preview')}
+              >
                 <div className="option-icon">
                   <FaTable />
                 </div>
@@ -271,7 +506,7 @@ const AnalyzeData = () => {
                 </div>
               </div>
               
-              <div className="option-card">
+              <div className="option-card" onClick={() => handleOptionSelect('visualization')}>
                 <div className="option-icon">
                   <FaChartBar />
                 </div>
@@ -281,7 +516,7 @@ const AnalyzeData = () => {
                 </div>
               </div>
               
-              <div className="option-card">
+              <div className="option-card" onClick={() => handleOptionSelect('filtering')}>
                 <div className="option-icon">
                   <FaFilter />
                 </div>
@@ -291,7 +526,7 @@ const AnalyzeData = () => {
                 </div>
               </div>
               
-              <div className="option-card">
+              <div className="option-card" onClick={() => handleOptionSelect('advanced')}>
                 <div className="option-icon">
                   <FaSearch />
                 </div>
@@ -301,7 +536,7 @@ const AnalyzeData = () => {
                 </div>
               </div>
 
-              <div className="option-card">
+              <div className="option-card" onClick={() => handleOptionSelect('ai')}>
                 <div className="option-icon">
                   <FaRobot />
                 </div>
@@ -319,6 +554,25 @@ const AnalyzeData = () => {
             <p>Please select a file from the dropdown to begin analysis.</p>
           </div>
         )}
+
+        {selectedFile && selectedOption === 'preview' && (
+          <div className="data-content-section">
+            {renderDataPreview()}
+          </div>
+        )}
+      </div>
+
+      <div id="cellContentModal" className="cell-content-modal">
+        <div className="cell-content-container">
+          <div className="cell-content-header">
+            <div className="cell-content-title">Cell Content</div>
+            <button className="cell-content-close" onClick={() => document.getElementById('cellContentModal').style.display = 'none'}>×</button>
+          </div>
+          <div className="cell-content-body">
+            <span className="cell-column-name" id="cellColumnName"></span>
+            <div id="cellContent"></div>
+          </div>
+        </div>
       </div>
     </div>
   );
