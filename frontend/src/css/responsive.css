@@ -1763,3 +1763,366 @@
   from { opacity: 0.8; }
   to { opacity: 0; }
 }
+/* Add these styles to your responsive.css file */
+.data-visualization-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-top: 20px;
+}
+
+.visualization-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.visualization-header h3 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.chart-controls {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.axis-selectors {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.axis-selector {
+  flex: 1;
+  min-width: 180px;
+}
+
+.axis-selector label {
+  display: block;
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+  color: #444;
+  font-weight: 500;
+}
+
+.axis-dropdown {
+  position: relative;
+}
+
+.axis-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background-color: white;
+  font-size: 1.5rem;
+  color: #333;
+  appearance: none;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.axis-select:focus {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
+}
+
+.axis-select:hover {
+  border-color: #bbb;
+  background-color: #f9f9f9;
+}
+
+/* Make sure dropdown arrow is properly styled */
+.axis-dropdown {
+  position: relative;
+}
+
+.axis-dropdown::after {
+  content: '▼';
+  position: absolute;
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+  font-size: 1rem;
+  color: #666;
+  pointer-events: none;
+}
+
+/* Update responsive design for better mobile experience */
+@media (max-width: 768px) {
+  .axis-selectors {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* On mobile, make chart type selector stand out a bit */
+  .axis-selector:nth-child(3) {
+    margin-top: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+  }
+}
+/* Style placeholder text in dropdown */
+.axis-select option[value=""] {
+  color: #999;
+}
+
+/* Ensure dropdown lists have consistent styling across browsers */
+.axis-select option {
+  padding: 10px 15px;
+  color: #333;
+  background-color: white;
+}
+
+/* Fix the highlighted/selection color */
+.axis-select option:hover,
+.axis-select option:focus {
+  background-color: rgba(76, 175, 80, 0.1);
+  color: var(--primary-green);
+}
+.chart-type-selector {
+  margin-top: 10px;
+}
+
+.chart-type-selector label {
+  display: block;
+  font-size: 1.4rem;
+  margin-bottom: 10px;
+  color: #444;
+  font-weight: 500;
+}
+
+.chart-type-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.chart-type-btn {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 6px;
+  font-size: 1.4rem;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-type-btn:hover {
+  background-color: #f1f1f1;
+}
+
+.chart-type-btn.active {
+  background-color: var(--primary-green);
+  border-color: var(--primary-green);
+  color: white;
+}
+
+.chart-container {
+  background-color: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-placeholder {
+  text-align: center;
+  color: #666;
+  font-size: 1.6rem;
+}
+
+.chart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 5rem;
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.chart-empty-state h3 {
+  font-size: 1.8rem;
+  color: #444;
+  margin-bottom: 10px;
+}
+
+.chart-empty-state p {
+  font-size: 1.5rem;
+  color: #666;
+  max-width: 400px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .axis-selectors {
+    flex-direction: column;
+    gap: 15px;
+  }
+
+  .chart-controls {
+    padding: 15px;
+  }
+}
+/* Add to your responsive.css file */
+.data-preview-header, .visualization-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.data-preview-header h3, .visualization-header h3 {
+  font-size: 1.8rem;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.filename-text {
+  color: var(--primary-green);
+  font-weight: 600;
+}
+
+.data-stats {
+  display: flex;
+  gap: 15px;
+}
+
+.data-stats span {
+  font-size: 1.4rem;
+  color: #666;
+  background-color: #f5f5f5;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+/* Add to your responsive.css file */
+.chart-type-btn {
+  padding: 10px 16px;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 6px;
+  font-size: 1.4rem;
+  color: #444;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.chart-type-btn:hover {
+  background-color: #f1f1f1;
+}
+
+.chart-type-btn.active {
+  background-color: var(--primary-green);
+  border-color: var(--primary-green);
+  color: white;
+}
+/* Add these styles for the 3D chart selector */
+.threed-chart-selector {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+  text-align: center;
+}
+
+.threed-chart-selector label {
+  display: block;
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  color: #444;
+  font-weight: 600;
+  color: var(--primary-green);
+  text-align: center;
+}
+
+/* Special styling for 3D dropdown */
+.threed-chart-selector .axis-dropdown {
+  max-width: 300px;
+  margin: 0 auto;
+}
+/* Add these styles for better chart display */
+.chart-wrapper {
+  width: 100%;
+  height: 380px;
+  position: relative;
+  padding: 10px;
+}
+
+/* Animation for chart appearance */
+.chart-wrapper canvas {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Style adjustments for chart container */
+.chart-area {
+  width: 100%;
+  height: 100%;
+}
+
+/* Add data warning styles */
+.data-warning {
+  background-color: #fff8e1;
+  color: #f57c00;
+  border-left: 4px solid #f57c00;
+  padding: 10px 15px;
+  margin: 5px 0;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 0 4px 4px 0;
+}
+
+.data-warning svg {
+  font-size: 1.8rem;
+}
+/* Add styling for chart warning message */
+.chart-warning {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  text-align: center;
+  color: #d32f2f;
+  gap: 15px;
+}
+
+.chart-warning svg {
+  font-size: 3rem;
+}
+
+.chart-warning p {
+  font-size: 1.6rem;
+  max-width: 400px;
+}

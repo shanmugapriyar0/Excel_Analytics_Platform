@@ -9,8 +9,39 @@ import {
   FaFilter, 
   FaTable, 
   FaSearch, 
-  FaRobot // Replace FaLightbulb with FaRobot
+  FaRobot, // Replace FaLightbulb with FaRobot
+  FaExclamationTriangle
 } from 'react-icons/fa';
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+} from 'chart.js';
+import { Bar, Line, Pie, Scatter, Doughnut, PolarArea, Radar, Bubble } from 'react-chartjs-2';
+
+// Register Chart.js components
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  BarElement,
+  ArcElement,
+  RadialLinearScale,
+  Title,
+  Tooltip,
+  Legend,
+  Filler
+);
 
 const AnalyzeData = () => {
   const { user } = useSelector(state => state.auth);
@@ -21,16 +52,39 @@ const AnalyzeData = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   
   // Add these new state variables
-  const [selectedOption, setSelectedOption] = useState(null); // 'preview', 'visualization', 'filtering', 'advanced', 'ai'
+  const [selectedOption, setSelectedOption] = useState(null);
   const [fileData, setFileData] = useState(null);
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState(null);
   
-  // Add these state variables after your other state declarations
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage] = useState(50); // Fixed at 75 rows
+  const [rowsPerPage] = useState(50); 
   
-  // Memoize fetchFiles with useCallback
+  // Add these near your other state declarations
+  const [xAxis, setXAxis] = useState('');
+  const [yAxis, setYAxis] = useState('');
+  const [chartType, setChartType] = useState('none');
+  const [chart3DType, setChart3DType] = useState('none'); 
+  const [availableColumns, setAvailableColumns] = useState([]);
+
+  // Add these functions to handle chart type changes
+  const handle2DChartTypeChange = (e) => {
+    const newChartType = e.target.value;
+    setChartType(newChartType);
+    if (newChartType !== 'none') {
+      setChart3DType('none');
+    }
+  };
+
+  const handle3DChartTypeChange = (e) => {
+    const new3DChartType = e.target.value;
+    setChart3DType(new3DChartType);
+    if (new3DChartType !== 'none') {
+      setChartType('none');
+    }
+  };
+
   const fetchFiles = useCallback(async () => {
     try {
       setLoading(true);
@@ -228,8 +282,8 @@ const AnalyzeData = () => {
       setFileData(null);
       setDataError(null);
       
-      // If preview is already selected, fetch the new file data
-      if (selectedOption === 'preview') {
+      // If preview or visualization is already selected, fetch the new file data
+      if (selectedOption === 'preview' || selectedOption === 'visualization') {
         fetchFileData();
       }
     }
@@ -239,8 +293,8 @@ const AnalyzeData = () => {
     if (selectedFile) {
       setSelectedOption(option);
       
-      // For preview option, fetch file data
-      if (option === 'preview' && !fileData) {
+      // For preview or visualization options, fetch file data
+      if ((option === 'preview' || option === 'visualization') && !fileData) {
         fetchFileData();
       }
     }
@@ -358,6 +412,414 @@ const AnalyzeData = () => {
     );
   };
   
+  // New function to render data visualization
+  const renderDataVisualization = () => {
+    if (dataLoading) {
+      return (
+        <div className="data-loading">
+          <div className="loading-spinner"></div>
+          <p>Loading data...</p>
+        </div>
+      );
+    }
+    
+    if (dataError) {
+      return (
+        <div className="data-error">
+          <p>{dataError}</p>
+          <button onClick={fetchFileData} className="retry-button">Try Again</button>
+        </div>
+      );
+    }
+    
+    if (!fileData || !fileData.data || fileData.data.length === 0) {
+      return <div className="no-data-message">No data available for this file.</div>;
+    }
+    
+    // Get headers/columns from the data and filter out empty ones
+    const headers = Object.keys(fileData.data[0]).filter(column => 
+      column && column.trim() !== "" && column !== "__empty"
+    );
+    
+    // Check data types for selected axes
+    const validateChartData = () => {
+      if (!fileData || !fileData.data || fileData.data.length === 0 || !xAxis || !yAxis) {
+        return null;
+      }
+      
+      // For most chart types, Y should be numeric
+      if (chartType !== 'none' && chartType !== 'pie' && chartType !== 'doughnut') {
+        if (!isNumericData(fileData.data, yAxis)) {
+          return (
+            <div className="data-warning">
+              <FaExclamationTriangle />
+              <span>The selected Y-axis data contains non-numeric values. This may affect chart display.</span>
+            </div>
+          );
+        }
+      }
+      
+      // Scatter and bubble charts need numeric X and Y
+      if ((chartType === 'scatter' || chartType === 'bubble') && !isNumericData(fileData.data, xAxis)) {
+        return (
+          <div className="data-warning">
+            <FaExclamationTriangle />
+            <span>Scatter/Bubble charts require numeric data for both axes. The X-axis contains non-numeric values.</span>
+          </div>
+        );
+      }
+      
+      return null;
+    };
+    
+    const dataValidationMessage = validateChartData();
+    
+    return (
+      <div className="data-visualization-container">
+        <div className="data-preview-header">
+          <h3>
+            Data Visualization: <span className="filename-text">{selectedFile.filename}</span>
+          </h3>
+          <div className="data-stats">
+            <span>{fileData.data.length} rows</span>
+            <span>{headers.length} columns</span>
+          </div>
+        </div>
+        
+        <div className="chart-controls">
+          <div className="axis-selectors">
+            <div className="axis-selector">
+              <label htmlFor="x-axis">X-Axis</label>
+              <div className="axis-dropdown">
+                <select 
+                  id="x-axis" 
+                  value={xAxis} 
+                  onChange={(e) => setXAxis(e.target.value)}
+                  className="axis-select"
+                >
+                  <option value="" disabled>Select X-Axis</option>
+                  {headers.filter(column => 
+                    column && column.trim() !== "" && column !== "__empty"
+                  ).map((column) => (
+                    <option key={`x-${column}`} value={column}>
+                      {column}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="axis-selector">
+              <label htmlFor="y-axis">Y-Axis</label>
+              <div className="axis-dropdown">
+                <select 
+                  id="y-axis" 
+                  value={yAxis} 
+                  onChange={(e) => setYAxis(e.target.value)}
+                  className="axis-select"
+                >
+                  <option value="" disabled>Select Y-Axis</option>
+                  {headers.filter(column => 
+                    column && column.trim() !== "" && column !== "__empty"
+                  ).map((column) => (
+                    <option key={`y-${column}`} value={column}>
+                      {column}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            
+            <div className="axis-selector">
+              <label htmlFor="chart-type">Chart Type</label>
+              <div className="axis-dropdown">
+                <select
+                  id="chart-type"
+                  value={chartType}
+                  onChange={handle2DChartTypeChange}  // Use the new handler
+                  className="axis-select"
+                >
+                  <option value="none">None</option>
+                  <option value="bar">Bar Chart</option>
+                  <option value="line">Line Chart</option>
+                  <option value="pie">Pie Chart</option>
+                  <option value="scatter">Scatter Plot</option>
+                  <option value="area">Area Chart</option>
+                  <option value="doughnut">Doughnut Chart</option>
+                  <option value="radar">Radar Chart</option>
+                  <option value="bubble">Bubble Chart</option>
+                  <option value="polar">Polar Area Chart</option>
+                  <option value="column">Column Chart</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          {/* Add the new 3D chart type dropdown below the other dropdowns */}
+          <div className="threed-chart-selector">
+            <label htmlFor="3d-chart-type">3D Chart Type</label>
+            <div className="axis-dropdown">
+              <select
+                id="3d-chart-type"
+                value={chart3DType}
+                onChange={handle3DChartTypeChange}  // Use the new handler
+                className="axis-select"
+              >
+                <option value="none">None</option>
+                <option value="3d-bar">3D Bar Chart</option>
+                <option value="3d-pie">3D Pie Chart</option>
+                <option value="3d-scatter">3D Scatter Plot</option>
+                <option value="3d-surface">3D Surface Plot</option>
+                <option value="3d-line">3D Line Chart</option>
+                <option value="3d-area">3D Area Chart</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div className="chart-container">
+          {xAxis && yAxis ? (
+            <div className="chart-area">
+              {chartType !== 'none' && chart3DType === 'none' ? (
+                // Only show 2D chart if 2D is selected and 3D is not
+                <div className="chart-wrapper">
+                  {renderChart()}
+                </div>
+              ) : chart3DType !== 'none' && chartType === 'none' ? (
+                // Only show 3D placeholder if 3D is selected and 2D is not
+                <div className="chart-placeholder">
+                  <p>3D Chart will be displayed here</p>
+                  <p>X-Axis: {xAxis}, Y-Axis: {yAxis}, Type: {chart3DType}</p>
+                </div>
+              ) : chartType !== 'none' && chart3DType !== 'none' ? (
+                // If both are selected, show a message that only one can be used
+                <div className="chart-warning">
+                  <FaExclamationTriangle />
+                  <p>Please select either a 2D chart type OR a 3D chart type, not both.</p>
+                </div>
+              ) : (
+                // If neither chart type is selected
+                <div className="chart-empty-state">
+                  <div className="empty-state-icon">
+                    <FaChartBar />
+                  </div>
+                  <h3>Select a chart type to generate visualization</h3>
+                  <p>Choose either a 2D or 3D chart type to visualize your data</p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="chart-empty-state">
+              <div className="empty-state-icon">
+                <FaChartBar />
+              </div>
+              <h3>Select axis values and chart type to generate visualization</h3>
+              <p>Choose columns from your data for the X and Y axes and select a chart type to visualize your data</p>
+            </div>
+          )}
+        </div>
+        
+        {dataValidationMessage}
+      </div>
+    );
+  };
+  
+  // Add this function inside your AnalyzeData component
+
+  const renderChart = () => {
+    // Ensure we have data and selected axes
+    if (!fileData || !fileData.data || fileData.data.length === 0 || !xAxis || !yAxis) {
+      return null;
+    }
+
+    // Extract unique values for X-axis and corresponding Y values
+    const processedData = processChartData(fileData.data, xAxis, yAxis);
+    
+    // Apply chart options
+    const options = {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: {
+            font: {
+              family: "'Poppins', sans-serif",
+              size: 12
+            }
+          }
+        },
+        title: {
+          display: true,
+          text: `${yAxis} by ${xAxis}`,
+          font: {
+            family: "'Poppins', sans-serif",
+            size: 16,
+            weight: 'bold'
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(46, 125, 50, 0.8)',
+          titleFont: {
+            family: "'Poppins', sans-serif",
+            size: 14
+          },
+          bodyFont: {
+            family: "'Poppins', sans-serif",
+            size: 13
+          },
+          padding: 10,
+          cornerRadius: 4
+        }
+      },
+    };
+
+    // Render the selected chart type
+    switch (chartType) {
+      case 'bar':
+        return <Bar data={processedData} options={options} />;
+      case 'line':
+        return <Line data={processedData} options={{...options, tension: 0.2}} />;
+      case 'pie':
+        return <Pie data={processedData} options={options} />;
+      case 'doughnut':
+        return <Doughnut data={processedData} options={options} />;
+      case 'scatter':
+        return <Scatter data={processScatterData(fileData.data, xAxis, yAxis)} options={options} />;
+      case 'polar':
+        return <PolarArea data={processedData} options={options} />;
+      case 'radar':
+        return <Radar data={processedData} options={options} />;
+      case 'area':
+        return <Line 
+          data={{
+            ...processedData,
+            datasets: [{
+              ...processedData.datasets[0],
+              fill: true,
+              backgroundColor: 'rgba(76, 175, 80, 0.2)'
+            }]
+          }} 
+          options={{...options, tension: 0.2}}
+        />;
+      case 'bubble':
+        return <Bubble data={processBubbleData(fileData.data, xAxis, yAxis)} options={options} />;
+      case 'column':
+        return <Bar 
+          data={processedData} 
+          options={{
+            ...options,
+            indexAxis: 'x'
+          }} 
+        />;
+      default:
+        return null;
+    }
+  };
+  
+  // Add these functions inside your AnalyzeData component
+
+  // Process data for most chart types (bar, line, pie, etc.)
+  const processChartData = (data, xAxisKey, yAxisKey) => {
+    // Group data by X axis value
+    const groupedData = {};
+    
+    data.forEach(item => {
+      const xValue = item[xAxisKey]?.toString() || 'Undefined';
+      const yValue = parseFloat(item[yAxisKey]) || 0;
+      
+      if (!groupedData[xValue]) {
+        groupedData[xValue] = [];
+      }
+      
+      groupedData[xValue].push(yValue);
+    });
+    
+    // Calculate averages for each X value
+    const labels = Object.keys(groupedData);
+    const values = labels.map(label => {
+      const values = groupedData[label];
+      const sum = values.reduce((acc, val) => acc + val, 0);
+      return sum / values.length; // Average
+    });
+    
+    // Get a nice shade of green
+    const backgroundColor = labels.map((_, index) => {
+      // Create different shades of green
+      const opacity = 0.7 + (index % 3) * 0.1;
+      // Use a simpler calculation instead of creating an unused variable
+      return `rgba(56, ${120 + (index % 5) * 15}, 56, ${opacity})`;
+    });
+    
+    const borderColor = labels.map((_, index) => {
+      return `rgba(46, ${100 + (index % 5) * 15}, 46, 1)`;
+    });
+    
+    return {
+      labels,
+      datasets: [
+        {
+          label: yAxisKey,
+          data: values,
+          backgroundColor,
+          borderColor,
+          borderWidth: 1,
+        }
+      ]
+    };
+  };
+
+  // Process data for scatter plots
+  const processScatterData = (data, xAxisKey, yAxisKey) => {
+    const points = data.map(item => ({
+      x: parseFloat(item[xAxisKey]) || 0,
+      y: parseFloat(item[yAxisKey]) || 0
+    }));
+    
+    return {
+      datasets: [
+        {
+          label: `${yAxisKey} vs ${xAxisKey}`,
+          data: points,
+          backgroundColor: 'rgba(76, 175, 80, 0.7)',
+          borderColor: 'rgba(46, 125, 50, 1)',
+          borderWidth: 1,
+          pointRadius: 4,
+          pointHoverRadius: 6
+        }
+      ]
+    };
+  };
+
+  // Process data for bubble charts
+  const processBubbleData = (data, xAxisKey, yAxisKey) => {
+    // Get a third dimension for bubble size - use index if no other field
+    const bubblePoints = data.slice(0, 100).map((item, index) => ({
+      x: parseFloat(item[xAxisKey]) || 0,
+      y: parseFloat(item[yAxisKey]) || 0,
+      r: (index % 10) + 5 // Random size between 5-15
+    }));
+    
+    return {
+      datasets: [
+        {
+          label: `${yAxisKey} vs ${xAxisKey}`,
+          data: bubblePoints,
+          backgroundColor: 'rgba(76, 175, 80, 0.7)',
+          borderColor: 'rgba(46, 125, 50, 1)',
+          borderWidth: 1
+        }
+      ]
+    };
+  };
+
+  // Helper to check if data is numeric
+  const isNumericData = (data, key) => {
+    if (!data || data.length === 0) return false;
+    const sample = data.slice(0, 5);
+    return sample.every(item => !isNaN(parseFloat(item[key])));
+  };
+  
   useEffect(() => {
     const setupCellExpansion = () => {
       const cells = document.querySelectorAll('.data-table td');
@@ -403,6 +865,30 @@ const AnalyzeData = () => {
     };
   }, [fileData, currentPage, rowsPerPage]);
   
+  // Add a new useEffect to process column data when fileData changes
+  useEffect(() => {
+    if (fileData && fileData.data && fileData.data.length > 0) {
+      // Extract column information
+      const headers = Object.keys(fileData.data[0]);
+      
+      // Generate metadata about columns (type detection, etc)
+      const columnsWithMetadata = headers.filter(header => 
+        header && header.trim() !== "" && header !== "__empty"
+      ).map(header => {
+        // Try to detect if column is numeric
+        const isNumeric = isNumericData(fileData.data, header);
+        
+        return {
+          name: header,
+          isNumeric,
+          // Add any other metadata you might need
+        };
+      });
+      
+      setAvailableColumns(columnsWithMetadata);
+    }
+  }, [fileData]);
+  
   return (
     <div className="analyze-data-container">
       <div className="analyze-header">
@@ -417,7 +903,8 @@ const AnalyzeData = () => {
           <div className="section-header">
             <h3>1. Select File for Analysis</h3>
             <p>Choose from your uploaded Excel or CSV files</p>
-          </div>
+          </div
+          >
           
           <div className="file-selector">
             <div className="file-dropdown">
@@ -558,6 +1045,12 @@ const AnalyzeData = () => {
         {selectedFile && selectedOption === 'preview' && (
           <div className="data-content-section">
             {renderDataPreview()}
+          </div>
+        )}
+
+        {selectedFile && selectedOption === 'visualization' && (
+          <div className="data-content-section">
+            {renderDataVisualization()}
           </div>
         )}
       </div>
