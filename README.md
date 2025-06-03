@@ -1,6 +1,63 @@
 # Excel Analytics Platform
 
-Last Updated: June 2, 2025
+Last Updated: 2 June, 2025
+
+A full-stack web application for analyzing Excel data with authentication, role-based access control, and modern UI components.
+
+## Tech Stack
+
+### Frontend
+- React.js with Vite
+- Redux Toolkit for state management
+- React Router v7 for routing
+- Tailwind CSS for styling
+- Axios for API requests
+- React Icons for UI elements
+- GSAP for animations
+- Plotly.js for 3D data visualization
+
+### Backend
+- Node.js & Express.js
+- MongoDB with Mongoose
+- JWT for authentication
+- Bcrypt for password hashing
+- CORS for cross-origin resource sharing
+- SendGrid for email communications
+- GridFS for handling large files
+
+## Features
+
+### Week 1 Progress
+- Basic authentication setup
+- Initial dashboard layout
+- Project structure establishment
+- Database connectivity
+- Environment configuration
+
+### Week 2 Progress
+This week we've made significant additions to the platform:
+
+#### Authentication & Security
+- Implemented complete authentication flow (login, signup, logout)
+- Added password reset functionality with email integration
+- Created JWT-based authentication for secure API access
+- Implemented role-based access control (admin vs user)
+- Protected routes on both frontend and backend
+- Added responsive notifications for user actions
+
+#### UI/UX Improvements
+- Created engaging intro animation sequence with GSAP
+- Designed responsive layouts for mobile and tablet devices
+- Added custom form components (checkbox, input fields with toggle visibility)
+- Implemented drag-and-drop file upload with validation and progress tracking
+- Created admin-specific dashboard sections with role-based UI
+
+#### Backend Enhancements
+- Integrated SendGrid for email communications (password reset)
+- Improved Excel file handling with GridFS for large files
+- Added secure file upload validation and processing
+- Enhanced error handling across all API endpoints
+- Implemented secure password handling with bcrypt
 
 ## Week 3 Progress
 
@@ -88,78 +145,37 @@ On the final day of Week 3, we successfully completed the advanced data visualiz
 - Create data export functionality for visualizations
 - Add user file management features (rename, delete, organize)
 - Implement collaborative features for team analysis
+- Add batch processing capabilities for multiple files
+- Create user permissions for file access control
 
-## Technical Details
+## Getting Started
 
-The key bug fix implemented was addressing the MongoDB ObjectId constructor issue:
+### Prerequisites
+- Node.js (v14 or higher)
+- MongoDB (local or Atlas URI)
+- npm or yarn
 
-```javascript
-// Previous code with error
-await bucket.delete(mongoose.Types.ObjectId(existingFile.fileId));
+### Installation
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd Excel_Analytics_Platform
+   ```
 
-// Fixed code
-await bucket.delete(new mongoose.Types.ObjectId(existingFile.fileId));
-```
+2. Install Frontend Dependencies:
+   ```
+   cd frontend
+   npm install
+   ```
 
-The file selection persistence was implemented using localStorage:
+3. Install Backend Dependencies:
+   ```
+   cd ../backend
+   npm install
+   ```
 
-```javascript
-// Save file selection to localStorage
-localStorage.setItem('selectedFileId', file._id);
+### Environment Setup
 
-// Retrieve and use saved selection on component load
-const savedFileId = localStorage.getItem('selectedFileId');
-if (savedFileId && response.data.length > 0) {
-  const savedFile = response.data.find(file => file._id === savedFileId);
-  if (savedFile) {
-    setSelectedFile(savedFile);
-  }
-}
-```
-
-## Image Slider Implementation
-
-### Login Page Enhancement
-- Replaced static login image with an interactive image slider to improve user engagement
-- Added the ability to showcase multiple images with automatic rotation
-- Implemented indicator dots for manual navigation between slides
-
-### Technical Details
-- Created a new reusable `ImageSlider` component for displaying rotating images
-- Added responsive styles to ensure proper display across all device sizes
-- Integrated smooth transition effects between images
-- Ensured proper scaling on mobile devices and large screens
-
-### CSS Enhancements
-- Added slider-specific styles in responsive.css:
-  ```css
-  .image-slider {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-  }
-
-  .slider-indicators {
-    position: absolute;
-    bottom: 20px;
-    left: 0;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    z-index: 10;
-  }
-  ```
-
-- Updated the Login component to utilize the new ImageSlider:
-  ```javascript
-  <div className="login-left-flex">
-    <ImageSlider />
-  </div>
-  ```
-
-### User Experience Benefits
-- Provides a more visually appealing login experience
-- Allows showcasing product features and benefits through rotating images
-- Maintains responsive design across all device sizes from mobile to large desktop screens
+#### Setting Up .env File
+1. Create a `.env` file in the root of the backend directory
+2. Add the following environment variables:
