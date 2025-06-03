@@ -1943,30 +1943,62 @@
 }
 
 .chart-placeholder {
+display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  padding: 30px;
   text-align: center;
-  color: #666;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+.chart-placeholder p {
+  margin: 8px 0;
   font-size: 1.6rem;
+  color: #555;
 }
 
+.chart-placeholder p:first-child {
+  font-size: 2rem;
+  color: var(--primary-green);
+  font-weight: 500;
+  margin-bottom: 20px;
+}
 .chart-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
   text-align: center;
+  padding: 40px 20px;
+  height: 100%;
+  width: 100%;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+  border: 1px dashed #e0e0e0;
 }
 
 .empty-state-icon {
   font-size: 5rem;
-  color: #ccc;
+  color: rgba(76, 175, 80, 0.2);
   margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.2; }
+  50% { transform: scale(1.1); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 0.2; }
 }
 
 .chart-empty-state h3 {
   font-size: 1.8rem;
   color: #444;
   margin-bottom: 10px;
+   font-weight: 500;
 }
 
 .chart-empty-state p {
@@ -2067,43 +2099,230 @@
 /* Add these styles for better chart display */
 .chart-wrapper {
   width: 100%;
-  height: 380px;
+  height: 450px; /* Increased from 380px for larger charts */
   position: relative;
-  padding: 10px;
+  padding: 20px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
 }
 
-/* Animation for chart appearance */
-.chart-wrapper canvas {
-  animation: fadeIn 0.5s ease-in-out;
+.chart-wrapper:hover {
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+chart-wrapper canvas {
+  animation: fadeInUp 0.6s ease-out;
+  max-height: 100%;
 }
 
-/* Style adjustments for chart container */
+@keyframes fadeInUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Style adjustments for specific chart types */
 .chart-area {
   width: 100%;
   height: 100%;
+  padding: 10px 0;
 }
 
-/* Add data warning styles */
-.data-warning {
-  background-color: #fff8e1;
-  color: #f57c00;
-  border-left: 4px solid #f57c00;
-  padding: 10px 15px;
-  margin: 5px 0;
-  font-size: 1.3rem;
+/* Enhance chart container */
+.chart-container {
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 15px;
+  margin-top: 25px;
+  min-height: 480px;
   display: flex;
   align-items: center;
-  gap: 10px;
-  border-radius: 0 4px 4px 0;
+  justify-content: center;
+  transition: all 0.3s ease;
 }
 
-.data-warning svg {
+/* Special styling for radar and polar charts */
+[data-charttype="radar"] .chart-wrapper,
+[data-charttype="polar"] .chart-wrapper {
+  padding: 30px;
+}
+
+/* Special styling for pie and doughnut charts */
+[data-charttype="pie"] .chart-wrapper,
+[data-charttype="doughnut"] .chart-wrapper {
+  display: flex;
+  padding: 15px;
+  height: 500px; /* Increased height */
+}
+
+/* Improve legend container spacing and sizing */
+[data-charttype="pie"] .chartjs-legend-wrap,
+[data-charttype="doughnut"] .chartjs-legend-wrap {
+  max-width: 35%; /* Increased from 30% */
+  padding-left: 20px;
+  flex-shrink: 0;
+}
+
+/* Fix legend text sizes */
+[data-charttype="pie"] .chartjs-legend-wrap ul li span,
+[data-charttype="doughnut"] .chartjs-legend-wrap ul li span {
+  font-size: 14px !important; /* Much larger font size */
+  line-height: 1.4 !important;
+}
+
+/* Better spacing for legend items */
+[data-charttype="pie"] .chartjs-legend-wrap ul li,
+[data-charttype="doughnut"] .chartjs-legend-wrap ul li {
+  margin-bottom: 12px !important; /* More vertical space between items */
+  padding: 4px 0 !important;
+}
+
+/* Fix legend item color boxes */
+[data-charttype="pie"] .chartjs-legend-wrap ul li span:first-child,
+[data-charttype="doughnut"] .chartjs-legend-wrap ul li span:first-child {
+  width: 16px !important;  /* Larger color boxes */
+  height: 16px !important;
+  margin-right: 8px !important;
+}
+
+/* Improve responsiveness for better mobile display */
+@media (max-width: 768px) {
+  [data-charttype="pie"] .chart-wrapper,
+  [data-charttype="doughnut"] .chart-wrapper {
+    flex-direction: column;
+    height: auto;
+    min-height: 700px; /* Increased from 650px */
+  }
+  
+  [data-charttype="pie"] canvas,
+  [data-charttype="doughnut"] canvas {
+    max-width: 100%;
+    max-height: 350px !important; /* Increased chart size */
+    margin-bottom: 30px; /* More space between chart and legend */
+  }
+  
+  [data-charttype="pie"] .chartjs-legend-wrap,
+  [data-charttype="doughnut"] .chartjs-legend-wrap {
+    max-width: 100%;
+    padding: 0 10px;
+  }
+  
+  /* Better mobile legend display */
+  .chartjs-legend-wrap ul {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important; /* 2 columns on mobile */
+    gap: 12px 20px !important;
+    justify-content: center !important;
+    padding: 0 !important;
+  }
+  
+  .chartjs-legend-wrap li {
+    margin: 0 !important;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+/* Add data warning styles */
+/* Enhanced warning styling with critical warning variant */
+.data-warning {
+  display: flex;
+  align-items: flex-start;
+  background-color: #fff8e1;
+  border-left: 4px solid #f57c00;
+  padding: 12px 15px;
+  margin-top: 15px;
+  border-radius: 0 4px 4px 0;
+  gap: 12px;
+}
+
+.data-warning-critical {
+  display: flex;
+  align-items: flex-start;
+  background-color: #ffebee;
+  border-left: 4px solid #d32f2f;
+  padding: 14px 16px;
+  margin-top: 15px;
+  border-radius: 0 4px 4px 0;
+  gap: 12px;
+}
+
+.data-warning svg, .data-warning-critical svg {
+  color: #f57c00;
   font-size: 1.8rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.data-warning-critical svg {
+  color: #d32f2f;
+  font-size: 2rem;
+}
+
+.warning-content {
+  flex: 1;
+}
+
+.warning-text {
+  font-size: 1.5rem;
+  color: #555;
+  margin: 0 0 6px 0;
+  font-weight: 500;
+}
+
+.data-warning-critical .warning-text {
+  color: #d32f2f;
+  font-weight: 600;
+}
+
+.warning-suggestion {
+  font-size: 1.3rem;
+  color: #777;
+  margin: 0;
+}
+/* Add styling for chart error state */
+.chart-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  height: 100%;
+  width: 100%;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+  border: 1px dashed #e0e0e0;
+}
+
+.error-state-icon {
+  font-size: 5rem;
+  color: #f57c00;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite;
+}
+
+.chart-error-state h3 {
+  font-size: 1.8rem;
+  color: #d32f2f;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.chart-error-state p {
+  font-size: 1.5rem;
+  color: #666;
+  max-width: 400px;
+  line-height: 1.5;
 }
 /* Add styling for chart warning message */
 .chart-warning {
@@ -2125,4 +2344,64 @@
 .chart-warning p {
   font-size: 1.6rem;
   max-width: 400px;
+}
+
+/* Enhanced styling for radar charts */
+[data-charttype="radar"] .chart-wrapper {
+  padding: 40px;  /* Increased padding */
+  height: 500px;  /* Taller height for radar charts */
+}
+
+/* Apply special styling for radar chart tooltips */
+[data-charttype="radar"] .chartjs-tooltip {
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 10px;
+  border-left: 3px solid var(--primary-green);
+}
+[data-charttype="bubble"] .chart-wrapper {
+  height: 500px; 
+  padding: 20px 25px 25px 20px; 
+}
+
+[data-charttype="bubble"] canvas {
+  max-height: 100% !important;
+}
+/* Add these to your responsive.css file */
+
+/* Improve bubble chart transition effects */
+[data-charttype="bubble"] .chart-wrapper {
+  height: 500px; 
+  padding: 20px 25px 25px 20px;
+}
+
+[data-charttype="bubble"] canvas {
+  max-height: 100% !important;
+  transition: all 0.3s ease;
+}
+
+/* Add transition for any Chart.js elements */
+canvas[data-charttype="bubble"] .chartjs-bubble-point {
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+}
+
+/* Enhanced rendering for bubble charts */
+[data-charttype="bubble"] {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+/* Enhanced styling for scatter plots */
+[data-charttype="scatter"] .chart-wrapper {
+  height: 500px;
+  padding: 20px 25px 25px 20px;
+}
+
+[data-charttype="scatter"] canvas {
+  max-height: 100% !important;
+}
+
+/* Add hover transition effects for scatter points */
+[data-charttype="scatter"] .chart-point {
+  transition: all 0.3s ease !important;
 }

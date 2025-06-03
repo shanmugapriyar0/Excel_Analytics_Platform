@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback,} from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { 
@@ -91,7 +91,8 @@ const AnalyzeData = () => {
       setError(null);
       
       // Get authentication token
-      const token = user?.token || user?.accessToken || (user?.data?.token);
+      // Fix the mixed operators in token access
+const token = (user?.token || user?.accessToken) || user?.data?.token;
       
       if (!token) {
         setError('Authentication token not found. Please log in again.');
@@ -447,26 +448,67 @@ const AnalyzeData = () => {
         return null;
       }
       
-      // For most chart types, Y should be numeric
-      if (chartType !== 'none' && chartType !== 'pie' && chartType !== 'doughnut') {
-        if (!isNumericData(fileData.data, yAxis)) {
+      const isXNumeric = isNumericData(fileData.data, xAxis);
+      const isYNumeric = isNumericData(fileData.data, yAxis);
+      
+      // Critical warning: Both axes are non-numeric (except for pie/doughnut)
+      if (!isXNumeric && !isYNumeric && chartType !== 'none' && 
+          chartType !== 'pie' && chartType !== 'doughnut') {
+        return (
+          <div className="data-warning-critical">
+            <FaExclamationTriangle />
+            <div className="warning-content">
+              <p className="warning-text">Both selected columns contain text/non-numeric data.</p>
+              <p className="warning-suggestion">Charts require at least one numeric axis to display data properly. Please select a column with numeric values for at least one axis.</p>
+            </div>
+          </div>
+        );
+      }
+      
+      // For pie and doughnut charts - SHOULD have one text column and one numeric column
+      if ((chartType === 'pie' || chartType === 'doughnut')) {
+        // If both columns are numeric or both are text, show warning but STILL render the chart
+        if ((isXNumeric && isYNumeric) || (!isXNumeric && !isYNumeric)) {
           return (
             <div className="data-warning">
               <FaExclamationTriangle />
-              <span>The selected Y-axis data contains non-numeric values. This may affect chart display.</span>
+              <div className="warning-content">
+                <p className="warning-text">Pie/Doughnut charts work best with one categorical column and one numeric column.</p>
+                <p className="warning-suggestion">For best results, select one column with categories (text) and one with values (numbers).</p>
+              </div>
+            </div>
+          );
+        }
+      }
+      
+      // For most chart types, Y should be numeric
+      if (chartType !== 'none' && chartType !== 'pie' && chartType !== 'doughnut') {
+        if (!isYNumeric) {
+          return (
+            <div className="data-warning">
+              <FaExclamationTriangle />
+              <div className="warning-content">
+                <p className="warning-text">The Y-axis column "{yAxis}" contains non-numeric values.</p>
+                <p className="warning-suggestion">For {chartType} charts, Y-axis should contain numbers. Consider switching the columns or selecting a different column.</p>
+              </div>
             </div>
           );
         }
       }
       
       // Scatter and bubble charts need numeric X and Y
-      if ((chartType === 'scatter' || chartType === 'bubble') && !isNumericData(fileData.data, xAxis)) {
-        return (
-          <div className="data-warning">
-            <FaExclamationTriangle />
-            <span>Scatter/Bubble charts require numeric data for both axes. The X-axis contains non-numeric values.</span>
-          </div>
-        );
+      if ((chartType === 'scatter' || chartType === 'bubble')) {
+        if (!isXNumeric || !isYNumeric) {
+          return (
+            <div className="data-warning">
+              <FaExclamationTriangle />
+              <div className="warning-content">
+                <p className="warning-text">The "{!isXNumeric ? xAxis : yAxis}" column contains non-numeric values.</p>
+                <p className="warning-suggestion">Scatter/Bubble charts require numeric data for both axes. Try using a Bar or Column chart instead.</p>
+              </div>
+            </div>
+          );
+        }
       }
       
       return null;
@@ -577,28 +619,51 @@ const AnalyzeData = () => {
           </div>
         </div>
         
-        <div className="chart-container">
-          {xAxis && yAxis ? (
-            <div className="chart-area">
-              {chartType !== 'none' && chart3DType === 'none' ? (
-                // Only show 2D chart if 2D is selected and 3D is not
-                <div className="chart-wrapper">
-                  {renderChart()}
-                </div>
+<div className="chart-container">
+  {xAxis && yAxis ? (
+    <div className="chart-area">
+      {chartType !== 'none' && chart3DType === 'none' ? (
+        <>
+          {/* Show error for ALL charts when both columns are text-only, including pie/doughnut */}
+          {!isNumericData(fileData.data, xAxis) && !isNumericData(fileData.data, yAxis) ? (
+            <div className="chart-error-state">
+              <div className="error-state-icon">
+                <FaExclamationTriangle />
+              </div>
+              
+              {/* Use same message for all chart types including pie/doughnut */}
+              <h3>Cannot generate chart with text-only data</h3>
+              <p>Both selected columns contain text/non-numeric data. Charts require at least one numeric axis to display data properly. Please select a column with numeric values for at least one axis.</p>
+            </div>
+          ) : (
+            <div className="chart-wrapper" data-charttype={chartType}>
+              {renderChart()}
+            </div>
+          )}
+        </>
               ) : chart3DType !== 'none' && chartType === 'none' ? (
-                // Only show 3D placeholder if 3D is selected and 2D is not
-                <div className="chart-placeholder">
-                  <p>3D Chart will be displayed here</p>
-                  <p>X-Axis: {xAxis}, Y-Axis: {yAxis}, Type: {chart3DType}</p>
-                </div>
+                <>
+                  {!isNumericData(fileData.data, xAxis) && !isNumericData(fileData.data, yAxis) ? (
+                    <div className="chart-error-state">
+                      <div className="error-state-icon">
+                        <FaExclamationTriangle />
+                      </div>
+                      <h3>Cannot generate 3D chart with text-only data</h3>
+                      <p>Both selected columns contain text/non-numeric values. 3D charts require numeric data to display properly.</p>
+                    </div>
+                  ) : (
+                    <div className="chart-placeholder">
+                      <p>3D Chart will be displayed here</p>
+                      <p>X-Axis: {xAxis}, Y-Axis: {yAxis}, Type: {chart3DType}</p>
+                    </div>
+                  )}
+                </>
               ) : chartType !== 'none' && chart3DType !== 'none' ? (
-                // If both are selected, show a message that only one can be used
                 <div className="chart-warning">
                   <FaExclamationTriangle />
                   <p>Please select either a 2D chart type OR a 3D chart type, not both.</p>
                 </div>
               ) : (
-                // If neither chart type is selected
                 <div className="chart-empty-state">
                   <div className="empty-state-icon">
                     <FaChartBar />
@@ -624,9 +689,138 @@ const AnalyzeData = () => {
     );
   };
   
-  // Add this function inside your AnalyzeData component
+  // Simplified processChartData function
+  const processChartData = useCallback((data, xAxisKey, yAxisKey) => {
+    // Check if this is a pie/doughnut chart
+    const isPieType = chartType === 'pie' || chartType === 'doughnut';
+    
+    // Determine which is the category axis and which is the value axis
+    const isXNumeric = isNumericData(data, xAxisKey);
+    const isYNumeric = isNumericData(data, yAxisKey);
+    
+    // For pie/doughnut, set categoryKey to the text column, valueKey to the numeric column
+    let categoryKey, valueKey;
+    
+    if (isPieType) {
+      if (!isXNumeric && isYNumeric) {
+        categoryKey = xAxisKey;
+        valueKey = yAxisKey;
+      } else if (isXNumeric && !isYNumeric) {
+        categoryKey = yAxisKey;
+        valueKey = xAxisKey;
+      } else {
+        categoryKey = xAxisKey;
+        valueKey = yAxisKey;
+      }
+    }
+    
+    // Group data by X axis value
+    const groupedData = {};
+    
+    data.forEach(item => {
+      const xValue = isPieType 
+        ? item[categoryKey]?.toString() || 'Undefined'
+        : item[xAxisKey]?.toString() || 'Undefined';
+        
+      const yValue = isPieType
+        ? parseFloat(item[valueKey]) || 0
+        : parseFloat(item[yAxisKey]) || 0;
+    
+      if (!groupedData[xValue]) {
+        groupedData[xValue] = [];
+      }
+      
+      groupedData[xValue].push(yValue);
+    });
+    
+    // Calculate values for each category
+    let labels = Object.keys(groupedData);
+    let values = labels.map(label => {
+      const values = groupedData[label];
+      const sum = values.reduce((acc, val) => acc + val, 0);
+      return isPieType ? sum : sum / values.length; // For pie charts, use sum; otherwise average
+    });
+    
+    // Limit the number of labels for readability
+    if (labels.length > 30) {
+      if (chartType === 'bar' || chartType === 'column') {
+        labels = labels.slice(0, 15);
+        values.splice(15);
+      } else if (chartType === 'line' || chartType === 'area') {
+        labels = labels.slice(0, 30);
+        values.splice(30);
+      } else if (chartType === 'radar') {
+        labels = labels.slice(0, 12);
+        values.splice(12);
+      } else if (chartType === 'pie' || chartType === 'doughnut' || chartType === 'polar') {
+        // Sort by value and keep top entries
+        const combined = labels.map((label, i) => ({ label, value: values[i] }));
+        combined.sort((a, b) => b.value - a.value);
+        labels = combined.map(item => item.label).slice(0, 15);
+        values = combined.map(item => item.value).slice(0, 15);
+      }
+    }
+    
+    // Create color palette based on the green theme
+    const greenPalette = [
+      'rgba(46, 125, 50, 0.9)',
+      'rgba(76, 175, 80, 0.9)',
+      'rgba(129, 199, 132, 0.9)',
+      'rgba(27, 94, 32, 0.9)',
+      'rgba(56, 142, 60, 0.9)',
+      'rgba(102, 187, 106, 0.9)',
+      'rgba(46, 125, 50, 0.7)',
+      'rgba(76, 175, 80, 0.7)',
+      'rgba(129, 199, 132, 0.7)',
+      'rgba(27, 94, 32, 0.7)',
+    ];
+    
+    // Extend palette if needed
+    while (greenPalette.length < labels.length) {
+      const baseColor = greenPalette[greenPalette.length % 10];
+      const opacity = 0.5 + (Math.random() * 0.4);
+      greenPalette.push(baseColor.replace(/[\d.]+\)$/, `${opacity})`));
+    }
+    
+    // Get background and border colors based on chart type
+    const backgroundColor = labels.map((_, index) => greenPalette[index % greenPalette.length]);
+    
+    const borderColor = labels.map((_, index) => {
+      const bgColor = greenPalette[index % greenPalette.length];
+      return bgColor.replace(/[\d.]+\)$/, '1)');
+    });
+    
+    return {
+      labels,
+      datasets: [
+        {
+          label: isPieType ? categoryKey : yAxisKey,
+          data: values,
+          backgroundColor,
+          borderColor,
+          borderWidth: 1,
+          hoverOffset: 10,
+          hoverBorderWidth: 2,
+        }
+      ]
+    };
+  }, [chartType]);
 
+
+
+  // Remove the processing status renderer from renderChart:
   const renderChart = () => {
+    // Remove this part:
+    /*
+    if (processingStatus.isProcessing) {
+      return (
+        <div className="chart-processing-container">
+          ...processing indicator...
+        </div>
+      );
+    }
+    */
+    
     // Ensure we have data and selected axes
     if (!fileData || !fileData.data || fileData.data.length === 0 || !xAxis || !yAxis) {
       return null;
@@ -635,7 +829,7 @@ const AnalyzeData = () => {
     // Extract unique values for X-axis and corresponding Y values
     const processedData = processChartData(fileData.data, xAxis, yAxis);
     
-    // Apply chart options
+    // Enhanced chart options with better styling
     const options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -645,8 +839,12 @@ const AnalyzeData = () => {
           labels: {
             font: {
               family: "'Poppins', sans-serif",
-              size: 12
-            }
+              size: 14, // Increased from 12
+              weight: '500'
+            },
+            padding: 20,
+            usePointStyle: true, // Use point style instead of rectangles for legend
+            pointStyle: 'circle'
           }
         },
         title: {
@@ -654,42 +852,504 @@ const AnalyzeData = () => {
           text: `${yAxis} by ${xAxis}`,
           font: {
             family: "'Poppins', sans-serif",
-            size: 16,
+            size: 18, // Increased from 16
             weight: 'bold'
-          }
+          },
+          padding: {
+            top: 10,
+            bottom: 25
+          },
+          color: '#333'
         },
         tooltip: {
-          backgroundColor: 'rgba(46, 125, 50, 0.8)',
+          backgroundColor: 'rgba(46, 125, 50, 0.85)',
           titleFont: {
             family: "'Poppins', sans-serif",
-            size: 14
+            size: 16 // Increased from 14
           },
           bodyFont: {
             family: "'Poppins', sans-serif",
-            size: 13
+            size: 14 // Increased from 13
           },
-          padding: 10,
-          cornerRadius: 4
+          padding: 12,
+          cornerRadius: 6,
+          displayColors: true,
+          usePointStyle: true,
+          callbacks: {
+            // Format numbers with comma separators and 2 decimal places
+            label: function(context) {
+              let value = context.raw;
+              if (typeof value === 'number') {
+                return `${context.dataset.label}: ${value.toLocaleString(undefined, {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2
+                })}`;
+              }
+              return `${context.dataset.label}: ${value}`;
+            }
+          }
         }
       },
+      elements: {
+        point: {
+          radius: 5, // Larger points
+          hoverRadius: 8,
+          borderWidth: 2,
+          hoverBorderWidth: 3
+        },
+        line: {
+          borderWidth: 3, // Thicker lines
+          tension: 0.2 // Slight curve for line charts
+        },
+        bar: {
+          borderWidth: 1,
+          borderRadius: 4 // Rounded bars
+        },
+        arc: {
+          borderWidth: 2
+        }
+      }
     };
 
-    // Render the selected chart type
+    // Chart-specific options
+    const specificOptions = {
+      // For radar charts
+      radar: {
+        ...options,
+        plugins: {
+          ...options.plugins,
+          legend: {
+            ...options.plugins.legend,
+            position: 'top',
+            labels: {
+              font: {
+                family: "'Poppins', sans-serif",
+                size: 14,
+                weight: '500'
+              }
+            }
+          },
+          title: {
+            ...options.plugins.title,
+            padding: {
+              top: 10,
+              bottom: 30  // Increased padding at bottom
+            }
+          }
+        },
+        scales: {
+          r: {
+            min: 0,  // Always start from zero
+            beginAtZero: true,
+            angleLines: {
+              color: 'rgba(0, 0, 0, 0.1)',
+              lineWidth: 1
+            },
+            grid: {
+              color: 'rgba(0, 0, 0, 0.05)',
+              circular: true
+            },
+            pointLabels: {
+              font: {
+                family: "'Poppins', sans-serif",
+                size: 11  // Smaller font size for labels
+              },
+              padding: 15,  // Increased padding
+              centerPointLabels: false,
+              display: true,
+              callback: function(value) {
+                // If the value is longer than 5 characters, truncate it
+                if (value && value.length > 5) {
+                  return value.substr(0, 5) + '...';
+                }
+                return value;
+              }
+            },
+            ticks: {
+              backdropColor: 'transparent',
+              backdropPadding: 5,
+              showLabelBackdrop: false,
+              z: 1,  // Place ticks above grid
+              font: {
+                size: 10
+              },
+              count: 5  // Limit the number of ticks
+            }
+          }
+        },
+        elements: {
+          line: {
+            borderWidth: 2,
+            tension: 0.1  // Less curve
+          },
+          point: {
+            radius: 3,  // Smaller points
+            hoverRadius: 5,
+            hitRadius: 8,  // Larger hit area for interaction
+            borderWidth: 2
+          }
+        }
+      },
+      // For polar area charts
+      polarArea: {
+        ...options,
+        scales: {
+          r: {
+            beginAtZero: true,
+            ticks: {
+              backdropColor: 'transparent',
+              font: {
+                size: 12
+              }
+            }
+          }
+        }
+      },
+      // For pie and doughnut charts
+      pie: {
+        ...options,
+        cutout: '0%',
+        maintainAspectRatio: false,
+        responsive: true,
+        layout: {
+          padding: {
+            right: 30,
+            left: 5,
+            top: 15,
+            bottom: 15
+          }
+        },
+        plugins: {
+          ...options.plugins,
+          legend: {
+            position: 'right',
+            align: 'center',
+            labels: {
+              boxWidth: 18, // Increased from 12
+              boxHeight: 18, // Increased from 12
+              padding: 14, // Increased padding between items
+              color: '#333',
+              font: {
+                size: 14, // Increased from 10
+                family: "'Poppins', sans-serif",
+                weight: '500' // Added weight for better readability
+              },
+              generateLabels: function(chart) {
+                // Get default labels
+                const original = ChartJS.overrides.pie.plugins.legend.labels.generateLabels(chart);
+                
+                // Truncate long labels
+                return original.map(label => {
+                  if (label.text && label.text.length > 12) { // Increased from 10
+                    label.text = label.text.substring(0, 12) + '...';
+                  }
+                  return label;
+                });
+              }
+            },
+            maxHeight: 400, // Increased max height
+            maxWidth: 300, // Increased max width for more text
+            overflow: 'auto'
+          },
+          tooltip: {
+            ...options.plugins.tooltip,
+            titleFont: {
+              size: 16,
+              family: "'Poppins', sans-serif"
+            },
+            bodyFont: {
+              size: 14,
+              family: "'Poppins', sans-serif"
+            },
+            padding: 12,
+            callbacks: {
+              ...options.plugins.tooltip.callbacks,
+              title: function(tooltipItems) {
+                // Get the original full label
+                const dataIndex = tooltipItems[0].dataIndex;
+                return processedData.labels[dataIndex];
+              }
+            }
+          }
+        }
+      },
+      doughnut: {
+        ...options,
+        cutout: '60%',
+        maintainAspectRatio: false,
+        responsive: true,
+        layout: {
+          padding: {
+            right: 30,
+            left: 5,
+            top: 15,
+            bottom: 15
+          }
+        },
+        plugins: {
+          ...options.plugins,
+          legend: {
+            position: 'right',
+            align: 'center',
+            labels: {
+              boxWidth: 18, // Increased from 12
+              boxHeight: 18, // Increased from 12
+              padding: 14, // Increased from 8
+              color: '#333',
+              font: {
+                size: 14, // Increased from 10
+                family: "'Poppins', sans-serif",
+                weight: '500'
+              },
+              generateLabels: function(chart) {
+                // Get default labels
+                const original = ChartJS.overrides.pie.plugins.legend.labels.generateLabels(chart);
+                
+                // Truncate long labels
+                return original.map(label => {
+                  if (label.text && label.text.length > 12) { // Increased from 10
+                    label.text = label.text.substring(0, 12) + '...';
+                  }
+                  return label;
+                });
+              }
+            },
+            maxHeight: 400, // Increased max height
+            maxWidth: 300, // Increased max width for more text
+            overflow: 'auto'
+          },
+          tooltip: {
+            ...options.plugins.tooltip,
+            titleFont: {
+              size: 16,
+              family: "'Poppins', sans-serif"
+            },
+            bodyFont: {
+              size: 14,
+              family: "'Poppins', sans-serif"
+            },
+            padding: 12,
+            callbacks: {
+              ...options.plugins.tooltip.callbacks,
+              title: function(tooltipItems) {
+                // Get the original full label
+                const dataIndex = tooltipItems[0].dataIndex;
+                return processedData.labels[dataIndex];
+              }
+            }
+          }
+        }
+      }
+    };
+
+    // Add a visual indicator for data sampling
+    const originalDataLength = Object.keys(processChartData(fileData.data, xAxis, yAxis)).length;
+    const currentDataLength = processedData.labels.length;
+    const samplingInfo = originalDataLength > currentDataLength ? 
+      `(Showing ${currentDataLength} out of ${originalDataLength} data points)` : '';
+
+    // Update chart title to show data sampling information
+    if (samplingInfo) {
+      options.plugins.title.text = [`${yAxis} by ${xAxis}`, samplingInfo];
+      options.plugins.title.font = {
+        family: "'Poppins', sans-serif",
+        size: samplingInfo ? 16 : 18,
+        weight: 'bold'
+      };
+    }
+
+    // Render the selected chart type with enhanced styling
     switch (chartType) {
       case 'bar':
-        return <Bar data={processedData} options={options} />;
+        return <Bar 
+          data={processedData} 
+          options={{
+            ...options,
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 13 } }
+              },
+              y: {
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { font: { size: 13 } }
+              }
+            }
+          }} 
+        />;
       case 'line':
-        return <Line data={processedData} options={{...options, tension: 0.2}} />;
+        return <Line 
+          data={{
+            ...processedData,
+            datasets: processedData.datasets.map(dataset => ({
+              ...dataset,
+              pointBackgroundColor: dataset.borderColor,
+              tension: 0.3
+            }))
+          }} 
+          options={{
+            ...options, 
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 13 } }
+              },
+              y: {
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { font: { size: 13 } }
+              }
+            }
+          }} 
+        />;
       case 'pie':
-        return <Pie data={processedData} options={options} />;
+        // Make sure to use the right column as category/value based on data type
+        const isXNumeric = isNumericData(fileData.data, xAxis);
+        const isYNumeric = isNumericData(fileData.data, yAxis);
+        
+        let pieData;
+        
+        // Special handling based on column types
+        if ((!isXNumeric && isYNumeric) || (isXNumeric && !isYNumeric)) {
+          // Ideal case: one text, one numeric column
+          pieData = {...processedData};
+        } else {
+          // Both columns same type - convert data to make it work anyway
+          pieData = {...processedData};
+          
+          // Add a visual indicator that this isn't ideal
+          pieData.datasets[0].backgroundColor = pieData.datasets[0].backgroundColor.map(color => {
+            // Make colors slightly more muted to indicate non-ideal data
+            return color.replace('0.9', '0.7').replace('0.7', '0.5');
+          });
+        }
+        
+        // Sort for better visualization
+        if (pieData.labels && pieData.labels.length > 0) {
+          const items = pieData.labels.map((label, i) => ({
+            label,
+            value: pieData.datasets[0].data[i],
+            backgroundColor: pieData.datasets[0].backgroundColor[i],
+            borderColor: pieData.datasets[0].borderColor[i]
+          }));
+          
+          // Sort by value descending
+          items.sort((a, b) => b.value - a.value);
+          
+          // Update data
+          pieData.labels = items.map(item => item.label);
+          pieData.datasets[0].data = items.map(item => item.value);
+          pieData.datasets[0].backgroundColor = items.map(item => item.backgroundColor);
+          pieData.datasets[0].borderColor = items.map(item => item.borderColor);
+        }
+        
+        return <Pie 
+          data={pieData} 
+          options={specificOptions.pie} 
+        />;
       case 'doughnut':
-        return <Doughnut data={processedData} options={options} />;
+        // Apply the same logic as pie chart for data type handling
+        const dXNumeric = isNumericData(fileData.data, xAxis);
+        const dYNumeric = isNumericData(fileData.data, yAxis);
+        
+        let doughnutData;
+        
+        // Special handling based on column types
+        if ((!dXNumeric && dYNumeric) || (dXNumeric && !dYNumeric)) {
+          // Ideal case: one text, one numeric column
+          doughnutData = {...processedData};
+        } else {
+          // Both columns same type - convert data to make it work anyway
+          doughnutData = {...processedData};
+          
+          // Add a visual indicator that this isn't ideal
+          doughnutData.datasets[0].backgroundColor = doughnutData.datasets[0].backgroundColor.map(color => {
+            // Make colors slightly more muted to indicate non-ideal data
+            return color.replace('0.9', '0.7').replace('0.7', '0.5');
+          });
+        }
+        
+        // Sort for better visualization
+        if (doughnutData.labels && doughnutData.labels.length > 0) {
+          const items = doughnutData.labels.map((label, i) => ({
+            label,
+            value: doughnutData.datasets[0].data[i],
+            backgroundColor: doughnutData.datasets[0].backgroundColor[i],
+            borderColor: doughnutData.datasets[0].borderColor[i]
+          }));
+          
+          // Sort by value descending
+          items.sort((a, b) => b.value - a.value);
+          
+          // Update data
+          doughnutData.labels = items.map(item => item.label);
+          doughnutData.datasets[0].data = items.map(item => item.value);
+          doughnutData.datasets[0].backgroundColor = items.map(item => item.backgroundColor);
+          doughnutData.datasets[0].borderColor = items.map(item => item.borderColor);
+        }
+        
+        return <Doughnut 
+          data={doughnutData} 
+          options={specificOptions.doughnut} 
+        />;
       case 'scatter':
-        return <Scatter data={processScatterData(fileData.data, xAxis, yAxis)} options={options} />;
+  return <Scatter 
+    data={processScatterData(fileData.data, xAxis, yAxis)} 
+    options={{
+      ...options,
+      scales: {
+        x: {
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          ticks: { font: { size: 13 } }
+        },
+        y: {
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          ticks: { font: { size: 13 } }
+        }
+      },
+      elements: {
+        point: {
+          radius: fileData.data.length > 200 ? 3 : 4,
+          hoverRadius: 6,
+          hoverBorderWidth: 2
+        }
+      },
+      plugins: {
+        ...options.plugins,
+        tooltip: {
+          ...options.plugins.tooltip,
+          callbacks: {
+            ...options.plugins.tooltip.callbacks,
+            label: function(context) {
+              return [
+                `${xAxis}: ${context.raw.x}`,
+                `${yAxis}: ${context.raw.y}`
+              ];
+            }
+          }
+        }
+      }
+    }} 
+  />;
       case 'polar':
-        return <PolarArea data={processedData} options={options} />;
+        return <PolarArea 
+          data={processedData} 
+          options={specificOptions.polarArea} 
+        />;
       case 'radar':
-        return <Radar data={processedData} options={options} />;
+        return <Radar 
+          data={{
+            ...processedData,
+            datasets: [{
+              ...processedData.datasets[0],
+              pointBackgroundColor: processedData.datasets[0].borderColor,
+              pointBorderColor: '#fff',
+              borderJoinStyle: 'round',
+              fill: true,
+              backgroundColor: 'rgba(76, 175, 80, 0.2)'
+            }]
+          }} 
+          options={specificOptions.radar} 
+        />;
       case 'area':
         return <Line 
           data={{
@@ -697,19 +1357,91 @@ const AnalyzeData = () => {
             datasets: [{
               ...processedData.datasets[0],
               fill: true,
-              backgroundColor: 'rgba(76, 175, 80, 0.2)'
+              backgroundColor: 'rgba(76, 175, 80, 0.2)',
+              pointBackgroundColor: 'rgba(46, 125, 50, 1)',
+              tension: 0.3
             }]
           }} 
-          options={{...options, tension: 0.2}}
+          options={{
+            ...options,
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 13 } }
+              },
+              y: {
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { font: { size: 13 } }
+              }
+            }
+          }} 
         />;
       case 'bubble':
-        return <Bubble data={processBubbleData(fileData.data, xAxis, yAxis)} options={options} />;
+  return <Bubble 
+    data={processBubbleData(fileData.data, xAxis, yAxis)} 
+    options={{
+      ...options,
+      scales: {
+        x: {
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          ticks: { font: { size: 13 } }
+        },
+        y: {
+          grid: { color: 'rgba(0, 0, 0, 0.05)' },
+          ticks: { font: { size: 13 } }
+        }
+      },
+      elements: {
+        point: {
+          // Configure hover effects for bubbles
+          hoverRadius: 15, // Increase radius on hover
+          hoverBorderWidth: 2,
+          // Add transition effect on hover
+          hitRadius: 10
+        }
+      },
+      hover: {
+        mode: 'nearest',
+        intersect: true,
+        animationDuration: 400
+      },
+      animation: {
+        duration: 1000,
+        easing: 'easeOutQuart'
+      },
+      plugins: {
+        ...options.plugins,
+        tooltip: {
+          ...options.plugins.tooltip,
+          callbacks: {
+            ...options.plugins.tooltip.callbacks,
+            label: function(context) {
+              return [
+                `${xAxis}: ${context.raw.x}`,
+                `${yAxis}: ${context.raw.y}`
+              ];
+            }
+          }
+        }
+      }
+    }} 
+  />;
       case 'column':
         return <Bar 
           data={processedData} 
           options={{
             ...options,
-            indexAxis: 'x'
+            indexAxis: 'x',
+            scales: {
+              x: {
+                grid: { display: false },
+                ticks: { font: { size: 13 } }
+              },
+              y: {
+                grid: { color: 'rgba(0, 0, 0, 0.05)' },
+                ticks: { font: { size: 13 } }
+              }
+            }
           }} 
         />;
       default:
@@ -717,99 +1449,114 @@ const AnalyzeData = () => {
     }
   };
   
-  // Add these functions inside your AnalyzeData component
-
-  // Process data for most chart types (bar, line, pie, etc.)
-  const processChartData = (data, xAxisKey, yAxisKey) => {
-    // Group data by X axis value
-    const groupedData = {};
-    
-    data.forEach(item => {
-      const xValue = item[xAxisKey]?.toString() || 'Undefined';
-      const yValue = parseFloat(item[yAxisKey]) || 0;
-      
-      if (!groupedData[xValue]) {
-        groupedData[xValue] = [];
-      }
-      
-      groupedData[xValue].push(yValue);
-    });
-    
-    // Calculate averages for each X value
-    const labels = Object.keys(groupedData);
-    const values = labels.map(label => {
-      const values = groupedData[label];
-      const sum = values.reduce((acc, val) => acc + val, 0);
-      return sum / values.length; // Average
-    });
-    
-    // Get a nice shade of green
-    const backgroundColor = labels.map((_, index) => {
-      // Create different shades of green
-      const opacity = 0.7 + (index % 3) * 0.1;
-      // Use a simpler calculation instead of creating an unused variable
-      return `rgba(56, ${120 + (index % 5) * 15}, 56, ${opacity})`;
-    });
-    
-    const borderColor = labels.map((_, index) => {
-      return `rgba(46, ${100 + (index % 5) * 15}, 46, 1)`;
-    });
-    
-    return {
-      labels,
-      datasets: [
-        {
-          label: yAxisKey,
-          data: values,
-          backgroundColor,
-          borderColor,
-          borderWidth: 1,
-        }
-      ]
-    };
-  };
 
   // Process data for scatter plots
   const processScatterData = (data, xAxisKey, yAxisKey) => {
-    const points = data.map(item => ({
-      x: parseFloat(item[xAxisKey]) || 0,
-      y: parseFloat(item[yAxisKey]) || 0
-    }));
-    
-    return {
-      datasets: [
-        {
-          label: `${yAxisKey} vs ${xAxisKey}`,
-          data: points,
-          backgroundColor: 'rgba(76, 175, 80, 0.7)',
-          borderColor: 'rgba(46, 125, 50, 1)',
-          borderWidth: 1,
-          pointRadius: 4,
-          pointHoverRadius: 6
-        }
-      ]
-    };
+  // Check if we need to limit data points for performance
+  const pointLimit = 500;
+  let pointsData = data;
+  
+  if (data.length > pointLimit) {
+    // Sample data for better performance
+    const samplingInterval = Math.ceil(data.length / pointLimit);
+    pointsData = data.filter((_, index) => index % samplingInterval === 0);
+  }
+  
+  // Filter out invalid data points
+  const validPoints = pointsData.filter(item => {
+    const xValue = parseFloat(item[xAxisKey]);
+    const yValue = parseFloat(item[yAxisKey]);
+    return !isNaN(xValue) && !isNaN(yValue);
+  });
+  
+  // Map to proper format for scatter plot - must have x and y properties
+  const points = validPoints.map(item => ({
+    x: parseFloat(item[xAxisKey]),
+    y: parseFloat(item[yAxisKey])
+  }));
+  
+  return {
+    datasets: [
+      {
+        label: `${yAxisKey} vs ${xAxisKey}`,
+        data: points,
+        backgroundColor: points.map(() => {
+          // Generate slightly different colors for points
+          const baseColor = 'rgba(76, 175, 80,';
+          const opacity = (Math.random() * 0.3 + 0.4).toFixed(2); // Between 0.4 and 0.7
+          return `${baseColor} ${opacity})`;
+        }),
+        borderColor: 'rgba(46, 125, 50, 1)',
+        borderWidth: 1,
+        pointRadius: data.length > 200 ? 3 : 4, // Smaller points for large datasets
+        pointHoverRadius: 6
+      }
+    ]
   };
+};
 
-  // Process data for bubble charts
+  // Updated processBubbleData function to properly format bubble chart data
   const processBubbleData = (data, xAxisKey, yAxisKey) => {
-    // Get a third dimension for bubble size - use index if no other field
-    const bubblePoints = data.slice(0, 100).map((item, index) => ({
-      x: parseFloat(item[xAxisKey]) || 0,
-      y: parseFloat(item[yAxisKey]) || 0,
-      r: (index % 10) + 5 // Random size between 5-15
-    }));
+    // Ensure both columns are numeric for bubble charts
+    const isXNumeric = isNumericData(data, xAxisKey);
+    const isYNumeric = isNumericData(data, yAxisKey);
+  // Log warning if columns aren't numeric (but continue processing)
+  if (!isXNumeric || !isYNumeric) {
+    console.warn('Bubble chart works best with numeric columns. Some data points may be filtered out.');
+  }
+    // Limit points for performance
+    const bubbleLimit = 200;
+    
+    // Filter data to include only rows with valid numeric values for both axes
+    const validData = data.filter(item => {
+      const xValue = parseFloat(item[xAxisKey]);
+      const yValue = parseFloat(item[yAxisKey]);
+      return !isNaN(xValue) && !isNaN(yValue);
+    });
+    
+    // Sample data if needed
+    let bubbleData = validData;
+    if (validData.length > bubbleLimit) {
+      const samplingInterval = Math.ceil(validData.length / bubbleLimit);
+      bubbleData = validData.filter((_, index) => index % samplingInterval === 0).slice(0, bubbleLimit);
+    }
+    
+    // Create proper bubble point objects with x, y, and r properties
+    const bubblePoints = bubbleData.map((item, index) => {
+      // Base bubble size
+      const baseRadius = Math.max(4, Math.min(15, 
+        (Math.abs(parseFloat(item[xAxisKey]) % 10) + 5) || (index % 10) + 5));
+        
+      return {
+        x: parseFloat(item[xAxisKey]),
+        y: parseFloat(item[yAxisKey]),
+        r: baseRadius,
+        // Add hover transition properties
+        hoverBackgroundColor: 'rgba(76, 175, 80, 0.9)',
+        hoverBorderColor: 'rgba(46, 125, 50, 1)',
+        hoverBorderWidth: 2,
+        // Hover radius will be handled by chart.js options
+        originalRadius: baseRadius // Store original for custom hover handlers
+      };
+    });
     
     return {
-      datasets: [
-        {
-          label: `${yAxisKey} vs ${xAxisKey}`,
-          data: bubblePoints,
-          backgroundColor: 'rgba(76, 175, 80, 0.7)',
-          borderColor: 'rgba(46, 125, 50, 1)',
-          borderWidth: 1
-        }
-      ]
+      datasets: [{
+        label: `${yAxisKey} vs ${xAxisKey}`,
+        data: bubblePoints,
+        backgroundColor: bubblePoints.map(() => {
+          // Generate different colors for bubbles
+          const hue = Math.floor(Math.random() * 60) + 100; // Green hues
+          return `hsla(${hue}, 70%, 60%, 0.7)`;
+        }),
+        borderColor: 'rgba(46, 125, 50, 0.7)',
+        borderWidth: 1,
+        // Add transition properties
+        transitionDuration: 750,
+        hoverBackgroundColor: bubblePoints.map(() => 'rgba(76, 175, 80, 0.9)'),
+        hoverBorderColor: 'rgba(46, 125, 50, 1)',
+        hoverBorderWidth: 2
+      }]
     };
   };
 
@@ -819,51 +1566,62 @@ const AnalyzeData = () => {
     const sample = data.slice(0, 5);
     return sample.every(item => !isNaN(parseFloat(item[key])));
   };
+
   
-  useEffect(() => {
-    const setupCellExpansion = () => {
-      const cells = document.querySelectorAll('.data-table td');
-      
-      cells.forEach(cell => {
-        // Check if content is truncated
-        if (cell.scrollWidth > cell.clientWidth) {
-          cell.classList.add('has-more');
-          
-          cell.addEventListener('click', function() {
-            const columnName = cell.closest('table').querySelector('th:nth-child(' + (Array.from(cell.parentNode.children).indexOf(cell) + 1) + ')').textContent;
-            const cellContent = cell.textContent;
-            
-            // Set modal content
-            document.getElementById('cellColumnName').textContent = columnName + ':';
-            document.getElementById('cellContent').textContent = cellContent;
-            
-            // Show modal
-            document.getElementById('cellContentModal').style.display = 'flex';
-          });
-        }
-      });
-      
-      // Close modal when clicking outside
-      document.getElementById('cellContentModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-          this.style.display = 'none';
-        }
-      });
-    };
+  // Add this useEffect to handle cell expansion properly
+useEffect(() => {
+  // Define a named handler function that we can both add and remove
+  const handleCellClick = (event) => {
+    const cell = event.target;
+    const columnName = document.querySelector('.data-table thead th:nth-child(' + (Array.from(cell.parentNode.children).indexOf(cell) + 1) + ')').textContent;
     
-    // Wait for table to render completely
-    if (fileData && fileData.data && fileData.data.length > 0) {
-      setTimeout(setupCellExpansion, 100);
+    document.getElementById('cellColumnName').textContent = columnName;
+    document.getElementById('cellContent').textContent = cell.textContent || "Empty cell";
+    document.getElementById('cellContentModal').style.display = 'flex';
+  };
+  
+  // Define modal close handler at this scope level
+  const handleModalOutsideClick = (e) => {
+    if (e.target.id === 'cellContentModal') {
+      document.getElementById('cellContentModal').style.display = 'none';
     }
+  };
+  
+  const setupCellExpansion = () => {
+    // Get all table cells
+    const cells = document.querySelectorAll('.data-table td');
     
-    // Cleanup
-    return () => {
-      const cells = document.querySelectorAll('.data-table td');
-      cells.forEach(cell => {
-        cell.removeEventListener('click', () => {});
-      });
-    };
-  }, [fileData, currentPage, rowsPerPage]);
+    // Add click event to each cell
+    cells.forEach(cell => {
+      cell.addEventListener('click', handleCellClick);
+    });
+    
+    // Setup modal close handler
+    const modal = document.getElementById('cellContentModal');
+    if (modal) {
+      modal.removeEventListener('click', handleModalOutsideClick); // Remove first to avoid duplicates
+      modal.addEventListener('click', handleModalOutsideClick);
+    }
+  };
+  
+  // Wait for table to render completely
+  if (fileData && fileData.data && fileData.data.length > 0) {
+    setTimeout(setupCellExpansion, 100);
+  }
+  
+  // Cleanup function - properly remove the exact same handler
+  return () => {
+    const cells = document.querySelectorAll('.data-table td');
+    cells.forEach(cell => {
+      cell.removeEventListener('click', handleCellClick);
+    });
+    
+    const modal = document.getElementById('cellContentModal');
+    if (modal) {
+      modal.removeEventListener('click', handleModalOutsideClick);
+    }
+  };
+}, [fileData, currentPage, rowsPerPage]);
   
   // Add a new useEffect to process column data when fileData changes
   useEffect(() => {
@@ -993,7 +1751,10 @@ const AnalyzeData = () => {
                 </div>
               </div>
               
-              <div className="option-card" onClick={() => handleOptionSelect('visualization')}>
+              <div 
+                className={`option-card ${selectedOption === 'visualization' ? 'active' : ''}`}
+                onClick={() => handleOptionSelect('visualization')}
+              >
                 <div className="option-icon">
                   <FaChartBar />
                 </div>
@@ -1003,7 +1764,10 @@ const AnalyzeData = () => {
                 </div>
               </div>
               
-              <div className="option-card" onClick={() => handleOptionSelect('filtering')}>
+              <div 
+                className={`option-card ${selectedOption === 'filtering' ? 'active' : ''}`}
+                onClick={() => handleOptionSelect('filtering')}
+              >
                 <div className="option-icon">
                   <FaFilter />
                 </div>
@@ -1013,7 +1777,10 @@ const AnalyzeData = () => {
                 </div>
               </div>
               
-              <div className="option-card" onClick={() => handleOptionSelect('advanced')}>
+              <div 
+                className={`option-card ${selectedOption === 'advanced' ? 'active' : ''}`}
+                onClick={() => handleOptionSelect('advanced')}
+              >
                 <div className="option-icon">
                   <FaSearch />
                 </div>
@@ -1023,7 +1790,10 @@ const AnalyzeData = () => {
                 </div>
               </div>
 
-              <div className="option-card" onClick={() => handleOptionSelect('ai')}>
+              <div 
+                className={`option-card ${selectedOption === 'ai' ? 'active' : ''}`}
+                onClick={() => handleOptionSelect('ai')}
+              >
                 <div className="option-icon">
                   <FaRobot />
                 </div>
