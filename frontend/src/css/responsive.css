@@ -350,9 +350,7 @@
 /* Increase base container sizes */
 .file-upload-container,
 .analyze-data-container {
-  max-width: 1200px; /* Increased from 1000px */
   width: 85%;        /* Adjusted for better proportions */
-  padding: 35px;     /* Slightly more padding for better spacing */
 }
 
 /* Add responsive adjustments for different screen sizes */
@@ -2099,7 +2097,7 @@ display: flex;
 /* Add these styles for better chart display */
 .chart-wrapper {
   width: 100%;
-  height: 450px; /* Increased from 380px for larger charts */
+  height: 600px; 
   position: relative;
   padding: 20px;
   background-color: white;
@@ -2143,6 +2141,8 @@ chart-wrapper canvas {
   padding: 15px;
   margin-top: 25px;
   min-height: 480px;
+  height: auto; /* Allow flexible height */
+  max-height: none; /* Remove height constraints */
   display: flex;
   align-items: center;
   justify-content: center;

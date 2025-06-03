@@ -1451,17 +1451,17 @@ form button[type="button"] {
   }
 }
 
-/* 3D Chart Styling */
-/* Update 3D chart styling for dark mode */
 .three-d-chart-container {
   width: 100%;
-  height: 450px;
-  background-color: rgb(17, 17, 17);
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  overflow: hidden;
+  height: 750px; /* Increased from 650px to match chart-wrapper */
+  background-color: rgb(23, 25, 35);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  overflow: visible; /* Changed from hidden to prevent cutting off */
   position: relative;
   border: 1px solid rgba(255, 255, 255, 0.1);
+  margin: 0 0 20px 0;
+  box-sizing: border-box;
 }
 
 .three-d-chart-container.loading {
@@ -1470,7 +1470,7 @@ form button[type="button"] {
   justify-content: center;
   align-items: center;
   color: #4CAF50;
-  background-color: rgb(17, 17, 17);
+   background-color: rgb(23, 25, 35);
 }
 
 .chart-loading-spinner {
@@ -1485,6 +1485,34 @@ form button[type="button"] {
 
 .three-d-chart-container.loading p {
   color: white;
+  font-size: 1.6rem;
+  margin-top: 15px;
+}
+
+/* Style Plotly controls better in dark theme */
+.three-d-chart-container .modebar {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+  border-radius: 6px !important;
+  padding: 4px !important;
+}
+
+.three-d-chart-container .modebar-btn path {
+  fill: rgba(255, 255, 255, 0.7) !important;
+}
+
+.three-d-chart-container .modebar-btn:hover path {
+  fill: white !important;
+}
+
+/* Adjust tooltip styling */
+.three-d-chart-container .hovertext {
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Add glow effect to chart elements */
+.three-d-chart-container .point, 
+.three-d-chart-container .scatter {
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.3));
 }
 
 @keyframes spin {
@@ -1492,23 +1520,23 @@ form button[type="button"] {
   100% { transform: rotate(360deg); }
 }
 
-/* Performance warning for large datasets */
 .three-d-performance-warning {
-  background-color: #fff8e1;
+  background-color: rgba(255, 248, 225, 0.9);
   border-left: 4px solid #f57c00;
-  padding: 12px 15px;
+  padding: 14px 18px;
   margin-top: 15px;
   margin-bottom: 15px;
   font-size: 1.4rem;
-  color: #666;
+  color: #333;
   display: flex;
   align-items: flex-start;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
   box-sizing: border-box;
   max-width: 100%;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .three-d-performance-warning svg {
@@ -1531,16 +1559,28 @@ form button[type="button"] {
   margin-top: 10px;
 }
 
-/* Responsive adjustments for 3D charts on smaller screens */
+/* Media query adjustments */
 @media (max-width: 768px) {
+  .chart-wrapper,
   .three-d-chart-container {
-    height: 350px;
+    height: 500px; /* Reduced but still adequate for mobile */
+  }
+  
+  .analyze-data-container {
+    padding: 15px;
+    width: 95%;
   }
 }
 
 @media (max-width: 576px) {
+  .chart-wrapper,
   .three-d-chart-container {
-    height: 300px;
+    height: 450px; /* Further reduced for very small screens */
+  }
+  
+  .analyze-data-container {
+    padding: 10px;
+    width: 98%;
   }
 }
 .chart-wrapper {
@@ -1548,4 +1588,51 @@ form button[type="button"] {
   max-width: 100%;
   overflow: hidden;
   padding-bottom: 15px;
+  margin: 0 0 20px 0;
+  box-sizing: border-box;
+}
+/* Update the text styling for better readability */
+.three-d-chart-container .text {
+  text-shadow: 0px 0px 6px rgba(0, 0, 0, 0.9), 
+               0px 0px 3px rgba(0, 0, 0, 0.9);
+  font-weight: 600 !important;
+  opacity: 0.9;
+}
+
+/* Add these additional styles for the bar chart values */
+.three-d-chart-container .textpoint {
+  opacity: 0.85 !important;
+  pointer-events: none !important;
+}
+
+/* Add a subtle text highlight */
+.three-d-chart-container text.nums {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.85));
+}
+/* Ensure main SVG occupies full space */
+.main-svg {
+  width: 100% !important;
+  height: 100% !important;
+  overflow: visible !important;
+}
+
+/* Fix for Plotly modebar positioning */
+.modebar-container {
+  right: 10px !important;
+  top: 10px !important;
+}
+
+/* Special override for data visualization section */
+.data-visualization-section {
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fix for analyze-data-container when 3D charts are present */
+.analyze-data-container[data-has-3d-chart="true"] {
+  height: auto;
+  min-height: 900px; /* Higher minimum height for 3D charts */
+  padding-bottom: 40px; /* Extra padding at bottom */
 }

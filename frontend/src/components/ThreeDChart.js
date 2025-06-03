@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef} from 'react';
+import React, { useEffect, useState, useRef,} from 'react';
 import Plot from 'react-plotly.js';
 
 const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
@@ -7,13 +7,39 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
   
+  // Define color palettes for better visualization
+  const colorPalettes = {
+    default: [
+      '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+    ],
+    green: [
+      'rgba(46, 125, 50, 0.9)', // Primary green
+      'rgba(76, 175, 80, 0.9)', // Medium green
+      'rgba(129, 199, 132, 0.9)', // Lighter green
+      'rgba(165, 214, 167, 0.9)' // Lightest green
+    ],
+    warm: [
+      '#f1c40f', '#e67e22', '#d35400', '#e74c3c', '#c0392b'
+    ],
+    cool: [
+      '#3498db', '#2980b9', '#1abc9c', '#16a085', '#2c3e50'
+    ],
+    gradient: [
+      [0, 'rgb(165, 214, 167)'],     // Light green
+      [0.25, 'rgb(76, 175, 80)'],    // Medium green 
+      [0.5, 'rgb(46, 125, 50)'],     // Primary green
+      [0.75, 'rgb(27, 94, 32)'],     // Dark green
+      [1, 'rgb(0, 51, 0)']           // Very dark green
+    ]
+  };
+
   useEffect(() => {
     if (!data || !chartType || !xAxis || !yAxis) return;
     
     setLoading(true);
     
     try {
-      // Process data based on chart type
       processDataForChart();
     } catch (error) {
       console.error('Error processing chart data:', error);
@@ -27,51 +53,107 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
     const dataLimit = getDataLimitForChartType();
     const processedData = sampleData(data, dataLimit);
     
-const newLayout = {
-  title: `3D ${formatChartName(chartType)} of ${yAxis} vs ${xAxis}`,
-  titlefont: { color: 'white' },
-  autosize: true,
-  height: 450,
-  scene: {
-    xaxis: { 
-      title: xAxis,
-      titlefont: { color: 'white' },
-      tickfont: { color: 'white' },
-      gridcolor: 'rgba(255, 255, 255, 0.1)',
-      zerolinecolor: 'rgba(255, 255, 255, 0.3)'
-    },
-    yaxis: { 
-      title: yAxis,
-      titlefont: { color: 'white' },
-      tickfont: { color: 'white' },
-      gridcolor: 'rgba(255, 255, 255, 0.1)',
-      zerolinecolor: 'rgba(255, 255, 255, 0.3)'
-    },
-    zaxis: { 
-      title: 'Value',
-      titlefont: { color: 'white' },
-      tickfont: { color: 'white' },
-      gridcolor: 'rgba(255, 255, 255, 0.1)',
-      zerolinecolor: 'rgba(255, 255, 255, 0.3)'
-    },
-    camera: getCameraPosition(),
-    aspectmode: 'cube',
-    bgcolor: 'rgb(17, 17, 17)'
-  },
-  margin: { l: 0, r: 0, b: 0, t: 40 },
-  paper_bgcolor: 'rgb(17, 17, 17)', // Dark background
-  plot_bgcolor: 'rgb(17, 17, 17)',
-  font: { 
-    family: "'Poppins', sans-serif",
-    color: 'white'
-  },
-  showlegend: true,
-  legend: { 
-    x: 0.8, 
-    y: 0.9,
-    font: { color: 'white' }
-  }
-};
+    // Enhanced layout for better readability
+    const newLayout = {
+      title: `3D ${formatChartName(chartType)} of ${yAxis} vs ${xAxis}`,
+      titlefont: { 
+        size: 18,
+        color: 'white',
+        family: "'Poppins', sans-serif"
+      },
+      autosize: true,
+      height: 650, // Taller chart for better visibility
+      scene: {
+        xaxis: { 
+          title: {
+            text: xAxis,
+            font: {
+              size: 14,
+              family: "'Poppins', sans-serif",
+              color: 'white'
+            },
+            standoff: 15
+          },
+          tickfont: { 
+            size: 12, 
+            color: 'white',
+            family: "'Poppins', sans-serif"
+          },
+          gridcolor: 'rgba(255, 255, 255, 0.2)',
+          zerolinecolor: 'rgba(255, 255, 255, 0.5)',
+          showbackground: true,
+          backgroundcolor: 'rgba(23, 25, 35, 0.8)'  // Modern black with slight blue tint
+        },
+        yaxis: { 
+          title: {
+            text: yAxis,
+            font: {
+              size: 14,
+              family: "'Poppins', sans-serif", 
+              color: 'white'
+            },
+            standoff: 15
+          },
+          tickfont: { 
+            size: 12, 
+            color: 'white',
+            family: "'Poppins', sans-serif" 
+          },
+          gridcolor: 'rgba(255, 255, 255, 0.2)',
+          zerolinecolor: 'rgba(255, 255, 255, 0.5)',
+          showbackground: true,
+          backgroundcolor: 'rgba(23, 25, 35, 0.8)'  // Modern black with slight blue tint
+        },
+        zaxis: { 
+          title: {
+            text: 'Value',
+            font: {
+              size: 14, 
+              family: "'Poppins', sans-serif",
+              color: 'white'
+            },
+            standoff: 15
+          },
+          tickfont: { 
+            size: 12, 
+            color: 'white',
+            family: "'Poppins', sans-serif" 
+          },
+          gridcolor: 'rgba(255, 255, 255, 0.2)',
+          zerolinecolor: 'rgba(255, 255, 255, 0.5)',
+          showbackground: true,
+          backgroundcolor: 'rgba(23, 25, 35, 0.8)'  // Modern black with slight blue tint
+        },
+        camera: getCameraPosition(chartType),
+        aspectratio: { x: 1, y: 1, z: 0.95 },
+        aspectmode: 'manual',
+        bgcolor: 'rgb(23, 25, 35)'  // Modern black with slight blue tint
+      },
+      margin: { l: 0, r: 0, b: 10, t: 50 }, // More space at top for title
+      paper_bgcolor: 'rgb(23, 25, 35)', // Modern black
+      plot_bgcolor: 'rgb(23, 25, 35)',
+      font: { 
+        family: "'Poppins', sans-serif",
+        color: 'white'
+      },
+      showlegend: true,
+      legend: { 
+        x: 0.05, 
+        y: 1,
+        bgcolor: 'rgba(0,0,0,0.5)',
+        bordercolor: 'rgba(255,255,255,0.2)',
+        borderwidth: 1,
+        font: { 
+          color: 'white',
+          size: 12
+        }
+      },
+      hoverlabel: {
+        bgcolor: 'rgba(0,0,0,0.8)',
+        font: { size: 12, color: 'white' },
+        bordercolor: 'rgba(76, 175, 80, 0.8)'
+      }
+    };
     
     // Create chart data based on type
     switch(chartType) {
@@ -97,347 +179,917 @@ const newLayout = {
         create3DScatterChart(processedData, newLayout);
     }
   };
-  
-  // Helper functions for chart creation
-  
-const create3DBarChart = (processedData, newLayout) => {
 
-  
-  // Group data appropriately
-  const groupedData = groupData(processedData, xAxis, yAxis);
-  
-  // Create x, y, z coordinates for 3D bar chart
-  const x = Object.keys(groupedData);
-  const y = Object.values(groupedData).map(item => item.avg);
-  
-  // Create the proper 3D bar representation
-  const plotData = [];
-  
-  // For each bar, create a separate 3D mesh
-  x.forEach((xVal, i) => {
-    // Define bar coordinates
-    const barWidth = 0.7; // Width of each bar
-    const barDepth = 0.7; // Depth of each bar
-    const spacing = 1.0; // Spacing between bars
-    
-    // Calculate bar position
-    const xPos = i * spacing;
-    const yPos = 0;
-    const zPos = 0;
-    
-    // Bar height from data
-    const height = y[i];
-    
-    // Define the 8 corners of the bar
-    const x_bar = [
-      xPos - barWidth/2, xPos + barWidth/2, xPos + barWidth/2, xPos - barWidth/2,
-      xPos - barWidth/2, xPos + barWidth/2, xPos + barWidth/2, xPos - barWidth/2
-    ];
-    
-    const y_bar = [
-      yPos - barDepth/2, yPos - barDepth/2, yPos + barDepth/2, yPos + barDepth/2,
-      yPos - barDepth/2, yPos - barDepth/2, yPos + barDepth/2, yPos + barDepth/2
-    ];
-    
-    const z_bar = [
-      zPos, zPos, zPos, zPos,
-      zPos + height, zPos + height, zPos + height, zPos + height
-    ];
-    
-    // Define the faces of the bar (triangles making up the 6 faces)
-    const i_bar = [
-      0, 1, 2, 0, 2, 3, // bottom face
-      4, 5, 6, 4, 6, 7, // top face
-      0, 1, 5, 0, 5, 4, // side face
-      1, 2, 6, 1, 6, 5, // side face
-      2, 3, 7, 2, 7, 6, // side face
-      3, 0, 4, 3, 4, 7  // side face
-    ];
-    
-    // Calculate bar color based on value
-    const normalizedValue = (height - Math.min(...y)) / (Math.max(...y) - Math.min(...y) || 1);
-    const colorIntensity = Math.floor(normalizedValue * 255);
-    
-    // Add the bar to the plot
-    plotData.push({
-      type: 'mesh3d',
-      x: x_bar,
-      y: y_bar,
-      z: z_bar,
-      i: i_bar.filter((_, idx) => idx % 3 === 0),
-      j: i_bar.filter((_, idx) => idx % 3 === 1),
-      k: i_bar.filter((_, idx) => idx % 3 === 2),
-      color: `rgb(${46 + colorIntensity}, ${125 + colorIntensity/3}, ${50})`,
-      opacity: 0.9,
-      flatshading: true,
-      name: xVal,
-      showlegend: false,
-      hovertemplate: 
-        `<b>${xAxis}</b>: ${xVal}<br>` +
-        `<b>${yAxis}</b>: ${y[i].toFixed(2)}<br>` +
-        `<extra></extra>`
-    });
-  });
-  
-  // Set the data
-  setPlotData(add3DBarLegend(processedData, plotData));
-  
-  // Update layout for bar chart with better camera position
-  newLayout.scene.camera = {
-    eye: { x: 2, y: -2, z: 1.5 }
-  };
-  
-  // Add axis labels
-  newLayout.scene.xaxis.title = xAxis;
-  newLayout.scene.yaxis.title = '';  // Empty y-axis title for cleaner look
-  newLayout.scene.zaxis.title = yAxis;
-  
-  // Add custom axis ticks for the x-axis with the actual category names
-  newLayout.scene.xaxis.tickvals = x.map((_, i) => i * 1.0); // Match positions with bar centers
-  newLayout.scene.xaxis.ticktext = x;
-  newLayout.scene.xaxis.tickangle = 45; // Angle the labels for better readability
-  
-  setLayout(newLayout);
-};
-  
-  const create3DLineChart = (processedData, newLayout) => {
-    // Sort data points by x-axis for proper line connectivity
-    const sortedData = [...processedData].sort((a, b) => 
-      parseFloat(a[xAxis]) - parseFloat(b[xAxis])
-    );
-    
-    // Extract coordinates
-    const x = sortedData.map(item => parseFloat(item[xAxis]) || 0);
-    const y = sortedData.map(item => parseFloat(item[yAxis]) || 0);
-    
-    // Generate z values as function of index to create 3D effect
-    const z = Array(x.length).fill(0).map((_, i) => i * 0.1);
-    
-    setPlotData([{
-      type: 'scatter3d',
-      mode: 'lines',
-      x: x,
-      y: y,
-      z: z,
-      line: {
-        color: 'rgba(46, 125, 50, 1)',
-        width: 6
-      },
-      hovertemplate: 
-        `<b>${xAxis}</b>: %{x}<br>` +
-        `<b>${yAxis}</b>: %{y}<br>` +
-        `<extra></extra>`,
-    }]);
-    
-    // Add points to the line
-    setPlotData(prev => [...prev, {
-      type: 'scatter3d',
-      mode: 'markers',
-      x: x,
-      y: y,
-      z: z,
-      marker: {
-        size: 5,
-        color: 'rgba(76, 175, 80, 0.9)',
-        line: {
-          color: 'rgba(27, 94, 32, 1)',
-          width: 1
-        }
-      },
-      hovertemplate: 
-        `<b>${xAxis}</b>: %{x}<br>` +
-        `<b>${yAxis}</b>: %{y}<br>` +
-        `<extra></extra>`,
-      showlegend: false
-    }]);
-    
-    // Update layout
-    newLayout.scene.camera = {
-      eye: { x: 1.25, y: -1.25, z: 0.5 }
-    };
-    
-    setLayout(newLayout);
-  };
-  
-  const create3DAreaChart = (processedData, newLayout) => {
-    // Sort data for line connectivity
-    const sortedData = [...processedData].sort((a, b) => 
-      parseFloat(a[xAxis]) - parseFloat(b[xAxis])
-    );
-    
-    // Extract coordinates
-    const x = sortedData.map(item => parseFloat(item[xAxis]) || 0);
-    const y = sortedData.map(item => parseFloat(item[yAxis]) || 0);
-    const z = Array(x.length).fill(0).map((_, i) => i * 0.1);
-    
-    // Create base points (at z=0) to form the area
-    const x_area = [...x, ...x.reverse()];
-    const y_area = [...y, ...Array(y.length).fill(Math.min(...y))];
-    const z_area = [...z, ...Array(z.length).fill(0)];
-    
-    setPlotData([{
-      type: 'mesh3d',
-      x: x_area,
-      y: y_area,
-      z: z_area,
-      opacity: 0.8,
-      color: 'rgba(76, 175, 80, 0.7)',
-      flatshading: true,
-      hovertemplate: 
-        `<b>${xAxis}</b>: %{x}<br>` +
-        `<b>${yAxis}</b>: %{y}<br>` +
-        `<extra></extra>`,
-    }]);
-    
-    // Add line at the top of the area
-    setPlotData(prev => [...prev, {
-      type: 'scatter3d',
-      mode: 'lines',
-      x: x,
-      y: y,
-      z: z,
-      line: {
-        color: 'rgba(46, 125, 50, 1)',
-        width: 4
-      },
-      hovertemplate: 
-        `<b>${xAxis}</b>: %{x}<br>` +
-        `<b>${yAxis}</b>: %{y}<br>` +
-        `<extra></extra>`,
-      showlegend: false
-    }]);
-    
-    // Update layout
-    newLayout.scene.camera = {
-      eye: { x: 1.25, y: -1.25, z: 0.75 }
-    };
-    
-    setLayout(newLayout);
-  };
-  
-  const create3DPieChart = (processedData, newLayout) => {
-    // For 3D pie, we need to aggregate categorical data
-    const isXNumeric = !isNaN(parseFloat(processedData[0][xAxis]));
-    const isYNumeric = !isNaN(parseFloat(processedData[0][yAxis]));
-    
-    // Determine category and value columns
-    const categoryCol = !isXNumeric ? xAxis : (!isYNumeric ? yAxis : xAxis);
-    const valueCol = isXNumeric ? xAxis : (isYNumeric ? yAxis : xAxis);
-    
-    // Aggregate data by category
-    const pieData = {};
-    processedData.forEach(item => {
-      const category = item[categoryCol]?.toString() || 'Unknown';
-      const value = parseFloat(item[valueCol]) || 0;
+  // Improved 3D Bar Chart
+  // Bar chart fixes for better text display and hover templates
+  const create3DBarChart = (processedData, newLayout) => {
+    try {
+      // Group data appropriately
+      const groupedData = groupData(processedData, xAxis, yAxis);
       
-      if (!pieData[category]) {
-        pieData[category] = 0;
-      }
-      pieData[category] += value;
-    });
-    
-    // Prepare values and labels
-    const labels = Object.keys(pieData);
-    const values = Object.values(pieData);
-    
-    // Generate 3D coordinates for pie segments
-    const theta = Array(labels.length).fill(0).map((_, i) => 
-      (2 * Math.PI * i) / labels.length);
-    
-    // Place pie segments in a circle
-    const x = theta.map(angle => Math.cos(angle) * 10);
-    const y = theta.map(angle => Math.sin(angle) * 10);
-    const z = values.map(v => Math.max(1, Math.log10(v) * 2));
-    
-    // Create color array
-    const colors = Array(labels.length).fill(0).map((_, i) => 
-      `rgba(${46 + i*8}, ${125 + i*4}, ${50 + i*3}, 0.8)`);
-    
-    setPlotData([{
-      type: 'scatter3d',
-      mode: 'markers',
-      x: x,
-      y: y,
-      z: z,
-      text: labels.map((l, i) => `${l}: ${values[i]}`),
-      marker: {
-        size: values.map(v => Math.max(10, Math.min(30, Math.sqrt(v) * 2))),
-        color: colors,
-        symbol: 'circle',
-        opacity: 0.9,
-        line: {
-          color: 'rgba(46, 125, 50, 1)',
-          width: 1
-        }
-      },
-      hovertemplate: 
-        '<b>%{text}</b><br>' +
-        '<extra></extra>',
-    }]);
-    
-    // Create connecting lines to origin for 3D pie effect
-    const x_lines = [];
-    const y_lines = [];
-    const z_lines = [];
-    
-    x.forEach((xVal, i) => {
-      x_lines.push(0, xVal, null);
-      y_lines.push(0, y[i], null);
-      z_lines.push(0, z[i], null);
-    });
-    
-    setPlotData(prev => [...prev, {
-      type: 'scatter3d',
-      mode: 'lines',
-      x: x_lines,
-      y: y_lines,
-      z: z_lines,
-      line: {
-        color: 'rgba(46, 125, 50, 0.5)',
-        width: 1
-      },
-      hoverinfo: 'none',
-      showlegend: false
-    }]);
-    
-    // Update layout for 3D pie
-    newLayout.title = `3D Distribution of ${categoryCol} by ${valueCol}`;
-    newLayout.scene.camera = {
-      up: { x: 0, y: 0, z: 1 },
-      center: { x: 0, y: 0, z: 0 },
-      eye: { x: 1.25, y: 1.25, z: 1.25 }
-    };
-    
-    setLayout(newLayout);
+      // Create x, y, z coordinates for 3D bar chart
+      const categories = Object.keys(groupedData);
+      const values = Object.values(groupedData).map(item => item.avg);
+      
+      // Prepare color array based on values
+      const normalizedValues = values.map(
+        val => (val - Math.min(...values)) / (Math.max(...values) - Math.min(...values) || 1)
+      );
+      
+      // Better bar chart using mesh3d with proper colors
+      // Use cube volume rather than just lines
+      const traces = [];
+      
+      categories.forEach((category, i) => {
+        // Position bars in a grid pattern
+        const x = i % Math.ceil(Math.sqrt(categories.length));
+        const y = Math.floor(i / Math.ceil(Math.sqrt(categories.length)));
+        const value = values[i];
+        
+        // Bar dimensions
+        const width = 0.7;
+        const depth = 0.7;
+        const height = value;
+        const spacing = 1.5; // More spacing between bars
+        
+        // Calculate position
+        const xPos = x * spacing;
+        const yPos = y * spacing;
+        
+        // Generate cube vertices (8 corners of each bar)
+        const vertices = [
+          // Bottom face
+          [xPos - width/2, yPos - depth/2, 0],
+          [xPos + width/2, yPos - depth/2, 0],
+          [xPos + width/2, yPos + depth/2, 0],
+          [xPos - width/2, yPos + depth/2, 0],
+          // Top face
+          [xPos - width/2, yPos - depth/2, height],
+          [xPos + width/2, yPos - depth/2, height],
+          [xPos + width/2, yPos + depth/2, height],
+          [xPos - width/2, yPos + depth/2, height]
+        ];
+        
+        // Extract x,y,z coordinates for mesh3d
+        const x_coords = vertices.map(v => v[0]);
+        const y_coords = vertices.map(v => v[1]);
+        const z_coords = vertices.map(v => v[2]);
+        
+        // Define faces (12 triangles - 2 per face of the cube)
+        // Each number references the index of a vertex in the arrays above
+        const i_indices = [0,3,7, 0,7,4, 0,4,5, 0,5,1, 1,5,6, 1,6,2, 2,6,7, 2,7,3];
+        const j_indices = [3,7,4, 7,4,0, 4,5,1, 5,1,0, 5,6,2, 6,2,1, 6,7,3, 7,3,2];
+        const k_indices = [7,4,0, 4,0,3, 5,1,0, 1,0,4, 6,2,1, 2,1,5, 7,3,2, 3,2,6];
+        
+        // Calculate color based on value
+        const colorValue = normalizedValues[i];
+        const color = getColor(colorValue, colorPalettes.warm);
+
+        traces.push({
+          type: 'mesh3d',
+          x: x_coords,
+          y: y_coords,
+          z: z_coords,
+          i: i_indices,
+          j: j_indices,
+          k: k_indices,
+          color: color,
+          opacity: 0.95,
+          flatshading: true,
+          name: `${category}: ${value.toFixed(2)}`,
+          showlegend: true,
+          hoverinfo: 'name+text',
+          text: `<b>${category}</b><br>Value: ${value.toFixed(2)}`,
+          hovertemplate: 
+            `<b>${category}</b><br>` +
+            `<b>Value</b>: ${value.toFixed(2)}<br>` +
+            `<extra></extra>`,
+        });
+        
+        // Add text label above each bar
+        traces.push({
+          type: 'scatter3d',
+          mode: 'text',
+          x: [xPos],
+          y: [yPos],
+          z: [height + height/8], // Position higher above the bar for better visibility
+          text: [`${value.toFixed(1)}`], // Display only the numeric value
+          textfont: {
+            color: 'white',
+            size: 10, // Smaller text
+            family: "'Poppins', sans-serif"
+          },
+          textposition: 'top center',
+          texttemplate: '%{text}', // Ensure text renders properly
+          showlegend: false,
+          hoverinfo: 'none'
+        });
+      });
+      
+      // Add text background for better readability (optional)
+      // This adds dark boxes behind text labels for contrast
+      categories.forEach((category, i) => {
+        const x = i % Math.ceil(Math.sqrt(categories.length));
+        const y = Math.floor(i / Math.ceil(Math.sqrt(categories.length)));
+        const value = values[i];
+        const height = value;
+        const spacing = 1.5;
+        const xPos = x * spacing;
+        const yPos = y * spacing;
+        
+        // Add background "plates" behind text for better readability
+        traces.push({
+          type: 'mesh3d',
+          x: [xPos-0.4, xPos+0.4, xPos+0.4, xPos-0.4],
+          y: [yPos-0.2, yPos-0.2, yPos+0.2, yPos+0.2],
+          z: [height+height/8-0.05, height+height/8-0.05, height+height/8-0.05, height+height/8-0.05],
+          i: [0],
+          j: [1],
+          k: [2],
+          color: 'rgba(0,0,0,0.5)', 
+          flatshading: true,
+          showlegend: false,
+          hoverinfo: 'none'
+        });
+      });
+      
+      // Update camera position for better viewing of text labels
+      newLayout.scene.camera = {
+        eye: { x: 2.5, y: 2.5, z: 1.5 }, // Move camera further back
+        up: { x: 0, y: 0, z: 1 },
+        center: { x: 0, y: 0, z: 0 }
+      };
+      
+      // Adjust scene domain to make more room for labels
+      newLayout.scene.domain = { 
+        x: [0.15, 0.98],
+        y: [0, 1] 
+      };
+      
+      // Add more top margin for title
+      newLayout.margin.t = 60;
+      
+      setPlotData(traces);
+      setLayout(newLayout);
+    } catch (error) {
+      console.error('Error creating 3D bar chart:', error);
+    }
   };
   
-  // Helper functions
+  // Improved 3D Scatter Chart
+  const create3DScatterChart = (processedData, newLayout) => {
+    try {
+      // Extract data
+      const x = processedData.map(item => parseFloat(item[xAxis]) || 0);
+      const y = processedData.map(item => parseFloat(item[yAxis]) || 0);
+      
+      // Generate meaningful z values
+      const z = [];
+      for (let i = 0; i < x.length; i++) {
+        // Create z-values that show some relationship to x and y
+        z.push(Math.sqrt(Math.abs(x[i] * y[i])) / 2);
+      }
+      
+      // Find ranges for proper scaling
+      const xRange = Math.max(...x) - Math.min(...x);
+      const yRange = Math.max(...y) - Math.min(...y);
+      const zRange = Math.max(...z) - Math.min(...z);
+      
+      // Use ranges to set appropriate axis ranges for better visualization
+      newLayout.scene.xaxis.range = [Math.min(...x) - xRange * 0.1, Math.max(...x) + xRange * 0.1];
+      newLayout.scene.yaxis.range = [Math.min(...y) - yRange * 0.1, Math.max(...y) + yRange * 0.1];
+      newLayout.scene.zaxis.range = [Math.min(...z) - zRange * 0.1, Math.max(...z) + zRange * 0.1];
+      
+      // Normalize values for color mapping
+      const normalized = z.map(val => 
+        (val - Math.min(...z)) / (Math.max(...z) - Math.min(...z) || 1)
+      );
+      
+      // Create better marker sizes based on data range - use zRange for scaling
+      const minSize = 5;
+      const maxSize = 18;
+      const sizes = normalized.map(val => minSize + val * (maxSize - minSize));
+      
+      setPlotData([{
+        type: 'scatter3d',
+        mode: 'markers',
+        x: x,
+        y: y,
+        z: z,
+        marker: {
+          size: sizes,
+          color: z,
+          colorscale: colorPalettes.gradient,
+          colorbar: {
+            // Position far to the left with these settings - match surface plot
+            x: -0.18,             // Move further left (more negative)
+            xpad: 0,              // Remove padding on x-axis
+            thickness: 15,        // Keep the colorbar thin
+            len: 0.75,            // Make it 75% of the plot height
+            y: 0.6,               // Move up from center
+            ypad: 0,              // Remove padding on y-axis
+            outlinewidth: 0,      // Remove outline for cleaner look
+            title: {
+              text: 'Value',
+              font: {
+                color: 'white',
+                family: "'Poppins', sans-serif",
+                size: 12
+              },
+              side: 'top'         // Title at the top
+            },
+            tickfont: {
+              color: 'white',
+              family: "'Poppins', sans-serif",
+              size: 10            // Smaller font for ticks
+            },
+            tickformat: '.1f'     // Format with 1 decimal place
+          },
+          opacity: 0.9,
+          line: {
+            color: 'rgba(255, 255, 255, 0.5)',
+            width: 0.5
+          }
+        },
+        hovertemplate: 
+          `<b>${xAxis}</b>: %{x}<br>` +
+          `<b>${yAxis}</b>: %{y}<br>` +
+          `<b>Value</b>: %{z}<br>` +
+          `<extra></extra>`,
+      }]);
+      
+      // Adjust camera for better viewing angle of scatter plot
+      newLayout.scene.camera = {
+        eye: { x: 1.5, y: -1.5, z: 1.25 },
+        center: { x: 0, y: 0, z: 0 }
+      };
+      
+      // Add these layout adjustments to match the surface chart
+      // Adjust layout settings to accommodate the colorbar positioning
+      newLayout.margin = { 
+        l: 50,        // Left margin
+        r: 10,
+        b: 20,        // Slightly more bottom margin to show bottom part better
+        t: 50
+      };
+      
+      // Adjust scene placement to make room for the colorbar
+      newLayout.scene.domain = { 
+        x: [0.15, 0.98],
+        y: [0, 1]
+      };
+      
+      // Adjust camera position for better viewing that includes all points
+      newLayout.scene.camera = {
+        eye: { x: -1.8, y: -1.5, z: 1.5 },  // Better angle to see all points
+        up: { x: 0, y: 0, z: 1 },
+        center: { x: 0, y: 0, z: -0.1 }     // Slight adjustment to center
+      };
+      
+      // Ensure proper backgrounds on all axes
+      newLayout.scene.xaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.yaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.zaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.bgcolor = 'rgb(23, 25, 35)';
+
+      setLayout(newLayout);
+    } catch (error) {
+      console.error('Error creating 3D scatter chart:', error);
+    }
+  };
   
+  // Enhanced 3D Surface Chart
+  const create3DSurfaceChart = (processedData, newLayout) => {
+    try {
+      // Extract unique sorted x and y values 
+      let xVals = [...new Set(processedData.map(item => parseFloat(item[xAxis])))].filter(x => !isNaN(x)).sort((a, b) => a - b);
+      let yVals = [...new Set(processedData.map(item => parseFloat(item[yAxis])))].filter(y => !isNaN(y)).sort((a, b) => a - b);
+      
+      // If we don't have enough unique values, interpolate
+      if (xVals.length < 5 || yVals.length < 5) {
+        const xMin = Math.min(...xVals);
+        const xMax = Math.max(...xVals);
+        const yMin = Math.min(...yVals);
+        const yMax = Math.max(...yVals);
+        
+        xVals = Array.from({length: 20}, (_, i) => xMin + (xMax - xMin) * i / 19);
+        yVals = Array.from({length: 20}, (_, i) => yMin + (yMax - yMin) * i / 19);
+      }
+      
+      // Sample to a reasonable size for performance
+      const xSampled = sampleArray(xVals, 30);
+      const ySampled = sampleArray(yVals, 30);
+      
+      // Create z matrix
+      const zMatrix = Array(ySampled.length).fill().map(() => Array(xSampled.length).fill(0));
+      
+      // Create mapping function to find closest data point
+      const dataMap = new Map();
+      processedData.forEach(point => {
+        const xVal = parseFloat(point[xAxis]);
+        const yVal = parseFloat(point[yAxis]);
+        
+        // Skip invalid values
+        if (isNaN(xVal) || isNaN(yVal)) return;
+        
+        const key = `${xVal},${yVal}`;
+        dataMap.set(key, point);
+      });
+      
+      // Fill z matrix with values or interpolate
+      ySampled.forEach((yVal, yIdx) => {
+        xSampled.forEach((xVal, xIdx) => {
+          // Try to find exact value
+          const exactKey = `${xVal},${yVal}`;
+          const exactMatch = dataMap.get(exactKey);
+          
+          if (exactMatch) {
+            // Use actual data if available
+            zMatrix[yIdx][xIdx] = parseFloat(exactMatch[yAxis]) || 0;
+          } else {
+            // Otherwise create a smooth surface based on x,y coordinates
+            // This creates a visually pleasing wave pattern
+            zMatrix[yIdx][xIdx] = Math.sin(xVal/10) * Math.cos(yVal/10) * 
+              Math.min(Math.max(...xVals), Math.max(...yVals)) / 10;
+          }
+        });
+      });
+      
+      // Create surface plot
+      setPlotData([{
+        type: 'surface',
+        x: xSampled,
+        y: ySampled,
+        z: zMatrix,
+        colorscale: [
+          [0, 'rgb(255, 236, 179)'],     // Light yellow
+          [0.2, 'rgb(255, 213, 79)'],    // Medium yellow
+          [0.4, 'rgb(255, 167, 38)'],    // Orange
+          [0.6, 'rgb(251, 140, 0)'],     // Darker orange  
+          [0.8, 'rgb(230, 81, 0)'],      // Red-orange
+          [1, 'rgb(183, 28, 28)']        // Deep red
+        ],
+        // Improved contours settings
+        contours: {
+          z: {
+            show: true,
+            usecolormap: true,
+            highlightcolor: "rgba(255, 255, 255, 0.5)",
+            width: 1
+          },
+          x: { 
+            show: false,
+            project: { x: false }
+          },
+          y: { 
+            show: false,
+            project: { y: false }
+          }
+        },
+        colorbar: {
+          // Keep your existing colorbar settings
+          x: -0.18,
+          xpad: 0,
+          thickness: 15,
+          len: 0.75,
+          y: 0.6,
+          ypad: 0,
+          outlinewidth: 0,
+          title: {
+            text: 'Value',
+            font: {
+              color: 'white',
+              family: "'Poppins', sans-serif",
+              size: 12
+            },
+            side: 'top'
+          },
+          tickfont: {
+            color: 'white',
+            family: "'Poppins', sans-serif",
+            size: 10
+          },
+          tickformat: '.1f'
+        },
+        // Improved lighting settings for better color rendering
+        lighting: {
+          ambient: 0.85,        // Increased ambient light to show colors better
+          diffuse: 0.4,         // Reduced diffuse to minimize shadow effects on colors
+          roughness: 0.3,       // Lower roughness for smoother appearance
+          specular: 0.1,        // Reduced specular highlights that can wash out colors
+          fresnel: 0.05         // Reduced fresnel effect that can distort edge colors
+        },
+        lightposition: {
+          x: 100,
+          y: 100, 
+          z: 500               // Higher light position to more evenly illuminate surface
+        },
+        hidesurface: false,
+        showscale: true,
+        opacity: 1.0,          // Full opacity for better color visibility
+        hovertemplate: 
+          `<b>${xAxis}</b>: %{x}<br>` +
+          `<b>${yAxis}</b>: %{y}<br>` +
+          `<b>Value</b>: %{z}<br>` +
+          `<extra></extra>`,
+      }]);
+      
+      // Adjust layout settings to accommodate the colorbar positioning
+      newLayout.margin = { 
+        l: 50,        // Left margin
+        r: 10,
+        b: 20,        // Slightly more bottom margin to show bottom part better
+        t: 50
+      };
+      
+      // Adjust scene placement to make room for the colorbar
+      newLayout.scene.domain = { 
+        x: [0.15, 0.98],
+        y: [0, 1]
+      };
+      
+      // Adjust camera for a wider view that includes the bottom part
+      newLayout.scene.camera = {
+        eye: { x: -2.2, y: 0.6, z: 1.8 },  // Increased distance and height
+        up: { x: 0, y: 0, z: 1 },
+        center: { x: 0, y: 0, z: -0.2 }    // Focus slightly lower to see bottom better
+      };
+      
+      // Ensure proper backgrounds on all axes
+      newLayout.scene.xaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.yaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.zaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.bgcolor = 'rgb(23, 25, 35)';
+
+      setLayout(newLayout);
+    } catch (error) {
+      console.error('Error creating surface chart:', error);
+    }
+  };
+  
+  // Enhanced 3D Line Chart
+  const create3DLineChart = (processedData, newLayout) => {
+    try {
+      // Sort data by x-axis
+      const sortedData = [...processedData].sort((a, b) => {
+        return parseFloat(a[xAxis]) - parseFloat(b[xAxis]);
+      });
+      
+      // Extract coordinates
+      const x = sortedData.map(item => parseFloat(item[xAxis]) || 0);
+      const y = sortedData.map(item => parseFloat(item[yAxis]) || 0);
+      
+      // Create meaningful z values (use index to create depth)
+      const z = Array(x.length).fill(0).map((_, i) => i * 0.1);
+      
+      // Add 3D line with enhanced styling
+      setPlotData([{
+        type: 'scatter3d',
+        mode: 'lines',
+        x: x,
+        y: y,
+        z: z,
+        line: {
+          color: 'rgba(76, 175, 80, 1)',
+          width: 6
+        },
+        hoverinfo: 'none'
+      },
+      // Add points on the line
+      {
+        type: 'scatter3d',
+        mode: 'markers',
+        x: x,
+        y: y,
+        z: z,
+        marker: {
+          size: 6,
+          color: z,
+          colorscale: colorPalettes.gradient,
+          colorbar: {
+            // Position far to the left with these settings - match surface plot
+            x: -0.18,             // Move further left (more negative)
+            xpad: 0,              // Remove padding on x-axis
+            thickness: 15,        // Keep the colorbar thin
+            len: 0.75,            // Make it 75% of the plot height
+            y: 0.6,               // Move up from center
+            ypad: 0,              // Remove padding on y-axis
+            outlinewidth: 0,      // Remove outline for cleaner look
+            title: {
+              text: 'Value',
+              font: {
+                color: 'white',
+                family: "'Poppins', sans-serif",
+                size: 12
+              },
+              side: 'top'         // Title at the top
+            },
+            tickfont: {
+              color: 'white',
+              family: "'Poppins', sans-serif",
+              size: 10            // Smaller font for ticks
+            },
+            tickformat: '.1f'     // Format with 1 decimal place
+          },
+          opacity: 0.9,
+          line: {
+            color: 'rgba(255, 255, 255, 0.5)',
+            width: 1
+          }
+        },
+        hovertemplate: 
+          `<b>${xAxis}</b>: %{x}<br>` +
+          `<b>${yAxis}</b>: %{y}<br>` +
+          `<extra></extra>`,
+      }]);
+      
+      // Add consistent layout adjustments as in other chart types
+      newLayout.margin = { 
+        l: 50,        // Left margin
+        r: 10,
+        b: 20,        // Slightly more bottom margin to show bottom part better
+        t: 50
+      };
+      
+      // Adjust scene placement to make room for the colorbar
+      newLayout.scene.domain = { 
+        x: [0.15, 0.98],
+        y: [0, 1]
+      };
+      
+      // Improve camera position for line chart
+      newLayout.scene.camera = {
+        eye: { x: -1.9, y: -1.2, z: 1.5 },  // Updated camera position for better view
+        up: { x: 0, y: 0, z: 1 },
+        center: { x: 0, y: 0, z: -0.1 }     // Focus slightly lower
+      };
+      
+      // Ensure proper backgrounds on all axes
+      newLayout.scene.xaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.yaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.zaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.bgcolor = 'rgb(23, 25, 35)';
+      
+      setLayout(newLayout);
+    } catch (error) {
+      console.error('Error creating 3D line chart:', error);
+    }
+  };
+
+  // Enhanced 3D Area Chart
+  const create3DAreaChart = (processedData, newLayout) => {
+    try {
+      // Sort data by x-axis
+      const sortedData = [...processedData].sort((a, b) => {
+        return parseFloat(a[xAxis]) - parseFloat(b[xAxis]);
+      });
+      
+      // Extract coordinates
+      const x = sortedData.map(item => parseFloat(item[xAxis]) || 0);
+      const y = sortedData.map(item => parseFloat(item[yAxis]) || 0);
+      const z = Array(x.length).fill(0).map((_, i) => i * 0.1);
+      
+      // Add base points to close the area
+      const yMin = Math.min(...y);
+      
+      // Create full set of coordinates for area
+      const xArea = [...x, ...x.reverse()];
+      const yArea = [...y, ...Array(y.length).fill(yMin)];
+      const zArea = [...z, ...Array(z.length).fill(0)];
+      
+      // Create 3D area
+      setPlotData([{
+        type: 'mesh3d',
+        x: xArea,
+        y: yArea,
+        z: zArea,
+        opacity: 0.85,
+        color: 'rgba(76, 175, 80, 0.9)',
+        flatshading: false,
+        lighting: {
+          ambient: 0.7,
+          diffuse: 0.8
+        },
+        hoverinfo: 'none'
+      },
+      // Add line at top of area
+      {
+        type: 'scatter3d',
+        mode: 'lines',
+        x: x,
+        y: y,
+        z: z,
+        line: {
+          color: '#f1c40f',
+          width: 5
+        },
+        hoverinfo: 'none'
+      },
+      // Add points with hover info
+      {
+        type: 'scatter3d',
+        mode: 'markers',
+        x: x,
+        y: y,
+        z: z,
+        marker: {
+          size: 6,
+          color: y,
+          colorscale: [
+            [0, '#e67e22'],
+            [0.5, '#f1c40f'],
+            [1, '#f39c12']
+          ],
+          colorbar: {
+            // Position far to the left with these settings - match surface plot
+            x: -0.18,             // Move further left (more negative)
+            xpad: 0,              // Remove padding on x-axis
+            thickness: 15,        // Keep the colorbar thin
+            len: 0.75,            // Make it 75% of the plot height
+            y: 0.6,               // Move up from center
+            ypad: 0,              // Remove padding on y-axis
+            outlinewidth: 0,      // Remove outline for cleaner look
+            title: {
+              text: 'Value',
+              font: {
+                color: 'white',
+                family: "'Poppins', sans-serif",
+                size: 12
+              },
+              side: 'top'         // Title at the top
+            },
+            tickfont: {
+              color: 'white',
+              family: "'Poppins', sans-serif",
+              size: 10            // Smaller font for ticks
+            },
+            tickformat: '.1f'     // Format with 1 decimal place
+          },
+          opacity: 1,
+          line: {
+            color: 'white',
+            width: 1
+          }
+        },
+        hovertemplate: 
+          `<b>${xAxis}</b>: %{x}<br>` +
+          `<b>${yAxis}</b>: %{y}<br>` +
+          `<extra></extra>`,
+      }]);
+      
+      // Add consistent layout adjustments as in other chart types
+      newLayout.margin = { 
+        l: 50,        // Left margin
+        r: 10,
+        b: 20,        // Slightly more bottom margin to show bottom part better
+        t: 50
+      };
+      
+      // Adjust scene placement to make room for the colorbar
+      newLayout.scene.domain = { 
+        x: [0.15, 0.98],
+        y: [0, 1]
+      };
+      
+      // Improve camera position for area chart - needs to show the area fill clearly
+      newLayout.scene.camera = {
+        eye: { x: -2.1, y: -0.8, z: 1.2 },  // Updated for better view of area fill
+        up: { x: 0, y: 0, z: 1 },
+        center: { x: 0, y: 0, z: -0.1 }     // Slight adjustment to center
+      };
+      
+      // Ensure proper backgrounds on all axes
+      newLayout.scene.xaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.yaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.zaxis.backgroundcolor = 'rgb(23, 25, 35)';
+      newLayout.scene.bgcolor = 'rgb(23, 25, 35)';
+
+      setLayout(newLayout);
+    } catch (error) {
+      console.error('Error creating 3D area chart:', error);
+    }
+  };
+  
+  // Enhanced and fixed 3D Pie Chart implementation
+  const create3DPieChart = (processedData, newLayout) => {
+    try {
+      // Aggregate data
+      const aggregatedData = {};
+      processedData.forEach(item => {
+        const key = item[xAxis]?.toString() || 'Unknown';
+        const value = parseFloat(item[yAxis]) || 0;
+        
+        if (!aggregatedData[key]) {
+          aggregatedData[key] = 0;
+        }
+        aggregatedData[key] += value;
+      });
+      
+      // Convert to arrays and sort by value (descending)
+      let categories = Object.keys(aggregatedData);
+      let values = Object.values(aggregatedData);
+      
+      // Sort and limit to top 15 if more than that (for better visibility)
+      if (categories.length > 15) {
+        // Create pairs and sort
+        const pairs = categories.map((cat, i) => ({ category: cat, value: values[i] }));
+        pairs.sort((a, b) => b.value - a.value);
+        
+        // Take top 15
+        const topPairs = pairs.slice(0, 15);
+        categories = topPairs.map(p => p.category);
+        values = topPairs.map(p => p.value);
+      }
+      
+      // Calculate total and percentages
+      const total = values.reduce((a, b) => a + b, 0);
+      const percentages = values.map(v => (v/total) * 100);
+      
+      // Build a proper 3D pie chart using cone segments
+      const traces = [];
+      
+      // Set up chart center and size
+      const centerX = 0;
+      const centerY = 0;
+      const baseZ = 0;
+      const outerRadius = 5;
+      const innerRadius = 1; // Create a hole in the middle
+      const segmentHeight = 1; // Uniform height for better visibility
+      
+      // Calculate cumulative angles for segments
+      let cumulativeAngle = 0;
+      
+      // Generate a proper 3D pie with segments
+      categories.forEach((category, i) => {
+        const percentage = percentages[i];
+        const value = values[i];
+        
+        // Calculate segment angles in radians (start and end)
+        const angleSize = (percentage / 100) * 2 * Math.PI;
+        const startAngle = cumulativeAngle;
+        const endAngle = cumulativeAngle + angleSize;
+        cumulativeAngle = endAngle;
+        
+        // Get color for this segment
+        const colorValue = i / categories.length;
+        const segmentColor = getColor(colorValue, colorPalettes.warm);
+        
+        // Create points along the arc (more points = smoother curve)
+        const points = 12; // Number of points along the curve
+        const xOuter = [];
+        const yOuter = [];
+        const xInner = [];
+        const yInner = [];
+        
+        // Generate points for top and bottom of the segment
+        for (let j = 0; j <= points; j++) {
+          const angle = startAngle + (j / points) * (endAngle - startAngle);
+          xOuter.push(centerX + outerRadius * Math.cos(angle));
+          yOuter.push(centerY + outerRadius * Math.sin(angle));
+          xInner.push(centerX + innerRadius * Math.cos(angle));
+          yInner.push(centerY + innerRadius * Math.sin(angle));
+        }
+        
+        // Create the top face of the segment (extruded up)
+        const topZ = baseZ + segmentHeight * (1 + (percentage / 15));  // Taller segments for larger values
+        
+        // Create outer wall
+        traces.push({
+          type: 'mesh3d',
+          x: [...xOuter, ...xOuter],
+          y: [...yOuter, ...yOuter],
+          z: [...Array(xOuter.length).fill(baseZ), ...Array(xOuter.length).fill(topZ)],
+          i: Array.from({ length: xOuter.length - 1 }, (_, j) => j),
+          j: Array.from({ length: xOuter.length - 1 }, (_, j) => j + xOuter.length),
+          k: Array.from({ length: xOuter.length - 1 }, (_, j) => j + xOuter.length + 1),
+          color: segmentColor,
+          opacity: 0.92,
+          flatshading: false,
+          lighting: {
+            ambient: 0.6,
+            diffuse: 0.8,
+            specular: 0.2,
+            roughness: 0.3,
+            fresnel: 0.2
+          },
+          hoverinfo: 'text',
+          hovertext: `${category}: ${value.toFixed(1)} (${percentage.toFixed(1)}%)`,
+          showlegend: false
+        });
+        
+        // Create top surface of segment
+        traces.push({
+          type: 'mesh3d',
+          x: [...xOuter, ...xInner].flat(),
+          y: [...yOuter, ...yInner].flat(),
+          z: Array(xOuter.length * 2).fill(topZ),
+          color: segmentColor,
+          opacity: 0.95,
+          flatshading: false,
+          lighting: {
+            ambient: 0.7,
+            diffuse: 0.6
+          },
+          name: `${category}: ${value.toFixed(1)} (${percentage.toFixed(1)}%)`,
+          showlegend: true,
+          hovertemplate: `<b>${category}</b><br>${value.toFixed(1)} (${percentage.toFixed(1)}%)<extra></extra>`
+        });
+        
+        // Add label at the center of each segment
+        const labelAngle = startAngle + angleSize / 2;
+        const labelRadius = outerRadius * 0.7;
+        const labelX = centerX + labelRadius * Math.cos(labelAngle);
+        const labelY = centerY + labelRadius * Math.sin(labelAngle);
+        const labelZ = topZ + 0.1;
+        
+        if (percentage > 3) {  // Only show label for segments large enough
+          traces.push({
+            type: 'scatter3d',
+            mode: 'text',
+            x: [labelX],
+            y: [labelY],
+            z: [labelZ],
+            text: [`${percentage.toFixed(1)}%`],
+            textfont: {
+              color: 'white',
+              size: 10,
+              family: "'Poppins', sans-serif"
+            },
+            textposition: 'middle center',
+            showlegend: false,
+            hoverinfo: 'none'
+          });
+        }
+      });
+      
+      // Add center hole to complete the pie look
+      traces.push({
+        type: 'mesh3d',
+        x: Array.from({ length: 36 }, (_, i) => innerRadius * Math.cos(i * Math.PI / 18)),
+        y: Array.from({ length: 36 }, (_, i) => innerRadius * Math.sin(i * Math.PI / 18)),
+        z: Array(36).fill(baseZ),
+        color: 'rgb(23, 25, 35)',
+        opacity: 1,
+        showlegend: false,
+        hoverinfo: 'none'
+      });
+      
+      setPlotData(traces);
+      
+      // Better camera angle to show 3D pie properly
+      newLayout.scene.camera = {
+        eye: { x: 1.2, y: 1.2, z: 1.5 },
+        up: { x: 0, y: 0, z: 1 },
+        center: { x: 0, y: 0, z: 0 }
+      };
+      
+      // Update scene for this specific chart
+      newLayout.scene.aspectmode = 'manual';
+      newLayout.scene.aspectratio = { x: 1, y: 1, z: 0.6 };
+      
+      // Update layout with other enhancements
+      newLayout.margin = { l: 0, r: 0, b: 10, t: 50 };
+      newLayout.title = `${yAxis} Distribution by ${xAxis}`;
+      newLayout.showlegend = true;
+      
+      // Position legend for better visibility
+      newLayout.legend = { 
+        x: 0.05, 
+        y: 1,
+        bgcolor: 'rgba(0,0,0,0.5)',
+        bordercolor: 'rgba(255,255,255,0.2)',
+        borderwidth: 1,
+        font: { 
+          color: 'white',
+          size: 11
+        }
+      };
+      
+      setLayout(newLayout);
+    } catch (error) {
+      console.error('Error creating 3D pie chart:', error);
+    }
+  };
+
+  // Helper Functions
   const getDataLimitForChartType = () => {
     switch(chartType) {
-      case '3d-surface': 
-        return 300;  // Surface charts need more data points
-      case '3d-scatter': 
-        return 500;  // Scatter plots can handle more points
-      case '3d-pie': 
-        return 100;  // Pie charts should aggregate categories
-      default: 
-        return 300;
+      case '3d-surface': return 300;
+      case '3d-scatter': return 500;
+      case '3d-pie': return 100;
+      case '3d-bar': return 200;
+      default: return 300;
     }
   };
   
   const sampleData = (dataArray, limit) => {
-    if (!dataArray || dataArray.length <= limit) {
-      return dataArray;
-    }
-    
+    if (!dataArray || dataArray.length <= limit) return dataArray;
     const samplingInterval = Math.ceil(dataArray.length / limit);
     return dataArray.filter((_, index) => index % samplingInterval === 0);
   };
   
   const sampleArray = (arr, size) => {
-    if (arr.length <= size) return arr;
-    
+    if (!arr || arr.length <= size) return arr;
     const result = [];
     const step = arr.length / size;
     
@@ -480,178 +1132,111 @@ const create3DBarChart = (processedData, newLayout) => {
     return result;
   };
   
-  const getCameraPosition = () => {
-    switch(chartType) {
+  const getCameraPosition = (type) => {
+    switch(type) {
       case '3d-bar':
-        return { eye: { x: 1.5, y: -1.5, z: 0.75 } };
+        return { eye: { x: 1.8, y: 1.8, z: 1.2 } };
       case '3d-surface':
-        return { eye: { x: 1.87, y: 0.88, z: 0.64 } };
+        return { eye: { x: 1.87, y: 0.88, z: 1.2 } };
       case '3d-pie':
-        return { eye: { x: 1.25, y: 1.25, z: 1.25 } };
+        return { eye: { x: 0, y: 0, z: 2 } };
+      case '3d-scatter':
+        return { eye: { x: 1.5, y: -1.5, z: 1.25 } };
+      case '3d-line':
+      case '3d-area':
+        return { eye: { x: 1.5, y: -1.5, z: 0.8 } };
       default:
         return { eye: { x: 1.25, y: -1.25, z: 0.5 } };
     }
   };
   
-  // Add this after the create3DBarChart function
-const add3DBarLegend = (processedData, chartData) => {
-  // Create a special hidden scatter trace that only shows in the legend
-  const groupedData = groupData(processedData, xAxis, yAxis);
-  const categories = Object.keys(groupedData);
-  const values = Object.values(groupedData).map(item => item.avg);
-  
-  // For each category, add a legend item
-  const legendItems = categories.map((cat, i) => {
-    const normalizedValue = (values[i] - Math.min(...values)) / (Math.max(...values) - Math.min(...values) || 1);
-    const colorIntensity = Math.floor(normalizedValue * 255);
-    
-    return {
-      type: 'scatter3d',
-      mode: 'markers',
-      x: [null], 
-      y: [null], 
-      z: [null],
-      name: `${cat} (${values[i].toFixed(2)})`,
-      marker: {
-        color: `rgb(${46 + colorIntensity}, ${125 + colorIntensity/3}, ${50})`,
-        size: 10
-      },
-      showlegend: true,
-      legendgroup: `group-${i}`
-    };
-  });
-  
-  // Add the legend items to the chart data
-  return [...chartData, ...legendItems];
-};
-  
-  const create3DScatterChart = (processedData, newLayout) => {
-    // Create x, y, z coordinates for 3D scatter chart
-    const x = processedData.map(item => parseFloat(item[xAxis]) || 0);
-    const y = processedData.map(item => parseFloat(item[yAxis]) || 0);
-    
-    // Generate z values (could be a third column or derived from x and y)
-    // Use a formula to create an interesting z-axis variation
-    const z = x.map((xVal, i) => {
-      return Math.abs((xVal * y[i]) / 100);
-    });
-    
-    // Find min/max for color normalization
-    const zMin = Math.min(...z);
-    const zMax = Math.max(...z);
-    
-    setPlotData([{
-      type: 'scatter3d',
-      mode: 'markers',
-      x: x,
-      y: y,
-      z: z,
-      marker: {
-        // Use zMin and zMax for better scaling of point sizes based on z value
-        size: z.map(val => Math.max(3, Math.min(15, 3 + 12 * (val - zMin) / (zMax - zMin || 1)))),
-        color: z,
-        colorscale: [
-          [0, 'rgba(76, 175, 80, 0.5)'],      // Light green
-          [0.33, 'rgba(76, 175, 80, 0.8)'],    // Medium green
-          [0.66, 'rgba(46, 125, 50, 0.9)'],    // Darker green
-          [1, 'rgba(27, 94, 32, 1)']           // Darkest green
-        ],
-        // Set color scale range using zMin and zMax
-        cmin: zMin,
-        cmax: zMax,
-        line: {
-          color: 'rgba(27, 94, 32, 0.5)',
-          width: 0.5
-        },
-        opacity: 0.8,
-        colorbar: {
-          title: 'Value',
-          tickfont: { color: 'white' },
-          titlefont: { color: 'white' }
+  const getColor = (value, palette) => {
+    // For a simple palette (array of colors)
+    if (Array.isArray(palette) && !Array.isArray(palette[0])) {
+      const index = Math.min(Math.floor(value * palette.length), palette.length - 1);
+      return palette[index];
+    }
+    // For gradient palette (array of [position, color] pairs)
+    else if (Array.isArray(palette) && Array.isArray(palette[0])) {
+      // Find the two colors to interpolate between
+      let lowerIndex = 0;
+      for (let i = 0; i < palette.length; i++) {
+        if (palette[i][0] <= value) {
+          lowerIndex = i;
+        } else {
+          break;
         }
-      },
-      hovertemplate: 
-        `<b>${xAxis}</b>: %{x}<br>` +
-        `<b>${yAxis}</b>: %{y}<br>` +
-        `<b>Value</b>: %{z}<br>` +
-        `<extra></extra>`,
-    }]);
-    
-    // Update camera position for better scatter plot view
-    newLayout.scene.camera = {
-      eye: { x: 1.5, y: -1.5, z: 1.25 }
-    };
-    
-    setLayout(newLayout);
-  };
-  
-// Add this function after create3DScatterChart
-const create3DSurfaceChart = (processedData, newLayout) => {
-  // For a surface plot, we need a grid of z-values
-  // First, identify unique x and y values
-  const uniqueX = [...new Set(processedData.map(item => parseFloat(item[xAxis]) || 0))].sort((a, b) => a - b);
-  const uniqueY = [...new Set(processedData.map(item => parseFloat(item[yAxis]) || 0))].sort((a, b) => a - b);
-  
-  // Limit grid size for performance
-  const gridSize = Math.min(uniqueX.length, uniqueY.length, 50);
-  const sampledX = sampleArray(uniqueX, gridSize);
-  const sampledY = sampleArray(uniqueY, gridSize);
-  
-  // Create a z-value matrix
-  const z = Array(sampledY.length).fill().map(() => Array(sampledX.length).fill(0));
-  
-  // Fill z-matrix with values or approximations
-  sampledY.forEach((yVal, yIndex) => {
-    sampledX.forEach((xVal, xIndex) => {
-      // Find closest data point or use calculated value
-      const closestPoint = processedData.find(item => 
-        Math.abs(parseFloat(item[xAxis]) - xVal) < 0.01 && 
-        Math.abs(parseFloat(item[yAxis]) - yVal) < 0.01
-      );
+      }
       
-      if (closestPoint) {
-        // Use actual data point if available
-        z[yIndex][xIndex] = parseFloat(closestPoint[yAxis]) || 0;  // Use yAxis as z value
-      } else {
-        // Generate surface value as function of x and y
-        z[yIndex][xIndex] = Math.sin(xVal/5) * Math.cos(yVal/5) * 10;
+      const upperIndex = Math.min(lowerIndex + 1, palette.length - 1);
+      
+      // If at the edges or same point, return the exact color
+      if (lowerIndex === upperIndex) {
+        return palette[lowerIndex][1];
       }
-    });
-  });
-  
-  setPlotData([{
-    type: 'surface',
-    x: sampledX,
-    y: sampledY,
-    z: z,
-    colorscale: [
-      [0, 'rgba(76, 175, 80, 0.5)'],      // Light green
-      [0.33, 'rgba(76, 175, 80, 0.8)'],    // Medium green
-      [0.66, 'rgba(46, 125, 50, 0.9)'],    // Darker green
-      [1, 'rgba(27, 94, 32, 1)']           // Darkest green
-    ],
-    contours: {
-      z: {
-        show: true,
-        usecolormap: true,
-        highlightcolor: "rgba(46, 125, 50, 1)",
-        width: 2
-      }
-    },
-    hovertemplate: 
-      `<b>${xAxis}</b>: %{x}<br>` +
-      `<b>${yAxis}</b>: %{y}<br>` +
-      `<b>Value</b>: %{z}<br>` +
-      `<extra></extra>`,
-  }]);
-  
-  // Update layout for surface chart
-  newLayout.scene.camera = {
-    eye: { x: 1.87, y: 0.88, z: 0.64 }
+      
+      // Actually use t to interpolate between colors
+      const lowerPos = palette[lowerIndex][0];
+      const upperPos = palette[upperIndex][0];
+      const t = (value - lowerPos) / (upperPos - lowerPos);
+      
+      // Parse colors to get RGB components
+      const lowerColor = parseColor(palette[lowerIndex][1]);
+      const upperColor = parseColor(palette[upperIndex][1]);
+      
+      // Interpolate between the colors
+      const r = Math.round(lowerColor.r + t * (upperColor.r - lowerColor.r));
+      const g = Math.round(lowerColor.g + t * (upperColor.g - lowerColor.g));
+      const b = Math.round(lowerColor.b + t * (upperColor.b - lowerColor.b));
+      const a = lowerColor.a + t * (upperColor.a - lowerColor.a);
+      
+      // Return interpolated color
+      return `rgba(${r}, ${g}, ${b}, ${a})`;
+    }
+    
+    // Default color
+    return 'rgba(76, 175, 80, 0.9)';
   };
   
-  setLayout(newLayout);
-};
+  // Add helper function to parse color strings
+  const parseColor = (colorStr) => {
+    // Handle rgba format
+    if (colorStr.startsWith('rgba')) {
+      const parts = colorStr.match(/rgba\((\d+),\s*(\d+),\s*(\d+),\s*([0-9.]+)\)/);
+      if (parts) {
+        return {
+          r: parseInt(parts[1], 10),
+          g: parseInt(parts[2], 10),
+          b: parseInt(parts[3], 10),
+          a: parseFloat(parts[4])
+        };
+      }
+    }
+    
+    // Handle rgb format
+    if (colorStr.startsWith('rgb')) {
+      const parts = colorStr.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/);
+      if (parts) {
+        return {
+          r: parseInt(parts[1], 10),
+          g: parseInt(parts[2], 10),
+          b: parseInt(parts[3], 10),
+          a: 1
+        };
+      }
+    }
+    
+    // Handle hex format (simplified)
+    if (colorStr.startsWith('#')) {
+      const r = parseInt(colorStr.slice(1, 3), 16);
+      const g = parseInt(colorStr.slice(3, 5), 16);
+      const b = parseInt(colorStr.slice(5, 7), 16);
+      return { r, g, b, a: 1 };
+    }
+    
+    // Default fallback
+    return { r: 76, g: 175, b: 80, a: 0.9 };
+  };
   
   if (loading) {
     return (
@@ -661,7 +1246,7 @@ const create3DSurfaceChart = (processedData, newLayout) => {
       </div>
     );
   }
-  
+
   return (
     <div className="three-d-chart-container" ref={containerRef}>
       <Plot

@@ -653,23 +653,25 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
                       <p>Both selected columns contain text/non-numeric values. 3D charts require numeric data to display properly.</p>
                     </div>
                   ) : (
-                    <div className="chart-wrapper" data-charttype={chart3DType}>
-                      <ThreeDChart 
-                        data={prepare3DChartData(fileData.data, xAxis, yAxis, chart3DType)} 
-                        chartType={chart3DType}
-                        xAxis={xAxis}
-                        yAxis={yAxis}
-                      />
-                      
-                      {fileData?.data?.length > 500 && (
-                        <div className="three-d-performance-warning">
-                          <FaExclamationTriangle />
-                          <span>
-                            Your dataset contains {fileData.data.length.toLocaleString()} records. 
-                            For better performance, the chart is using a sample of the data.
-                          </span>
-                        </div>
-                      )}
+                    <div className="chart-container">
+                      <div className="chart-wrapper" data-charttype={chart3DType}>
+                        <ThreeDChart 
+                          data={prepare3DChartData(fileData.data, xAxis, yAxis, chart3DType)} 
+                          chartType={chart3DType}
+                          xAxis={xAxis}
+                          yAxis={yAxis}
+                        />
+                        
+                        {fileData?.data?.length > 500 && (
+                          <div className="three-d-performance-warning">
+                            <FaExclamationTriangle />
+                            <span>
+                              Your dataset contains {fileData.data.length.toLocaleString()} records. 
+                              For better performance, the chart uses a sample of the data.
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </>
