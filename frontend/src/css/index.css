@@ -1451,3 +1451,101 @@ form button[type="button"] {
   }
 }
 
+/* 3D Chart Styling */
+/* Update 3D chart styling for dark mode */
+.three-d-chart-container {
+  width: 100%;
+  height: 450px;
+  background-color: rgb(17, 17, 17);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.three-d-chart-container.loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #4CAF50;
+  background-color: rgb(17, 17, 17);
+}
+
+.chart-loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(76, 175, 80, 0.2);
+  border-top: 3px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 10px;
+}
+
+.three-d-chart-container.loading p {
+  color: white;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Performance warning for large datasets */
+.three-d-performance-warning {
+  background-color: #fff8e1;
+  border-left: 4px solid #f57c00;
+  padding: 12px 15px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+  font-size: 1.4rem;
+  color: #666;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.three-d-performance-warning svg {
+  color: #f57c00;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.three-d-performance-warning span {
+  flex: 1;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.4;
+}
+
+/* Extra styles for better 3D chart layout */
+[data-charttype^="3d"] .three-d-chart-container {
+  margin-top: 10px;
+}
+
+/* Responsive adjustments for 3D charts on smaller screens */
+@media (max-width: 768px) {
+  .three-d-chart-container {
+    height: 350px;
+  }
+}
+
+@media (max-width: 576px) {
+  .three-d-chart-container {
+    height: 300px;
+  }
+}
+.chart-wrapper {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  padding-bottom: 15px;
+}
