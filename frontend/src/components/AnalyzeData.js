@@ -10,7 +10,8 @@ import {
   FaTable, 
   FaSearch, 
   FaRobot, // Replace FaLightbulb with FaRobot
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaDownload
 } from 'react-icons/fa';
 import {
   Chart as ChartJS,
@@ -625,19 +626,33 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
     <div className="chart-area">
       {chartType !== 'none' && chart3DType === 'none' ? (
         <>
-          {/* Show error for ALL charts when both columns are text-only, including pie/doughnut */}
+          {/* Check for both text-only data */}
           {!isNumericData(fileData.data, xAxis) && !isNumericData(fileData.data, yAxis) ? (
             <div className="chart-error-state">
               <div className="error-state-icon">
                 <FaExclamationTriangle />
               </div>
-              
-              {/* Use same message for all chart types including pie/doughnut */}
               <h3>Cannot generate chart with text-only data</h3>
-              <p>Both selected columns contain text/non-numeric data. Charts require at least one numeric axis to display data properly. Please select a column with numeric values for at least one axis.</p>
+              <p>Both selected columns contain text/non-numeric data. Charts require at least one numeric axis to display properly.</p>
+            </div>
+          /* Add this new condition to block numeric-only pie/doughnut charts */
+          ) : ((chartType === 'pie' || chartType === 'doughnut') && 
+                isNumericData(fileData.data, xAxis) && 
+                isNumericData(fileData.data, yAxis)) ? (
+            <div className="chart-error-state">
+              <div className="error-state-icon">
+                <FaExclamationTriangle />
+              </div>
+              <h3>Cannot generate pie chart with numeric-only data</h3>
+              <p>Pie charts require at least one categorical column. Please select a text column for either the X or Y axis.</p>
             </div>
           ) : (
             <div className="chart-wrapper" data-charttype={chartType}>
+              <div className="chart-controls-overlay">
+                <button className="chart-download-btn" onClick={downloadChart} title="Download as PNG">
+                  <FaDownload /> PNG
+                </button>
+              </div>
               {renderChart()}
             </div>
           )}
@@ -651,6 +666,14 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
                       </div>
                       <h3>Cannot generate 3D chart with text-only data</h3>
                       <p>Both selected columns contain text/non-numeric values. 3D charts require numeric data to display properly.</p>
+                    </div>
+                  ) : (chart3DType === '3d-pie' && isNumericData(fileData.data, xAxis) && isNumericData(fileData.data, yAxis)) ? (
+                    <div className="chart-error-state">
+                      <div className="error-state-icon">
+                        <FaExclamationTriangle />
+                      </div>
+                      <h3>Cannot generate 3D pie chart with numeric-only data</h3>
+                      <p>Pie charts require at least one categorical column. Please select a text column for either the X or Y axis.</p>
                     </div>
                   ) : (
                     <div className="chart-container">
@@ -1724,6 +1747,54 @@ const prepare3DChartData = (data, xAxisKey, yAxisKey, chartType) => {
   return data;
 };
   
+  const downloadChart = () => {
+    const chartElement = document.querySelector(`.chart-wrapper[data-charttype="${chartType}"] canvas`);
+    
+    if (chartElement) {
+      try {
+        // Create loading indicator
+        const chartContainer = document.querySelector('.chart-wrapper');
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'download-loading';
+        loadingIndicator.innerHTML = 'Generating image...';
+        loadingIndicator.style.position = 'absolute';
+        loadingIndicator.style.top = '50%';
+        loadingIndicator.style.left = '50%';
+        loadingIndicator.style.transform = 'translate(-50%, -50%)';
+        loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        loadingIndicator.style.color = 'white';
+        loadingIndicator.style.padding = '10px 20px';
+        loadingIndicator.style.borderRadius = '5px';
+        loadingIndicator.style.zIndex = '1000';
+        
+        chartContainer.style.position = 'relative';
+        chartContainer.appendChild(loadingIndicator);
+        
+        // Get chart canvas as image with better quality
+        setTimeout(() => { // Small delay to ensure loading indicator is shown
+          const dataUrl = chartElement.toDataURL('image/png', 1.0);
+          const fileName = `${chartType}_chart_${xAxis}_vs_${yAxis}.png`;
+          
+          // Create download link
+          const downloadLink = document.createElement('a');
+          downloadLink.href = dataUrl;
+          downloadLink.download = fileName;
+          document.body.appendChild(downloadLink);
+          downloadLink.click();
+          document.body.removeChild(downloadLink);
+          
+          // Remove loading indicator
+          chartContainer.removeChild(loadingIndicator);
+        }, 100);
+      } catch (error) {
+        console.error('Error generating chart image:', error);
+        alert('Failed to download chart. Please try again.');
+      }
+    } else {
+      alert('Chart not found. Please try again.');
+    }
+  };
+
   return (
     <div className="analyze-data-container">
       <div className="analyze-header">

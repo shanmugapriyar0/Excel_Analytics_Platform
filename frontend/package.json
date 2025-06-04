@@ -15,6 +15,7 @@
           "chart.js": "^4.4.9",
           "framer-motion": "^12.12.1",
           "gsap": "^3.13.0",
+          "html2canvas": "^1.4.1",
           "plotly.js-gl3d-dist": "^3.0.1",
           "react": "^19.1.0",
           "react-chartjs-2": "^5.3.0",

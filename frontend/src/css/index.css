@@ -1629,10 +1629,53 @@ form button[type="button"] {
   margin: 0;
   padding: 0;
 }
-
-/* Fix for analyze-data-container when 3D charts are present */
 .analyze-data-container[data-has-3d-chart="true"] {
   height: auto;
-  min-height: 900px; /* Higher minimum height for 3D charts */
-  padding-bottom: 40px; /* Extra padding at bottom */
+  min-height: 900px; 
+  padding-bottom: 40px;
+}
+/* Chart Download Button Styling */
+.chart-controls-overlay {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 10;
+  display: flex;
+  gap: 8px;
+}
+
+.chart-download-btn {
+  background-color: rgba(46, 125, 50, 0.8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.chart-download-btn:hover {
+  background-color: rgba(46, 125, 50, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.three-d-chart-container .chart-controls-overlay {
+  top: 15px;
+  left: 15px;
+}
+
+.three-d-chart-container .chart-download-btn {
+  background-color: rgba(76, 175, 80, 0.9);
+  background-color: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(5px);
+}
+
+.three-d-chart-container .chart-download-btn:hover {
+  background-color: rgba(255, 255, 255, 0.25);
 }

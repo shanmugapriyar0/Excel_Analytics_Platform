@@ -1,11 +1,13 @@
-import React, { useEffect, useState, useRef,} from 'react';
+import React, { useEffect, useState, useRef, lazy } from 'react';
 import Plot from 'react-plotly.js';
+import { FaDownload } from 'react-icons/fa';
 
 const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
   const [plotData, setPlotData] = useState([]);
   const [layout, setLayout] = useState({});
   const [loading, setLoading] = useState(true);
   const containerRef = useRef(null);
+  const plotRef = useRef(null);
   
   // Define color palettes for better visualization
   const colorPalettes = {
@@ -1237,19 +1239,69 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
     // Default fallback
     return { r: 76, g: 175, b: 80, a: 0.9 };
   };
-  
-  if (loading) {
-    return (
-      <div className="three-d-chart-container loading">
-        <div className="chart-loading-spinner"></div>
-        <p>Rendering 3D chart...</p>
-      </div>
-    );
-  }
+
+  // Add download chart function
+  const downloadChart = () => {
+    if (plotRef.current) {
+      try {
+        // Create loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'download-loading';
+        loadingIndicator.innerHTML = 'Generating image...';
+        loadingIndicator.style.position = 'absolute';
+        loadingIndicator.style.top = '50%';
+        loadingIndicator.style.left = '50%';
+        loadingIndicator.style.transform = 'translate(-50%, -50%)';
+        loadingIndicator.style.backgroundColor = 'rgba(0,0,0,0.7)';
+        loadingIndicator.style.color = 'white';
+        loadingIndicator.style.padding = '10px 20px';
+        loadingIndicator.style.borderRadius = '5px';
+        loadingIndicator.style.zIndex = '1000';
+        containerRef.current.appendChild(loadingIndicator);
+        
+        // Use html2canvas instead
+        import('html2canvas').then(html2canvas => {
+          const plotDiv = containerRef.current;
+          html2canvas.default(plotDiv, { 
+            backgroundColor: 'white',
+            scale: 2,
+            logging: false,
+            useCORS: true
+          }).then(canvas => {
+            // Convert to data URL
+            const dataUrl = canvas.toDataURL('image/png');
+            const fileName = `${formatChartName(chartType)}_${xAxis}_vs_${yAxis}.png`;
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = fileName;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            containerRef.current.removeChild(loadingIndicator);
+          });
+        }).catch(error => {
+          console.error('Error loading html2canvas:', error);
+          containerRef.current.removeChild(loadingIndicator);
+          alert('Failed to download chart. Please try again.');
+        });
+      } catch (error) {
+        console.error('Error downloading chart:', error);
+        alert('Failed to download chart. Please try again.');
+      }
+    }
+  };
 
   return (
     <div className="three-d-chart-container" ref={containerRef}>
+      <div className="chart-controls-overlay">
+        <button className="chart-download-btn" onClick={downloadChart} title="Download as PNG">
+          <FaDownload /> PNG
+        </button>
+      </div>
       <Plot
+        ref={plotRef}
         data={plotData}
         layout={layout}
         useResizeHandler={true}
@@ -1261,6 +1313,12 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
           displaylogo: false
         }}
       />
+      {loading && (
+        <div className="chart-loading-overlay">
+          <div className="chart-loading-spinner"></div>
+          <p>Rendering 3D chart...</p>
+        </div>
+      )}
     </div>
   );
 };
