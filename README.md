@@ -1,6 +1,6 @@
 # Excel Analytics Platform
 
-Last Updated: June 2, 2025
+Last Updated: June 5, 2025
 
 ## Week 3 Progress
 

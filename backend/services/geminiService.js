@@ -108,7 +108,15 @@ Provide a focused answer to this specific question. Keep your response proportio
 - For simple questions, give simple answers
 - For complex questions, show your work and reasoning
 - Avoid unnecessary verbosity
-- Include only relevant details for the specific question asked`;
+- Include only relevant details for the specific question asked
+
+Use this consistent formatting for your response:
+1. Use "# Data Analysis Insights: [Topic]" as the main title
+2. Use "## [Section Name]" for main sections
+3. Use "### [Subsection]" for subsections
+4. Use bold text for key terms and findings
+5. Use consistent green color headings throughout
+6. Maintain the same heading size and style throughout the entire response`;
 
     // Try the correct model name - use "gemini-pro" instead of "gemini-1.0-pro"
     const model = genAI.getGenerativeModel({ 

@@ -1,67 +1,92 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { 
-  FaSpinner, 
-  FaExclamationTriangle, 
-  FaRobot, 
-  FaSyncAlt, 
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import {
+  FaSpinner,
+  FaExclamationTriangle,
+  FaSyncAlt,
   FaLightbulb,
-  FaCommentDots, 
-  FaClock, 
+  FaCommentDots,
+  FaClock,
   FaHistory,
-} from 'react-icons/fa';
-import DOMPurify from 'dompurify';
-import { marked } from 'marked';
-import '../css/AIInsights.css';
+  FaTrash, // Add this if not already imported
+} from "react-icons/fa";
+import DOMPurify from "dompurify";
+import { marked } from "marked";
+import "../css/AIInsights.css";
 
 const AIInsights = ({ selectedFile, user }) => {
   const [aiInsights, setAiInsights] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState(null);
-  const [aiQuestion, setAiQuestion] = useState('');
+  const [aiQuestion, setAiQuestion] = useState("");
+  // eslint-disable-next-line no-unused-vars
   const [previousQuestions, setPreviousQuestions] = useState([]);
   const [showFullAnalysis, setShowFullAnalysis] = useState(false);
-  const insightsSectionRef = useRef(null);  
- const fetchAiInsights = async (question = null) => {
+  const [chatHistory, setChatHistory] = useState([]);
+  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false); 
+  const insightsSectionRef = useRef(null);
+  const fetchAiInsights = async (question = null) => {
     if (!selectedFile) return;
-    
+
     try {
       setAiLoading(true);
       setAiError(null);
-      
-      const token = user?.token || user?.accessToken || (user?.data?.token);
-      
+
+      const token = user?.token || user?.accessToken || user?.data?.token;
+
       if (!token) {
-        setAiError('Authentication token not found. Please log in again.');
+        setAiError("Authentication token not found. Please log in again.");
         setAiLoading(false);
         return;
       }
-      
+
       const response = await axios.post(
-        `http://localhost:5000/api/excel/insights/${selectedFile._id}`, 
+        `http://localhost:5000/api/excel/insights/${selectedFile._id}`,
         { questionPrompt: question },
         {
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
-      
+
       setAiInsights(response.data);
-      
+
+      // Add to chat history with timestamp
       if (question) {
-        setPreviousQuestions(prev => [question, ...prev.slice(0, 4)]);
-        setAiQuestion('');
+        const newHistoryItem = {
+          id: Date.now(),
+          question,
+          response: response.data.insights,
+          timestamp: new Date().toLocaleString(),
+        };
+
+        // Add to chat history and maintain most recent 10 items
+        setChatHistory((prevHistory) =>
+          [newHistoryItem, ...prevHistory].slice(0, 10)
+        );
+
+        // Also update local storage for persistence
+        const updatedHistory = [newHistoryItem, ...chatHistory].slice(0, 10);
+        localStorage.setItem(
+          `chatHistory_${selectedFile._id}`,
+          JSON.stringify(updatedHistory)
+        );
+
+        setPreviousQuestions((prev) => [question, ...prev.slice(0, 4)]);
+        setAiQuestion("");
       }
-      
+
       if (insightsSectionRef.current) {
-        insightsSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+        insightsSectionRef.current.scrollIntoView({ behavior: "smooth" });
       }
-      
     } catch (error) {
-      console.error('Error fetching AI insights:', error);
-      setAiError(error.response?.data?.message || 'Failed to get AI insights. Please try again.');
+      console.error("Error fetching AI insights:", error);
+      setAiError(
+        error.response?.data?.message ||
+          "Failed to get AI insights. Please try again."
+      );
     } finally {
       setAiLoading(false);
     }
@@ -71,75 +96,124 @@ const AIInsights = ({ selectedFile, user }) => {
       setAiInsights(null);
       setAiError(null);
       setPreviousQuestions([]);
-      setAiQuestion('');
+      setAiQuestion("");
+
+      // Load chat history from localStorage
+      const storedHistory = localStorage.getItem(
+        `chatHistory_${selectedFile._id}`
+      );
+      if (storedHistory) {
+        try {
+          setChatHistory(JSON.parse(storedHistory));
+        } catch (error) {
+          console.error("Error loading chat history:", error);
+        }
+      }
     }
   }, [selectedFile]);
-  
-  const handleAiQuestionSubmit = (e) => {
+
+  // Updated handleAiQuestionSubmit function
+  const handleAiQuestionSubmit = async (e) => {
     e.preventDefault();
-    if (!aiQuestion.trim()) {
-      return;
+
+    if (!aiQuestion.trim() || aiLoading) return;
+
+    setIsSubmittingQuestion(true); // Set this flag when submitting
+    setAiLoading(true);
+
+    try {
+      // Your existing code to fetch insights
+      const response = await fetchAiInsights(aiQuestion);
+
+      if (response) {
+        // Save to chat history
+        const newChatItem = {
+          id: Date.now().toString(),
+          question: aiQuestion,
+          response: response.insights,
+          timestamp: new Date().toLocaleString(),
+        };
+
+        const updatedHistory = [newChatItem, ...chatHistory];
+        setChatHistory(updatedHistory);
+        localStorage.setItem(
+          `chatHistory_${selectedFile._id}`,
+          JSON.stringify(updatedHistory)
+        );
+      }
+    } catch (error) {
+      console.error("Failed to get AI insights:", error);
+      setAiError(error.message || "An error occurred while processing your request");
+    } finally {
+      setAiLoading(false);
+      setIsSubmittingQuestion(false); // Reset the flag when done
     }
-    
-    fetchAiInsights(aiQuestion.trim());
   };
 
   const processInsights = (insights) => {
     // If it's a simple question but got a long response, summarize it
-    if (aiQuestion && 
-        /\b(sum|average|mean|median|calculate|count|total)\b/i.test(aiQuestion) && 
-        insights.length > 1000) {
-      
+    if (
+      aiQuestion &&
+      /\b(sum|average|mean|median|calculate|count|total)\b/i.test(aiQuestion) &&
+      insights.length > 1000
+    ) {
       // Find the first paragraph that likely contains the direct answer
-      const firstParagraph = insights.split('\n\n')[0];
-      
+      const firstParagraph = insights.split("\n\n")[0];
+
       return `${firstParagraph}\n\n*[Full analysis available but summarized for brevity. Click "Show Full Analysis" to see more details.]*`;
     }
-    
+
     return insights;
   };
 
   const renderInsightsContent = () => {
     if (!aiInsights) return null;
-    
+
     // Check if this is a generic response for a vague query
     if (aiInsights.isGenericResponse) {
       return (
         <div className="ai-insights-content ai-guidance">
-          <div 
+          <div
             className="markdown-content guidance-content"
-            dangerouslySetInnerHTML={{ 
-              __html: DOMPurify.sanitize(marked.parse(aiInsights.insights)) 
+            dangerouslySetInnerHTML={{
+              __html: DOMPurify.sanitize(marked.parse(aiInsights.insights)),
             }}
           />
         </div>
       );
     }
-    
+
     // Normal insights rendering
     return (
       <div className="ai-insights-content">
-        <div 
+        <div
           className="markdown-content"
-          dangerouslySetInnerHTML={{ 
-            __html: DOMPurify.sanitize(marked.parse(showFullAnalysis ? aiInsights.insights : processInsights(aiInsights.insights))) 
+          dangerouslySetInnerHTML={{
+            __html: DOMPurify.sanitize(
+              marked.parse(
+                showFullAnalysis
+                  ? aiInsights.insights
+                  : processInsights(aiInsights.insights)
+              )
+            ),
           }}
         />
-        
-        {aiQuestion && 
-          /\b(sum|average|mean|median|calculate|count|total)\b/i.test(aiQuestion) && 
+
+        {aiQuestion &&
+          /\b(sum|average|mean|median|calculate|count|total)\b/i.test(
+            aiQuestion
+          ) &&
           aiInsights.insights.length > 1000 && (
-          <button 
-            onClick={() => setShowFullAnalysis(!showFullAnalysis)}
-            className="toggle-analysis-button"
-          >
-            {showFullAnalysis ? "Show Summary" : "Show Full Analysis"}
-          </button>
-        )}
+            <button
+              onClick={() => setShowFullAnalysis(!showFullAnalysis)}
+              className="toggle-analysis-button"
+            >
+              {showFullAnalysis ? "Show Summary" : "Show Full Analysis"}
+            </button>
+          )}
       </div>
     );
   };
-
   if (aiLoading) {
     return (
       <div className="ai-loading">
@@ -148,7 +222,7 @@ const AIInsights = ({ selectedFile, user }) => {
       </div>
     );
   }
-  
+
   if (aiError) {
     return (
       <div className="ai-error">
@@ -165,25 +239,29 @@ const AIInsights = ({ selectedFile, user }) => {
       </div>
     );
   }
-    if (!aiInsights) {
+  if (!aiInsights) {
     return (
       <div className="ai-empty-state">
         <div className="empty-state-icon">
-          <FaRobot />
+          {/* Robot icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="80"
+            height="80"
+            fill="#2e7d32"
+          >
+            <path d="M12,2A2,2 0 0,1 14,4C14,4.74 13.6,5.39 13,5.73V7H14A7,7 0 0,1 21,14H22A1,1 0 0,1 23,15V18A1,1 0 0,1 22,19H21V20A2,2 0 0,1 19,22H5A2,2 0 0,1 3,20V19H2A1,1 0 0,1 1,18V15A1,1 0 0,1 2,14H3A7,7 0 0,1 10,7H11V5.73C10.4,5.39 10,4.74 10,4A2,2 0 0,1 12,2M7.5,13A2.5,2.5 0 0,0 5,15.5A2.5,2.5 0 0,0 7.5,18A2.5,2.5 0 0,0 10,15.5A2.5,2.5 0 0,0 7.5,13M16.5,13A2.5,2.5 0 0,0 14,15.5A2.5,2.5 0 0,0 16.5,18A2.5,2.5 0 0,0 19,15.5A2.5,2.5 0 0,0 16.5,13Z" />
+          </svg>
         </div>
         <h3>Get AI-Powered Insights for Your Data</h3>
-        <p>Our AI can analyze your data and find patterns, correlations, and anomalies automatically.</p>
-        
+        <p>
+          Our AI can analyze your data and find patterns, correlations, and
+          anomalies automatically.
+        </p>
+
         <div className="ai-question-form">
-          <form onSubmit={(e) => {
-            e.preventDefault();
-            if (aiQuestion.trim()) {
-              fetchAiInsights(aiQuestion.trim());
-            } else {
-              // Don't submit if empty
-              return;
-            }
-          }}>
+          <form onSubmit={handleAiQuestionSubmit}>
             <div className="question-input-wrapper">
               <input
                 type="text"
@@ -192,15 +270,20 @@ const AIInsights = ({ selectedFile, user }) => {
                 placeholder="Ask a specific question about your data..."
                 className="ai-question-input exclude-global-styles"
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="ask-button exclude-global-styles"
                 disabled={!aiQuestion.trim() || aiLoading}
               >
                 {aiLoading ? (
                   <FaSpinner className="spinner" />
                 ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="send-icon">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    className="send-icon"
+                  >
                     <path d="M3.4 20.4L20.85 12.92c1.1-.48 1.1-2.06 0-2.54L3.4 2.81c-.5-.22-1.01-.14-1.37.22-.37.36-.46.89-.25 1.37l2.78 6.12c.15.33.15.71 0 1.04L1.78 17.7c-.21.47-.12 1.01.25 1.37.36.36.87.44 1.37.22z" />
                   </svg>
                 )}
@@ -208,17 +291,10 @@ const AIInsights = ({ selectedFile, user }) => {
             </div>
           </form>
         </div>
-          <div className="ai-actions-container">
-          <button 
+        <div className="ai-actions-container">
+          <button
             className="analyze-ai-button"
-            onClick={() => {
-              // Only proceed if there's a question or we're doing a general analysis
-              if (aiQuestion.trim()) {
-                fetchAiInsights(aiQuestion.trim());
-              } else {
-                fetchAiInsights();
-              }
-            }}
+            onClick={() => fetchAiInsights()}
             disabled={aiLoading}
           >
             <FaLightbulb /> Analyze with AI
@@ -227,16 +303,69 @@ const AIInsights = ({ selectedFile, user }) => {
       </div>
     );
   }
-  
+
+  // Improved delete handler that fixes notification bugs
+  const handleDeleteChat = (itemToDelete, e) => {
+    // Stop event propagation to prevent triggering the parent click
+    e.stopPropagation();
+
+    // Remove the deleted chat from history
+    const updatedHistory = chatHistory.filter((chat) => chat.id !== itemToDelete.id);
+    setChatHistory(updatedHistory);
+
+    // Update localStorage
+    localStorage.setItem(
+      `chatHistory_${selectedFile._id}`,
+      JSON.stringify(updatedHistory)
+    );
+
+    // Check if the deleted chat was currently displayed
+    const wasCurrentlyDisplayed =
+      aiQuestion === itemToDelete.question ||
+      (aiInsights && aiInsights.insights === itemToDelete.response);
+
+    // If we deleted the currently displayed chat
+    if (wasCurrentlyDisplayed) {
+      // If there are remaining chats, show the most recent one
+      if (updatedHistory.length > 0) {
+        // Find the chat that was just above the deleted one (or the first one if we deleted the first)
+        const indexOfDeleted = chatHistory.findIndex(
+          (item) => item.id === itemToDelete.id
+        );
+        const previousChatIndex = indexOfDeleted > 0 ? indexOfDeleted - 1 : 0;
+        const chatToShow = updatedHistory[previousChatIndex];
+
+        // Display that chat
+        setAiQuestion(chatToShow.question);
+        setAiInsights({ insights: chatToShow.response });
+
+        // Scroll to insights content area if needed
+        if (insightsSectionRef.current) {
+          insightsSectionRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        // If no chats remain, clear everything to show the empty state
+        setAiQuestion("");
+        setAiInsights(null);
+      }
+    }
+  };
   return (
     <div className="ai-insights-results" ref={insightsSectionRef}>
-      <div className="ai-insights-header">
-        <h3><FaLightbulb /> AI Insights for {selectedFile.filename}</h3>
-        <div className="analysis-timestamp">
-          <FaClock /> Analyzed on {new Date(aiInsights.analysisDate).toLocaleString()}
+      <div className="ai-insights-header-container">
+        <div className="ai-insights-title">
+          <FaLightbulb className="insights-icon" />
+          <h3>
+            <span className="header-label">AI Insights for:</span>{" "}
+            <span className="file-name">{selectedFile ? (selectedFile.filename) : ""}</span>
+          </h3>
+        </div>
+        <div className="analysis-timestamp-container">
+          <FaClock className="timestamp-icon" />
+          <span>Analyzed on {new Date().toLocaleString()}</span>
         </div>
       </div>
-      
+
       <div className="ai-question-form">
         <form onSubmit={handleAiQuestionSubmit}>
           <div className="question-input-wrapper">
@@ -247,8 +376,8 @@ const AIInsights = ({ selectedFile, user }) => {
               placeholder="Ask a specific question about your data..."
               className="ai-question-input exclude-global-styles"
             />
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="ask-button exclude-global-styles"
               disabled={!aiQuestion.trim() || aiLoading}
               title="Ask AI"
@@ -256,35 +385,82 @@ const AIInsights = ({ selectedFile, user }) => {
               {aiLoading ? (
                 <FaSpinner className="spinner" />
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="send-icon">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="send-icon"
+                >
                   <path d="M3.4 20.4L20.85 12.92c1.1-.48 1.1-2.06 0-2.54L3.4 2.81c-.5-.22-1.01-.14-1.37.22-.37.36-.46.89-.25 1.37l2.78 6.12c.15.33.15.71 0 1.04L1.78 17.7c-.21.47-.12 1.01.25 1.37.36.36.87.44 1.37.22z" />
                 </svg>
               )}
             </button>
           </div>
         </form>
-        
-        {previousQuestions.length > 0 && (
+        {chatHistory.length > 0 && (
           <div className="previous-questions">
-            <h4><FaHistory /> Previous Questions</h4>
-            <ul>
-              {previousQuestions.map((q, idx) => (
-                <li key={idx} onClick={() => setAiQuestion(q)}>
-                  <FaCommentDots /> {q}
-                </li>
+            <div className="previous-questions-header">
+              <h4>
+                <FaHistory /> Previous Questions
+              </h4>
+              <button
+                className="clear-history-btn"
+                onClick={() => {
+                  setChatHistory([]);
+                  localStorage.removeItem(`chatHistory_${selectedFile._id}`);
+                  setAiQuestion("");
+                  setAiInsights(null);
+                }}
+              >
+                Clear History
+              </button>
+            </div>
+            <div className="questions-history-list">
+              {chatHistory.map((item) => (
+                <div key={item.id} className="question-history-item">
+                  <div
+                    className="question-item"
+                    onClick={() => {
+                      // When question is clicked, set the question and display its answer
+                      setAiQuestion(item.question);
+                      setAiInsights({ insights: item.response });
+
+                      // Scroll to the insights content area
+                      if (insightsSectionRef.current) {
+                        insightsSectionRef.current.scrollIntoView({
+                          behavior: "smooth",
+                        });
+                      }
+                    }}
+                  >
+                    <div className="question-icon">
+                      <FaCommentDots />
+                    </div>
+                    <div className="question-content">
+                      <div className="question-text">{item.question}</div>
+                      <div className="question-timestamp">{item.timestamp}</div>
+                    </div>
+
+                    <button
+                      className="delete-question-btn"
+                      onClick={(e) => handleDeleteChat(item, e)}
+                      title="Delete this question"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </div>
-      
-      <div className="ai-insights-content">
-        {renderInsightsContent()}
-      </div>
-      
+
+      <div className="ai-insights-content">{renderInsightsContent()}</div>
+
       {/* Right-aligned button */}
       <div className="ai-insights-actions">
-        <button 
+        <button
           className="regenerate-button"
           onClick={() => fetchAiInsights()}
           disabled={aiLoading}

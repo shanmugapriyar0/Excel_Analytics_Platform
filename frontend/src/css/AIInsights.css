@@ -23,20 +23,33 @@
 .empty-state-icon {
   font-size: 5rem;
   color: #2e7d32;
-  margin-bottom: 25px;
-  animation: float 3s ease-in-out infinite;
+  margin-bottom: 20px;
+  animation: pulse 2s infinite ease-in-out;
+  opacity: 1;
+  display: flex;
+  justify-content: center;
+  height: 80px;
 }
 
-@keyframes float {
+/* Make sure the animation is visible */
+@keyframes pulse {
   0% {
-    transform: translateY(0px);
+    transform: scale(1);
+    opacity: 0.4;
   }
   50% {
-    transform: translateY(-10px);
+    transform: scale(1.1);
+    opacity: 0.7;
   }
   100% {
-    transform: translateY(0px);
+    transform: scale(1);
+    opacity: 1;
   }
+}
+
+.empty-state-icon svg {
+  width: 80px;
+  height: 80px;
 }
 
 .ai-empty-state h3 {
@@ -348,7 +361,12 @@ background-color: #2e7d32;
   border-radius: 12px;
   padding: 15px;
 }
-
+.previous-questions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
 .previous-questions h4 {
   font-size: 1.4rem;
   color: #555;
@@ -396,7 +414,7 @@ background-color: #2e7d32;
   font-size: 1.4rem;
 }
 
-/* Markdown content styling */
+/* Let's update the markdown content styling to ensure consistency */
 .markdown-content {
   font-size: 1.6rem;
   line-height: 1.6;
@@ -416,12 +434,35 @@ background-color: #2e7d32;
   font-size: 2rem;
   margin-top: 30px;
   color: #2e7d32;
+  margin-bottom: 15px;
 }
 
 .markdown-content h3 {
   font-size: 1.8rem;
   margin-top: 25px;
-  color: #333;
+  color: #2e7d32; /* Change this to green to match the style */
+  margin-bottom: 12px;
+}
+
+.markdown-content h4 {
+  font-size: 1.6rem;
+  margin-top: 20px;
+  color: #2e7d32; /* Keep this green too */
+  margin-bottom: 10px;
+}
+
+/* Let's add specific styling for the first heading of each answer */
+.markdown-content h1:first-child,
+.markdown-content h2:first-child,
+.markdown-content h3:first-child {
+  margin-top: 0;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+/* Add consistent styling for item titles in lists */
+.markdown-content strong {
+  font-weight: 600;
 }
 
 .markdown-content ul, .markdown-content ol {
@@ -567,4 +608,182 @@ background-color: #2e7d32;
   padding: 2px 6px;
   border-radius: 4px;
   font-family: 'Courier New', monospace;
+}
+.ai-insights-header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.ai-insights-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ai-insights-title h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 1.9rem;
+  margin: 0;
+  font-weight: 500;
+}
+.ai-insights-title .header-label {
+  color: #333;
+  font-weight: 500;
+}
+.ai-insights-title .file-name {
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.insights-icon {
+  font-size: 2.2rem;
+  color: #2e7d32;
+}
+
+.analysis-timestamp-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #777;
+  font-style: italic;
+  font-size: 1.4rem;
+}
+
+.timestamp-icon {
+  color: #777;
+  font-size: 1.4rem;
+}
+.clear-history-btn {
+  background-color: transparent;
+  border: none;
+  color: #777;
+  font-size: 1.3rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.clear-history-btn:hover {
+  background-color: #f0f0f0;
+  color: #d32f2f;
+}
+
+.questions-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.question-history-item {
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e0e0e0;
+}
+
+.question-item {
+  padding: 12px 15px;
+  background-color: #f1f8e9;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.question-item:hover {
+  background-color: #e8f5e9;
+}
+
+.question-icon {
+  color: #2e7d32;
+  font-size: 1.6rem;
+  margin-top: 2px;
+  flex-shrink: 0;
+}
+
+.question-content {
+  flex: 1;
+}
+
+.question-text {
+  font-size: 1.4rem;
+  color: #333;
+  font-weight: 500;
+  line-height: 1.3;
+  margin-bottom: 5px;
+}
+
+.question-timestamp {
+  font-size: 1.1rem;
+  color: #777;
+}
+/* Scrollbar styling */
+.questions-history-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.questions-history-list::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.questions-history-list::-webkit-scrollbar-thumb {
+  background: #c5e1a5;
+  border-radius: 10px;
+}
+
+.questions-history-list::-webkit-scrollbar-thumb:hover {
+  background: #a5d6a7;
+}
+/* Add these styles for the delete button */
+.delete-question-btn {
+  background: transparent;
+  border: none;
+  color: #bbb;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 1; 
+  margin-left: auto; 
+}
+
+.question-item:hover .delete-question-btn {
+  opacity: 1; 
+}
+
+.delete-question-btn:hover {
+  background-color: rgba(211, 47, 47, 0.1);
+  color: #d32f2f;
+}
+
+
+.question-item {
+  padding: 12px 15px;
+  background-color: #f1f8e9;
+  cursor: pointer;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: all 0.2s ease;
+  position: relative; 
 }

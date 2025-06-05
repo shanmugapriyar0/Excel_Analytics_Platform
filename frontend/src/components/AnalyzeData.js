@@ -228,8 +228,6 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
     return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
-  // Memoize fetchFileData with useCallback to prevent unnecessary rerenders
-  // Update the fetch function to properly handle Unicode data
   const fetchFileData = useCallback(async () => {
     if (!selectedFile) return;
     
