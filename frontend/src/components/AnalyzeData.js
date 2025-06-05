@@ -1743,9 +1743,23 @@ const prepare3DChartData = (data, xAxisKey, yAxisKey, chartType) => {
         chartContainer.style.position = 'relative';
         chartContainer.appendChild(loadingIndicator);
         
-        // Get chart canvas as image with better quality
+        // Create a white background canvas for 2D charts
         setTimeout(() => { // Small delay to ensure loading indicator is shown
-          const dataUrl = chartElement.toDataURL('image/png', 1.0);
+          // Create a temporary canvas with white background
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = chartElement.width;
+          tempCanvas.height = chartElement.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          // Fill with white background
+          tempCtx.fillStyle = '#ffffff';
+          tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          
+          // Draw the original chart on top
+          tempCtx.drawImage(chartElement, 0, 0);
+          
+          // Get the image with white background
+          const dataUrl = tempCanvas.toDataURL('image/png', 1.0);
           const fileName = `${chartType}_chart_${xAxis}_vs_${yAxis}.png`;
           
           // Create download link
@@ -1756,12 +1770,18 @@ const prepare3DChartData = (data, xAxisKey, yAxisKey, chartType) => {
           downloadLink.click();
           document.body.removeChild(downloadLink);
           
-          // Remove loading indicator
+          // Clean up
           chartContainer.removeChild(loadingIndicator);
         }, 100);
       } catch (error) {
         console.error('Error generating chart image:', error);
         alert('Failed to download chart. Please try again.');
+        
+        // Make sure to clean up loading indicator if there's an error
+        const loadingIndicator = document.querySelector('.download-loading');
+        if (loadingIndicator) {
+          loadingIndicator.parentNode.removeChild(loadingIndicator);
+        }
       }
     } else {
       alert('Chart not found. Please try again.');

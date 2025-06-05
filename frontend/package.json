@@ -18,6 +18,7 @@
           "gsap": "^3.13.0",
           "html2canvas": "^1.4.1",
           "marked": "^15.0.12",
+          "plotly.js-basic-dist": "^3.0.1",
           "plotly.js-gl3d-dist": "^3.0.1",
           "react": "^19.1.0",
           "react-chartjs-2": "^5.3.0",

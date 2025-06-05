@@ -9,7 +9,6 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
   const containerRef = useRef(null);
   const plotRef = useRef(null);
   
-  // Define color palettes for better visualization
   const colorPalettes = {
     default: [
       '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
@@ -197,9 +196,6 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
       const normalizedValues = values.map(
         val => (val - Math.min(...values)) / (Math.max(...values) - Math.min(...values) || 1)
       );
-      
-      // Better bar chart using mesh3d with proper colors
-      // Use cube volume rather than just lines
       const traces = [];
       
       categories.forEach((category, i) => {
@@ -1259,20 +1255,20 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
         loadingIndicator.style.zIndex = '1000';
         containerRef.current.appendChild(loadingIndicator);
         
-        // Use html2canvas instead
-        import('html2canvas').then(html2canvas => {
-          const plotDiv = containerRef.current;
-          html2canvas.default(plotDiv, { 
-            backgroundColor: 'white',
-            scale: 2,
-            logging: false,
-            useCORS: true
-          }).then(canvas => {
-            // Convert to data URL
-            const dataUrl = canvas.toDataURL('image/png');
-            const fileName = `${formatChartName(chartType)}_${xAxis}_vs_${yAxis}.png`;
-            
-            // Create download link
+        const fileName = `${formatChartName(chartType)}_${xAxis}_vs_${yAxis}.png`;
+        
+        // Always use Plotly's native toImage for 3D charts - it handles WebGL properly
+        if (plotRef.current.el && window.Plotly) {
+          const gd = plotRef.current.el;
+          
+          // Increased size and resolution for better quality exports
+          window.Plotly.toImage(gd, {
+            format: 'png',
+            width: gd.clientWidth * 1,  
+            height: gd.clientHeight * 1, 
+            scale: 1  
+          })
+          .then(dataUrl => {
             const link = document.createElement('a');
             link.download = fileName;
             link.href = dataUrl;
@@ -1280,14 +1276,69 @@ const ThreeDChart = ({ data, chartType, xAxis, yAxis }) => {
             link.click();
             document.body.removeChild(link);
             containerRef.current.removeChild(loadingIndicator);
+          })
+          .catch(err => {
+            console.error('Error with Plotly.toImage:', err);
+            // Only fall back to html2canvas if Plotly's method fails
+            fallbackToHtml2Canvas();
           });
-        }).catch(error => {
-          console.error('Error loading html2canvas:', error);
-          containerRef.current.removeChild(loadingIndicator);
-          alert('Failed to download chart. Please try again.');
-        });
+        } else {
+          // Fall back to html2canvas if Plotly isn't available
+          fallbackToHtml2Canvas();
+        }
+        
+        function fallbackToHtml2Canvas() {
+          // Use html2canvas as fallback with improved settings
+          import('html2canvas').then(html2canvasModule => {
+            const html2canvas = html2canvasModule.default;
+            
+            // Make sure we capture the entire plotly container
+            const targetElement = containerRef.current;
+            
+            html2canvas(targetElement, { 
+              useCORS: true,
+              scale: 1,  // Increased from 2x to 3x for higher resolution
+              backgroundColor: 'rgb(23, 25, 35)',
+              allowTaint: true,
+              logging: false,
+              foreignObjectRendering: true,
+              // Increase canvas size to match display size * scale
+              width: targetElement.offsetWidth,
+              height: targetElement.offsetHeight,
+              ignoreElements: (element) => {
+                // Ignore loading elements or other overlays
+                return element.className === 'download-loading' || 
+                       element.className === 'chart-loading-overlay';
+              }
+            }).then(canvas => {
+              // Convert to PNG with maximum quality
+              const dataUrl = canvas.toDataURL('image/png', 1.0);
+              
+              // Create download link
+              const link = document.createElement('a');
+              link.download = fileName;
+              link.href = dataUrl;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              // Remove loading indicator
+              containerRef.current.removeChild(loadingIndicator);
+            }).catch(err => {
+              console.error('Error capturing chart:', err);
+              containerRef.current.removeChild(loadingIndicator);
+              alert('Failed to download chart. Please try again.');
+            });
+          }).catch(err => {
+            console.error('Error importing html2canvas:', err);
+            containerRef.current.removeChild(loadingIndicator);
+            alert('Failed to download chart. Please try again.');
+          });
+        }
       } catch (error) {
         console.error('Error downloading chart:', error);
+        const loadingElem = containerRef.current.querySelector('.download-loading');
+        if (loadingElem) containerRef.current.removeChild(loadingElem);
         alert('Failed to download chart. Please try again.');
       }
     }
