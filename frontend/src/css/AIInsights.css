@@ -787,3 +787,62 @@ background-color: #2e7d32;
   transition: all 0.2s ease;
   position: relative; 
 }
+/* Add these styles to AIInsights.css */
+.typing-animation {
+  position: relative;
+}
+
+.typing-animation::after {
+  content: '|';
+  display: inline;
+  color: #2e7d32;
+  animation: blink 0.8s step-end infinite;
+  margin-left: 2px;
+  opacity: 0.8;
+  font-weight: normal;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+.ai-insights-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background-color: #f1f8e9;
+  color: #2e7d32;
+  border: 1px solid #2e7d32;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  font-size: 1.5rem;
+}
+
+.copy-button:hover {
+  background-color: #e8f5e9;
+}
+
+.copy-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Add animation for when the content is copied */
+@keyframes copied-flash {
+  0%, 100% { background-color: #e8f5e9; }
+  50% { background-color: #a5d6a7; }
+}
+
+.copy-button.success {
+  animation: copied-flash 1s;
+}

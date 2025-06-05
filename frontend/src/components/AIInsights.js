@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import {
@@ -9,11 +8,11 @@ import {
   FaCommentDots,
   FaClock,
   FaHistory,
-  FaTrash, // Add this if not already imported
+  FaTrash,
+  FaCopy, // Add this new import
 } from "react-icons/fa";
-import DOMPurify from "dompurify";
-import { marked } from "marked";
 import "../css/AIInsights.css";
+import TypedResponse from './TypedResponse';
 
 const AIInsights = ({ selectedFile, user }) => {
   const [aiInsights, setAiInsights] = useState(null);
@@ -24,7 +23,9 @@ const AIInsights = ({ selectedFile, user }) => {
   const [previousQuestions, setPreviousQuestions] = useState([]);
   const [showFullAnalysis, setShowFullAnalysis] = useState(false);
   const [chatHistory, setChatHistory] = useState([]);
-  const [isSubmittingQuestion, setIsSubmittingQuestion] = useState(false); 
+  const [activeQuestion, setActiveQuestion] = useState(null);
+  const [copySuccess, setCopySuccess] = useState(false); 
+  const [typingComplete, setTypingComplete] = useState(false); 
   const insightsSectionRef = useRef(null);
   const fetchAiInsights = async (question = null) => {
     if (!selectedFile) return;
@@ -32,6 +33,13 @@ const AIInsights = ({ selectedFile, user }) => {
     try {
       setAiLoading(true);
       setAiError(null);
+      
+      // Store the active question being processed
+      if (question) {
+        setActiveQuestion(question);
+      } else {
+        setActiveQuestion(null); // Reset for general insights
+      }
 
       const token = user?.token || user?.accessToken || user?.data?.token;
 
@@ -65,23 +73,29 @@ const AIInsights = ({ selectedFile, user }) => {
 
         // Add to chat history and maintain most recent 10 items
         setChatHistory((prevHistory) =>
-          [newHistoryItem, ...prevHistory].slice(0, 10)
+          [newHistoryItem, ...prevHistory.filter(item => item.question !== question)].slice(0, 10)
         );
 
         // Also update local storage for persistence
-        const updatedHistory = [newHistoryItem, ...chatHistory].slice(0, 10);
+        const updatedHistory = [
+          newHistoryItem, 
+          ...chatHistory.filter(item => item.question !== question)
+        ].slice(0, 10);
+        
         localStorage.setItem(
           `chatHistory_${selectedFile._id}`,
           JSON.stringify(updatedHistory)
         );
 
-        setPreviousQuestions((prev) => [question, ...prev.slice(0, 4)]);
+        setPreviousQuestions((prev) => [question, ...prev.filter(q => q !== question).slice(0, 4)]);
         setAiQuestion("");
       }
 
       if (insightsSectionRef.current) {
         insightsSectionRef.current.scrollIntoView({ behavior: "smooth" });
       }
+      
+      return response.data;
     } catch (error) {
       console.error("Error fetching AI insights:", error);
       setAiError(
@@ -116,39 +130,14 @@ const AIInsights = ({ selectedFile, user }) => {
   // Updated handleAiQuestionSubmit function
   const handleAiQuestionSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!aiQuestion.trim() || aiLoading) return;
-
-    setIsSubmittingQuestion(true); // Set this flag when submitting
-    setAiLoading(true);
-
-    try {
-      // Your existing code to fetch insights
-      const response = await fetchAiInsights(aiQuestion);
-
-      if (response) {
-        // Save to chat history
-        const newChatItem = {
-          id: Date.now().toString(),
-          question: aiQuestion,
-          response: response.insights,
-          timestamp: new Date().toLocaleString(),
-        };
-
-        const updatedHistory = [newChatItem, ...chatHistory];
-        setChatHistory(updatedHistory);
-        localStorage.setItem(
-          `chatHistory_${selectedFile._id}`,
-          JSON.stringify(updatedHistory)
-        );
-      }
-    } catch (error) {
-      console.error("Failed to get AI insights:", error);
-      setAiError(error.message || "An error occurred while processing your request");
-    } finally {
-      setAiLoading(false);
-      setIsSubmittingQuestion(false); // Reset the flag when done
-    }
+    
+    // Set the active question to the current question
+    setActiveQuestion(aiQuestion);
+    
+    // Call fetchAiInsights with the question
+    await fetchAiInsights(aiQuestion);
   };
 
   const processInsights = (insights) => {
@@ -174,36 +163,26 @@ const AIInsights = ({ selectedFile, user }) => {
     if (aiInsights.isGenericResponse) {
       return (
         <div className="ai-insights-content ai-guidance">
-          <div
-            className="markdown-content guidance-content"
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(marked.parse(aiInsights.insights)),
-            }}
+          <TypedResponse 
+            content={aiInsights.insights}
+            speed={20}
+            onComplete={() => setTypingComplete(true)}
           />
         </div>
       );
     }
 
-    // Normal insights rendering
+    // Normal insights rendering with TypedResponse
     return (
       <div className="ai-insights-content">
-        <div
-          className="markdown-content"
-          dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(
-              marked.parse(
-                showFullAnalysis
-                  ? aiInsights.insights
-                  : processInsights(aiInsights.insights)
-              )
-            ),
-          }}
+        <TypedResponse 
+          content={showFullAnalysis ? aiInsights.insights : processInsights(aiInsights.insights)}
+          speed={15}
+          onComplete={() => setTypingComplete(true)}
         />
 
         {aiQuestion &&
-          /\b(sum|average|mean|median|calculate|count|total)\b/i.test(
-            aiQuestion
-          ) &&
+          /\b(sum|average|mean|median|calculate|count|total)\b/i.test(aiQuestion) &&
           aiInsights.insights.length > 1000 && (
             <button
               onClick={() => setShowFullAnalysis(!showFullAnalysis)}
@@ -351,6 +330,27 @@ const AIInsights = ({ selectedFile, user }) => {
       }
     }
   };
+
+  const copyResponseToClipboard = () => {
+    // Get the text without any markdown formatting
+    const contentToCopy = aiInsights.insights;
+    
+    // Copy to clipboard
+    navigator.clipboard.writeText(contentToCopy)
+      .then(() => {
+        // Show success message
+        setCopySuccess(true);
+        
+        // Reset success message after 2 seconds
+        setTimeout(() => {
+          setCopySuccess(false);
+        }, 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy text: ', err);
+      });
+  };
+
   return (
     <div className="ai-insights-results" ref={insightsSectionRef}>
       <div className="ai-insights-header-container">
@@ -424,6 +424,7 @@ const AIInsights = ({ selectedFile, user }) => {
                     onClick={() => {
                       // When question is clicked, set the question and display its answer
                       setAiQuestion(item.question);
+                      setActiveQuestion(item.question); // Also update the active question
                       setAiInsights({ insights: item.response });
 
                       // Scroll to the insights content area
@@ -463,10 +464,20 @@ const AIInsights = ({ selectedFile, user }) => {
       <div className="ai-insights-actions">
         <button
           className="regenerate-button"
-          onClick={() => fetchAiInsights()}
+          onClick={() => fetchAiInsights(activeQuestion || aiQuestion)}
           disabled={aiLoading}
+          title={activeQuestion ? `Regenerate response for: ${activeQuestion}` : "Regenerate general insights"}
         >
           <FaSyncAlt /> Regenerate Insights
+        </button>
+        
+        <button
+          className={`copy-button ${copySuccess ? 'success' : ''}`}
+          onClick={copyResponseToClipboard}
+          disabled={aiLoading || !typingComplete}
+          title={!typingComplete ? "Wait for response to complete" : "Copy response to clipboard"}
+        >
+          <FaCopy /> {copySuccess ? "Copied!" : "Copy Response"}
         </button>
       </div>
     </div>
