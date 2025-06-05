@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, lazy } from 'react';
+import React, { useEffect, useState, useRef} from 'react';
 import Plot from 'react-plotly.js';
 import { FaDownload } from 'react-icons/fa';
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback,} from 'react';
+import React, { useState, useEffect, useCallback} from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
 import { 
@@ -9,9 +9,9 @@ import {
   FaFilter, 
   FaTable, 
   FaSearch, 
-  FaRobot, // Replace FaLightbulb with FaRobot
+  FaRobot, 
   FaExclamationTriangle,
-  FaDownload
+  FaDownload,
 } from 'react-icons/fa';
 import {
   Chart as ChartJS,
@@ -29,8 +29,8 @@ import {
 } from 'chart.js';
 import { Bar, Line, Pie, Scatter, Doughnut, PolarArea, Radar, Bubble } from 'react-chartjs-2';
 import ThreeDChart from './ThreeDChart';
+import AIInsights from './AIInsights';
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -52,25 +52,19 @@ const AnalyzeData = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  
-  // Add these new state variables
   const [selectedOption, setSelectedOption] = useState(null);
   const [fileData, setFileData] = useState(null);
   const [dataLoading, setDataLoading] = useState(false);
   const [dataError, setDataError] = useState(null);
-  
-
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage] = useState(50); 
-  
-  // Add these near your other state declarations
   const [xAxis, setXAxis] = useState('');
   const [yAxis, setYAxis] = useState('');
   const [chartType, setChartType] = useState('none');
   const [chart3DType, setChart3DType] = useState('none'); 
   const [availableColumns, setAvailableColumns] = useState([]);
 
-  // Add these functions to handle chart type changes
+
   const handle2DChartTypeChange = (e) => {
     const newChartType = e.target.value;
     setChartType(newChartType);
@@ -91,9 +85,6 @@ const AnalyzeData = () => {
     try {
       setLoading(true);
       setError(null);
-      
-      // Get authentication token
-      // Fix the mixed operators in token access
 const token = (user?.token || user?.accessToken) || user?.data?.token;
       
       if (!token) {
@@ -109,8 +100,7 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
       });
       
       setFiles(response.data);
-      
-      // Get the saved file ID
+
       const savedFileId = localStorage.getItem('selectedFileId');
       console.log("Looking for saved file ID:", savedFileId);
 
@@ -633,7 +623,7 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
                 <FaExclamationTriangle />
               </div>
               <h3>Cannot generate chart with text-only data</h3>
-              <p>Both selected columns contain text/non-numeric data. Charts require at least one numeric axis to display properly.</p>
+              <p>Both selected columns contain text/non-numeric data. Charts require at least one numeric axis to display data properly.</p>
             </div>
           /* Add this new condition to block numeric-only pie/doughnut charts */
           ) : ((chartType === 'pie' || chartType === 'doughnut') && 
@@ -848,28 +838,13 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
 
 
 
-  // Remove the processing status renderer from renderChart:
   const renderChart = () => {
-    // Remove this part:
-    /*
-    if (processingStatus.isProcessing) {
-      return (
-        <div className="chart-processing-container">
-          ...processing indicator...
-        </div>
-      );
-    }
-    */
     
     // Ensure we have data and selected axes
     if (!fileData || !fileData.data || fileData.data.length === 0 || !xAxis || !yAxis) {
       return null;
     }
-
-    // Extract unique values for X-axis and corresponding Y values
     const processedData = processChartData(fileData.data, xAxis, yAxis);
-    
-    // Enhanced chart options with better styling
     const options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -1855,7 +1830,7 @@ const prepare3DChartData = (data, xAxisKey, yAxisKey, chartType) => {
                           <span className="file-meta">
                             {file.metadata?.rowCount || '?'} rows • Uploaded {formatDate(file.uploadDate)}
                           </span>
-                        </div>
+                                               </div>
                       </div>
                     </div>
                   ))}
@@ -1969,6 +1944,15 @@ const prepare3DChartData = (data, xAxisKey, yAxisKey, chartType) => {
         {selectedFile && selectedOption === 'visualization' && (
           <div className="data-content-section">
             {renderDataVisualization()}
+          </div>
+        )}
+
+        {selectedFile && selectedOption === 'ai' && (
+          <div className="data-content-section ai-insights-section">
+            <AIInsights 
+              selectedFile={selectedFile} 
+              user={user} 
+            />
           </div>
         )}
       </div>

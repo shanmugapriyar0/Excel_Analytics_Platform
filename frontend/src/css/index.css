@@ -119,7 +119,6 @@ body {
   margin-bottom: 40px;
 }
 
-/* Login form elements with transparent background */
 form input[type="email"],
 form input[type="password"],
 form input[type="text"] {
@@ -183,8 +182,8 @@ input::placeholder {
     bottom: 32px; 
 }
 
-form button[type="submit"],
-form button[type="button"] {
+form button[type="submit"]:not(.exclude-global-styles), 
+form button[type="button"]:not(.exclude-global-styles) {
   width: 100%;
   padding: 16px;
   border: none;
@@ -193,6 +192,12 @@ form button[type="button"] {
   cursor: pointer;
   font-weight: 600;
   transition: all 0.3s ease;
+}
+
+/* Add a utility class to exempt buttons from global styling */
+.button-auto-width {
+  width: auto !important;
+  padding: 0 15px !important;
 }
 
 /* Fix the remember me and forgot password section */

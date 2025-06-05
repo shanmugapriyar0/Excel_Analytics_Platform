@@ -9,6 +9,7 @@ const fs = require('fs');
 const ExcelFile = require('../models/ExcelFile');
 const path = require('path');
 const jwt = require('jsonwebtoken'); // <--- ADD THIS LINE
+const geminiService = require('../services/geminiService');
 
 // JWT Authentication middleware
 const protect = (req, res, next) => {
@@ -286,6 +287,78 @@ router.get('/test-auth', (req, res) => {
   } catch (error) {
     console.error('JWT verification error:', error);
     return res.status(401).json({ message: error.message });
+  }
+});
+
+// Route to get AI insights for a file
+router.post('/insights/:fileId', protect, async (req, res) => {
+  try {
+    const { questionPrompt } = req.body;
+    const file = await ExcelFile.findOne({ _id: req.params.fileId });
+    
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+    
+    // Check if the file belongs to the requesting user
+    if (file.metadata.uploadedBy.toString() !== req.user.id) {
+      return res.status(403).json({ message: 'Not authorized to access this file' });
+    }
+    
+    // Get the file data - reuse your existing file fetching logic
+    const bucket = new GridFSBucket(mongoose.connection.db, {
+      bucketName: 'excelFiles'
+    });
+    
+    // Create a temporary file path for downloading
+    const tempFilePath = path.join('./temp-uploads', `${Date.now()}-${file.filename}`);
+    
+    // Download the file from GridFS to the temporary location
+    const downloadStream = bucket.openDownloadStream(file.fileId);
+    const writeStream = fs.createWriteStream(tempFilePath);
+    
+    await new Promise((resolve, reject) => {
+      downloadStream.pipe(writeStream)
+        .on('error', reject)
+        .on('finish', resolve);
+    });
+    
+    // Read the Excel file
+    const workbook = XLSX.readFile(tempFilePath, {
+      type: 'binary',
+      codepage: 65001, // UTF-8 encoding
+      cellStyles: true
+    });
+    
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet, {
+      raw: false, // Convert all values to strings to preserve formatting
+      defval: '' // Default empty cells to empty string
+    });
+    
+    // Clean up temp file
+    fs.unlinkSync(tempFilePath);
+    
+    if (!data || data.length === 0) {
+      return res.status(400).json({ message: 'File contains no data to analyze' });
+    }
+    
+    const columns = Object.keys(data[0]);
+    
+    // Call the Gemini AI service to analyze the data
+    const analysisResult = await geminiService.analyzeData(data, columns, questionPrompt);
+    
+    res.json({
+      fileName: file.filename,
+      insights: analysisResult.insights,
+      columnStats: analysisResult.columnStats,
+      analysisDate: new Date()
+    });
+    
+  } catch (error) {
+    console.error('Error processing AI insights:', error);
+    res.status(500).json({ message: 'Error processing AI insights: ' + error.message });
   }
 });
 

@@ -1,0 +1,203 @@
+const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
+
+// Initialize the Gemini API client with your API key
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+
+// Function to analyze Excel data and generate insights
+async function analyzeData(data, columns, questionPrompt = null) {
+  try {
+    // First, handle basic validation for the user's question
+    if (questionPrompt) {
+      const tooShortOrGeneric = questionPrompt.trim().length < 5 || 
+                              ["hello", "hi", "test", "hey"].includes(questionPrompt.toLowerCase().trim());
+      
+      // Check if question appears to be random letters
+      const seemsRandom = /^[a-z]{1,5}$/i.test(questionPrompt.trim());
+      
+      if (tooShortOrGeneric || seemsRandom) {
+        return {
+          insights: `# I Need More Information
+
+It looks like your query "${questionPrompt}" is too brief or general for me to provide meaningful insights about your data.
+
+## How to Get Better Insights:
+
+1. **Ask specific questions** about your data, such as:
+   - "What's the relationship between age and purchase amount?"
+   - "Which products have the highest profit margin?"
+   - "Show me trends in customer behavior over time"
+
+2. **Mention specific columns** in your question to get more relevant analysis.
+
+3. **Try these example questions**:
+   - "What are the key patterns in my ${columns[0]} data?"
+   - "Compare the differences between ${columns.slice(0,2).join(' and ')}"
+   - "Find any outliers or anomalies in the dataset"
+
+Or simply click "Analyze with AI" for a comprehensive analysis of your entire dataset.`,
+          isGenericResponse: true
+        };
+      }
+      
+      // Check if this is a simple computational request
+      const isSimpleComputation = /\b(sum|average|mean|median|calculate|count|total)\b/i.test(questionPrompt);
+      
+      // For simple computational requests, set a flag to keep answers concise
+      if (isSimpleComputation) {
+        simpleComputationMode = true;
+      }
+    }
+    
+    // Continue with your data processing
+    const sampleSize = Math.min(data.length, 50); 
+    const dataSample = data.slice(0, sampleSize);
+    const columnStats = {};
+    columns.forEach(column => {
+      const values = data.map(row => row[column]);
+      const numericValues = values
+        .map(v => parseFloat(v))
+        .filter(v => !isNaN(v));
+      
+      columnStats[column] = {
+        type: numericValues.length / values.length > 0.5 ? 'numeric' : 'categorical',
+        uniqueValues: [...new Set(values)].length,
+        hasMissingValues: values.some(v => v === null || v === undefined || v === ''),
+        sampleValues: [...new Set(values)].slice(0, 5)
+      };
+      
+      if (numericValues.length > 0) {
+        columnStats[column].min = Math.min(...numericValues);
+        columnStats[column].max = Math.max(...numericValues);
+        columnStats[column].avg = numericValues.reduce((a, b) => a + b, 0) / numericValues.length;
+        // Add quartile information
+        numericValues.sort((a, b) => a - b);
+        columnStats[column].median = numericValues[Math.floor(numericValues.length / 2)];
+        columnStats[column].q1 = numericValues[Math.floor(numericValues.length / 4)];
+        columnStats[column].q3 = numericValues[Math.floor(3 * numericValues.length / 4)];
+      }
+    });
+    
+    // Enhanced prompt with more detailed instructions and response formatting guidance
+    let prompt = `You are an expert data analyst. Analyze this dataset thoroughly:
+
+Dataset Summary:
+- Total records: ${data.length}
+- Columns: ${columns.join(', ')}
+- Sample: ${JSON.stringify(dataSample.slice(0, 15), null, 0)}
+
+Column Statistics:
+${JSON.stringify(columnStats, null, 2)}`;
+
+    if (questionPrompt) {
+      // Add the user's specific question
+      prompt += `\n\nUser Question: "${questionPrompt}"
+
+Provide a focused answer to this specific question. Keep your response proportionate to the complexity of the question:
+1. For simple computational questions (sums, averages, etc.), give a direct answer with minimal explanation.
+2. For more complex analytical questions, provide appropriate detail and context.`;
+    } else {
+      // If no question, user wants a general analysis
+      prompt += `\n\nProvide a general analysis of this dataset.`;
+    }
+    
+    // Add instructions for response format
+    prompt += `\n\nFormat guidelines:
+- Use markdown formatting for readability
+- Be concise but thorough
+- Match the depth of your analysis to the complexity of the question
+- For simple questions, give simple answers
+- For complex questions, show your work and reasoning
+- Avoid unnecessary verbosity
+- Include only relevant details for the specific question asked`;
+
+    // Try the correct model name - use "gemini-pro" instead of "gemini-1.0-pro"
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-pro", // This is the correct model name
+      generationConfig: {
+        temperature: 0.1,   // Lower temperature for more factual responses
+        topP: 0.9,          // Slightly increased for better coverage
+        topK: 40,
+        maxOutputTokens: 2048 // Increased for more comprehensive responses
+      }
+    });
+
+    // Add retry logic with exponential backoff
+    let retries = 0;
+    const maxRetries = 3;
+    let lastError = null;
+    
+    while (retries <= maxRetries) {
+      try {
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const text = response.text();
+        
+        // Validate the response quality
+        if (text.length < 100) {
+          throw new Error("Response too short, retrying...");
+        }
+        
+        return {
+          insights: text,
+          columnStats
+        };
+      } catch (error) {
+        lastError = error;
+        console.error('API error:', error.message);
+        
+        // Check if it's a rate limit error
+        if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
+          const delay = Math.pow(2, retries) * 1000; // Exponential backoff
+          console.log(`Rate limit hit. Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          retries++;
+        } else if (error.message.includes('404') || error.message.includes('not found')) {
+          // If model not found, try a fallback model
+          try {
+            console.log("Trying fallback model gemini-1.5-flash...");
+            const fallbackModel = genAI.getGenerativeModel({
+              model: "gemini-1.5-flash",
+              generationConfig: {
+                temperature: 0.1,
+                topP: 0.9,
+                topK: 40,
+                maxOutputTokens: 2048
+              }
+            });
+            
+            const result = await fallbackModel.generateContent(prompt);
+            const response = await result.response;
+            const text = response.text();
+            
+            // Validate the response quality
+            if (text.length < 100) {
+              throw new Error("Response too short, retrying...");
+            }
+            
+            return {
+              insights: text,
+              columnStats
+            };
+          } catch (fallbackError) {
+            console.error('Fallback model error:', fallbackError.message);
+            lastError = fallbackError;
+            break;
+          }
+        } else {
+          // For other errors, don't retry
+          break;
+        }
+      }
+    }
+    
+    // If we got here, all retries failed
+    throw new Error(lastError || 'AI analysis failed after multiple attempts');
+  } catch (error) {
+    console.error('Gemini AI analysis error:', error);
+    throw new Error(`AI analysis failed: ${error.message}`);
+  }
+}
+
+module.exports = {
+  analyzeData
+};

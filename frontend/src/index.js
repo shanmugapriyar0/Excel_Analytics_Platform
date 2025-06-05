@@ -5,6 +5,7 @@ import { store } from './redux/store';
 import App from './App';
 import './css/index.css';
 import './css/responsive.css';
+import './css/AIInsights.css'; // Add this line
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
