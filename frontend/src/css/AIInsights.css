@@ -846,3 +846,24 @@ background-color: #2e7d32;
 .copy-button.success {
   animation: copied-flash 1s;
 }
+/* Add smooth scrolling to the entire document */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Add a subtle entrance animation for the content */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ai-insights-content {
+  animation: slideDown 0.3s ease-out;
+  scroll-margin-top: 20px; /* Add space above when scrolling to this element */
+}

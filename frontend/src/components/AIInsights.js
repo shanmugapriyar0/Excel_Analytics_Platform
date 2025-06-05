@@ -27,18 +27,22 @@ const AIInsights = ({ selectedFile, user }) => {
   const [copySuccess, setCopySuccess] = useState(false); 
   const [typingComplete, setTypingComplete] = useState(false); 
   const insightsSectionRef = useRef(null);
+  // Add a new ref to track the answer content area
+  const responseContentRef = useRef(null);
+
   const fetchAiInsights = async (question = null) => {
     if (!selectedFile) return;
 
     try {
       setAiLoading(true);
       setAiError(null);
+      setTypingComplete(false);
       
       // Store the active question being processed
       if (question) {
         setActiveQuestion(question);
       } else {
-        setActiveQuestion(null); // Reset for general insights
+        setActiveQuestion(null);
       }
 
       const token = user?.token || user?.accessToken || user?.data?.token;
@@ -91,9 +95,15 @@ const AIInsights = ({ selectedFile, user }) => {
         setAiQuestion("");
       }
 
-      if (insightsSectionRef.current) {
-        insightsSectionRef.current.scrollIntoView({ behavior: "smooth" });
-      }
+      // Scroll to the answer content after a small delay to ensure DOM is updated
+      setTimeout(() => {
+        if (responseContentRef.current) {
+          responseContentRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+        }
+      }, 100);
       
       return response.data;
     } catch (error) {
@@ -162,7 +172,7 @@ const AIInsights = ({ selectedFile, user }) => {
     // Check if this is a generic response for a vague query
     if (aiInsights.isGenericResponse) {
       return (
-        <div className="ai-insights-content ai-guidance">
+        <div className="ai-insights-content ai-guidance" ref={responseContentRef}>
           <TypedResponse 
             content={aiInsights.insights}
             speed={20}
@@ -174,7 +184,7 @@ const AIInsights = ({ selectedFile, user }) => {
 
     // Normal insights rendering with TypedResponse
     return (
-      <div className="ai-insights-content">
+      <div className="ai-insights-content" ref={responseContentRef}>
         <TypedResponse 
           content={showFullAnalysis ? aiInsights.insights : processInsights(aiInsights.insights)}
           speed={15}
