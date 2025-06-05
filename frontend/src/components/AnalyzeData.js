@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback} from 'react';
 import axios from 'axios';
 import { useSelector } from 'react-redux';
@@ -1178,12 +1179,13 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
           data={processedData} 
           options={{
             ...options,
+            indexAxis: 'y', // This makes the bars horizontal
             scales: {
-              x: {
+              y: {
                 grid: { display: false },
                 ticks: { font: { size: 13 } }
               },
-              y: {
+              x: {
                 grid: { color: 'rgba(0, 0, 0, 0.05)' },
                 ticks: { font: { size: 13 } }
               }
@@ -1444,7 +1446,7 @@ const token = (user?.token || user?.accessToken) || user?.data?.token;
           data={processedData} 
           options={{
             ...options,
-            indexAxis: 'x',
+            indexAxis: 'x', // This is already correct (makes vertical columns)
             scales: {
               x: {
                 grid: { display: false },
