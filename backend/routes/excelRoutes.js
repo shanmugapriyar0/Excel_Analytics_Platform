@@ -212,7 +212,7 @@ router.get('/download/:fileId', protect, async (req, res) => {
     // Log the download activity
     await Activity.create({
       userId: req.user.id,
-      fileId: ObjectId.createFromHexString(req.params.fileId),
+      fileId: new ObjectId(req.params.fileId),
       activityType: 'download',
       fileDetails: {
         filename: file.filename
@@ -267,13 +267,15 @@ router.get('/data/:fileId', protect, async (req, res) => {
     // Clean up temp file
     fs.unlinkSync(tempFilePath);
     
-    // Log the view activity
+    // Only create view activity, not analysis activity
     await Activity.create({
       userId: req.user.id,
-      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      fileId: new mongoose.Types.ObjectId(req.params.fileId), // FIXED: Added 'new'
       activityType: 'view',
-      fileDetails: {
-        filename: file.filename
+      fileDetails: { 
+        filename: file.filename,
+        rowCount: file.metadata?.rowCount,
+        columnCount: file.metadata?.headers?.length
       }
     });
     
@@ -454,7 +456,7 @@ router.get('/data/:fileId', protect, async (req, res) => {
     // Only create view activity, not analysis activity
     await Activity.create({
       userId: req.user.id,
-      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      fileId: new mongoose.Types.ObjectId(req.params.fileId),  // FIX: Added "new" keyword
       activityType: 'view',
       fileDetails: { 
         filename: file.filename,
@@ -489,7 +491,7 @@ router.post('/analyze/:fileId', protect, async (req, res) => {
     // Create analysis activity ONLY when user actively performs analysis
     await Activity.create({
       userId: req.user.id,
-      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      fileId: new mongoose.Types.ObjectId(req.params.fileId),
       activityType: 'analysis',
       fileDetails: { 
         filename: file.filename,

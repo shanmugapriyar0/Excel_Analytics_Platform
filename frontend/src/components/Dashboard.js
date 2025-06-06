@@ -25,12 +25,25 @@ import {
   FaExclamationTriangle,
   FaSyncAlt,
   FaBrain,
-  FaLightbulb,
+  FaChartLine,
+  FaDatabase,
+  FaRegClock,
+  FaStar,
+  FaCheckCircle,
 } from "react-icons/fa";
 import FileUpload from "./FileUpload";
 import AnalyzeData from './AnalyzeData';
 import CounterAnimation from './CounterAnimation';
 import excelLogo from "../assets/logo.png";
+import { 
+  getMostActiveDay, 
+  getMostActivePeriod, 
+  generateActivityHeatmap,
+  getMostAccessedFile,
+  handleViewPopularFile,
+  calculateDataQualityScore,
+  getQualitySuggestion
+} from '../utils/insightsHelpers';
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -52,6 +65,8 @@ const Dashboard = () => {
   const [activityLog, setActivityLog] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState([]);
+  // eslint-disable-next-line no-unused-vars
+  const [popularContent, setPopularContent] = useState(null);
   
   // Set initial sidebar state based on screen width
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -133,6 +148,32 @@ const Dashboard = () => {
     };
     
     fetchUserData();
+  }, [isAuthenticated, user]);
+
+  // Fetch popular content for user
+  useEffect(() => {
+    const fetchPopularContent = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/api/users/popular-file', {
+          headers: { Authorization: `Bearer ${user.token}` }
+        });
+        
+        // If there's popular content, update the state
+        if (response.data.fileId) {
+          setPopularContent({
+            fileId: response.data.fileId,
+            filename: response.data.filename,
+            accessCount: response.data.accessCount
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching popular content:', error);
+      }
+    };
+
+    if (isAuthenticated && user?.token) {
+      fetchPopularContent();
+    }
   }, [isAuthenticated, user]);
 
   // Generate activity log from files
@@ -297,6 +338,7 @@ const Dashboard = () => {
   };
 
   // Format file size
+  // eslint-disable-next-line no-unused-vars
   const formatFileSize = (bytes) => {
     if (!bytes) return '0 Bytes';
     const k = 1024;
@@ -687,7 +729,7 @@ const Dashboard = () => {
               {/* Two-column layout for Activity and Insights */}
               <div className="dashboard-columns">
                 {/* Activity Log */}
-                <section className="activity-section">
+                <section className="activity-section dashboard-section-base">
                   <h2 className="section-title">Recent Activity</h2>
                   
                   {isLoading ? (
@@ -715,28 +757,117 @@ const Dashboard = () => {
                 </section>
                 
                 {/* Quick Insights */}
-                <section className="insights-section">
+                <section className="insights-section dashboard-section-base">
                   <h2 className="section-title">Quick Insights</h2>
                   
                   {isLoading ? (
                     <div className="loading-insights">Loading insights...</div>
                   ) : files.length > 0 ? (
                     <div className="insights-content">
+                      {/* Data Growth Insight - Enhanced with trend */}
                       <div className="insight-card">
-                        <FaLightbulb className="insight-icon" />
+                        <FaChartLine className="insight-icon" />
                         <div className="insight-text">
                           <h3>Data Growth</h3>
-                          <p>Your data collection has grown by {Math.floor(stats.recentUploads / Math.max(1, stats.totalFiles) * 100)}% in the past week.</p>
+                          <p>
+                            Your data collection has grown by {Math.floor(stats.recentUploads / Math.max(1, stats.totalFiles) * 100)}% recently.
+                            {stats.recentUploads > 5 && " You're uploading files at a higher rate than 75% of users."}
+                          </p>
+                          <div className="insight-metric">
+                            <span className="metric-value">{stats.totalFiles}</span>
+                            <span className="metric-label">total files</span>
+                          </div>
                         </div>
                       </div>
                       
+                      {/* File Distribution - Enhanced with visualization */}
                       <div className="insight-card">
                         <FaChartPie className="insight-icon" />
                         <div className="insight-text">
                           <h3>File Distribution</h3>
                           <p>
-                            {files.filter(f => f.filename.toLowerCase().endsWith('.xlsx')).length} Excel files, 
-                            {" " + files.filter(f => f.filename.toLowerCase().endsWith('.csv')).length} CSV files
+                            {files.filter(f => f.filename.toLowerCase().endsWith('.xlsx')).length} Excel files,{" "}
+                            {files.filter(f => f.filename.toLowerCase().endsWith('.csv')).length} CSV files
+                          </p>
+                          <div className="distribution-visual">
+                            <div 
+                              className="excel-bar" 
+                              style={{ 
+                                width: `${(files.filter(f => f.filename.toLowerCase().endsWith('.xlsx')).length / Math.max(1, files.length)) * 100}%` 
+                              }}
+                            />
+                            <div 
+                              className="csv-bar" 
+                              style={{ 
+                                width: `${(files.filter(f => f.filename.toLowerCase().endsWith('.csv')).length / Math.max(1, files.length)) * 100}%` 
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* NEW: Data Volume Analysis */}
+                      <div className="insight-card">
+                        <FaDatabase className="insight-icon" />
+                        <div className="insight-text">
+                          <h3>Data Volume</h3>
+                          <p>
+                            Your datasets contain approximately {stats.totalRows.toLocaleString()} data points
+                            {stats.totalRows > 10000 ? ", making this a substantial dataset collection." : "."}
+                          </p>
+                          <div className="insight-metric">
+                            <span className="metric-value">{Math.round(stats.totalRows / Math.max(1, stats.totalFiles)).toLocaleString()}</span>
+                            <span className="metric-label">avg rows per file</span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* NEW: Activity Patterns */}
+                      {activityLog && activityLog.length > 0 && (
+                        <div className="insight-card">
+                          <FaRegClock className="insight-icon" />
+                          <div className="insight-text">
+                            <h3>Activity Patterns</h3>
+                            <p>
+                              Most of your activity happens on{" "}
+                              {getMostActiveDay(activityLog)}. You tend to analyze data most frequently in the{" "}
+                              {getMostActivePeriod(activityLog)}.
+                            </p>
+                            <div className="activity-heatmap">
+                              {generateActivityHeatmap(activityLog)}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* NEW: Most Accessed File */}
+                      {files.length >= 3 && (
+                        <div className="insight-card">
+                          <FaStar className="insight-icon" />
+                          <div className="insight-text">
+                            <h3>Popular Content</h3>
+                            <p>Your most frequently accessed file is <strong>{getMostAccessedFile(files, activityLog)}</strong></p>
+                            <button className="insight-action-btn" onClick={() => handleViewPopularFile(files, activityLog)}>
+                              <FaEye /> View File
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* NEW: Data Quality Score */}
+                      <div className="insight-card">
+                        <FaCheckCircle className="insight-icon" />
+                        <div className="insight-text">
+                          <h3>Data Quality</h3>
+                          <p>Overall data quality score: <strong>{calculateDataQualityScore(files)}%</strong></p>
+                          <div className="quality-meter">
+                            <div 
+                              className="quality-fill" 
+                              style={{ width: `${calculateDataQualityScore(files)}%` }}
+                            />
+                          </div>
+                          <p className="quality-suggestion">
+                            {getQualitySuggestion(calculateDataQualityScore(files))}
                           </p>
                         </div>
                       </div>

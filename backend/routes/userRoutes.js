@@ -3,6 +3,7 @@ const router = express.Router();
 const Activity = require('../models/Activity');
 const ExcelFile = require('../models/ExcelFile');
 const jwt = require('jsonwebtoken');
+const mongoose = require('mongoose');
 
 // Reuse your protect middleware
 const protect = (req, res, next) => {
@@ -108,6 +109,55 @@ router.delete('/activity/cleanup', protect, async (req, res) => {
     });
   } catch (error) {
     console.error('Error cleaning up activities:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add this new endpoint to get the most accessed file
+
+// Get most popular/accessed file
+router.get('/popular-file', protect, async (req, res) => {
+  try {
+    // Count activities by file ID to find most accessed
+    const fileCounts = await Activity.aggregate([
+      // Only include this user's activities
+      { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
+      
+      // Only count view, analysis, and insight activities (not uploads)
+      { $match: { activityType: { $in: ['view', 'analysis', 'insight'] } } },
+      
+      // Count activities per file
+      { $group: {
+          _id: '$fileId',
+          count: { $sum: 1 },
+          filename: { $first: '$fileDetails.filename' }
+        }
+      },
+      
+      // Sort by count descending to get most popular first
+      { $sort: { count: -1 } },
+      
+      // Just get the top result
+      { $limit: 1 }
+    ]);
+    
+    if (fileCounts.length > 0) {
+      res.json({ 
+        fileId: fileCounts[0]._id,
+        filename: fileCounts[0].filename,
+        accessCount: fileCounts[0].count
+      });
+    } else {
+      res.json({ 
+        fileId: null, 
+        filename: null, 
+        accessCount: 0,
+        message: 'No popular content yet'
+      });
+    }
+    
+  } catch (error) {
+    console.error('Error fetching popular file:', error);
     res.status(500).json({ message: 'Server error' });
   }
 });

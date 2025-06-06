@@ -299,17 +299,6 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
     grid-template-columns: 1fr;
   }
 }
-
-/* Activity section */
-.activity-section,
-.insights-section {
-  background-color: white;
-  border-radius: 10px;
-  padding: 2.5rem;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-  height: 100%;
-}
-
 .section-title {
   font-size: 1.9rem;
   font-weight: 600;
@@ -317,12 +306,6 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
   margin: 0 0 2rem 0;
   padding-bottom: 1rem;
   border-bottom: 1px solid #f0f0f0;
-}
-
-.activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
 }
 
 .activity-item {
@@ -402,13 +385,6 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
   color: #777;
 }
 
-/* Insights section */
-.insights-content {
-  display: flex;
-  flex-direction: column;
-  gap: 1.8rem;
-}
-
 .insight-card {
   display: flex;
   align-items: flex-start;
@@ -441,6 +417,26 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
   color: #333;
   margin: 0 0 0.5rem 0;
 }
+/* Insight metrics */
+.insight-metric {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
+}
+
+.metric-value {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: #2e7d32;
+  line-height: 1;
+}
+
+.metric-label {
+  font-size: 1.3rem;
+  color: #666;
+  margin-bottom: 0.2rem;
+}
 
 .insight-text p {
   font-size: 1.4rem;
@@ -463,12 +459,138 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
   cursor: pointer;
   transition: all 0.2s ease;
 }
+.distribution-visual {
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  margin-top: 1.5rem;
+  display: flex;
+  overflow: hidden;
+}
 
-.try-ai-btn:hover {
-  background-color: #1b5e20;
+.excel-bar {
+  height: 100%;
+  background-color: #2e7d32;
+  transition: width 0.5s ease-out;
+}
+
+.csv-bar {
+  height: 100%;
+  background-color: #f06f41;
+  transition: width 0.5s ease-out;
+}
+
+/* Activity heatmap */
+.heatmap-container {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 1.2rem;
+}
+
+.heatmap-day {
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.intensity-0 {
+  background-color: #eee;
+}
+
+.intensity-1 {
+  background-color: #dcf3dc;
+}
+
+.intensity-2 {
+  background-color: #a5d6a7;
+}
+
+.intensity-3 {
+  background-color: #66bb6a;
+}
+
+.intensity-4 {
+  background-color: #2e7d32;
+}
+
+.quality-meter {
+  height: 8px;
+  background-color: #f0f0f0;
+  border-radius: 4px;
+  margin: 1.2rem 0;
+  overflow: hidden;
+}
+
+.quality-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #ff9800, #4caf50);
+  transition: width 0.8s ease-out;
+}
+
+.quality-suggestion {
+  font-size: 1.3rem;
+  color: #666;
+  font-style: italic;
+}
+
+/* Insight action buttons */
+.insight-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1.5rem;
+  border-radius: 20px;
+  background-color: rgba(76, 175, 80, 0.1);
+  color: #2e7d32;
+  border: none;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: 1.2rem;
+  transition: all 0.3s ease;
+}
+
+.insight-action-btn:hover {
+  background-color: rgba(76, 175, 80, 0.2);
   transform: translateY(-2px);
 }
 
+/* Add animation for improved UX */
+@keyframes insightEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.insights-content .insight-card:nth-child(1) {
+  animation: insightEnter 0.5s ease-out 0.1s both;
+}
+
+.insights-content .insight-card:nth-child(2) {
+  animation: insightEnter 0.5s ease-out 0.2s both;
+}
+
+.insights-content .insight-card:nth-child(3) {
+  animation: insightEnter 0.5s ease-out 0.3s both;
+}
+
+.insights-content .insight-card:nth-child(4) {
+  animation: insightEnter 0.5s ease-out 0.4s both;
+}
+
+.insights-content .insight-card:nth-child(5) {
+  animation: insightEnter 0.5s ease-out 0.5s both;
+}
+
+.insights-content .insight-card:nth-child(6) {
+  animation: insightEnter 0.5s ease-out 0.6s both;
+}
 /* Error message */
 .error-message {
   display: flex;
@@ -722,24 +844,30 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
   gap: 3rem;
   margin-top: 3.5rem;
   margin-bottom: 3.5rem;
+  align-items: start; /* Critical fix - don't stretch children */
 }
 
-/* Enhanced Activity and Insights sections */
+/* Activity section */
 .activity-section,
 .insights-section {
+height: 690px !important; 
+  min-height: 0 !important; 
+  max-height: 690px !important; 
+  overflow: hidden; 
+  display: flex;
+  flex-direction: column;
+  padding: 2.8rem;
   background-color: white;
   border-radius: 16px;
-  padding: 2.8rem;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
-  height: 100%;
   border: 1px solid rgba(0, 0, 0, 0.04);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .activity-section:hover,
 .insights-section:hover {
-  transform: translateY(-5px);
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transform: none; /* Remove the translateY that affects layout */
 }
 
 .section-title {
@@ -750,6 +878,8 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
   padding-bottom: 1.2rem;
   border-bottom: 2px solid rgba(165, 214, 167, 0.25);
   position: relative;
+  flex-shrink: 0; 
+  margin-bottom: 1.8rem !important; 
 }
 
 .section-title::after {
@@ -763,21 +893,25 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
 }
 
 .activity-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1.8rem;
-  max-height: 500px;
-  overflow-y: auto;
+flex: 1; /* Take remaining space */
+  overflow-y: auto !important; /* Force scrolling */
   padding-right: 10px;
   margin-right: -10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  max-height: calc(690px - 6.6rem - 2px); /* Container height minus padding and title */
+  scroll-behavior: smooth;
 }
 
 /* Custom scrollbar for activity list */
-.activity-list::-webkit-scrollbar {
+.activity-list::-webkit-scrollbar,
+.insights-content::-webkit-scrollbar {
   width: 6px;
 }
 
-.activity-list::-webkit-scrollbar-track {
+.activity-list::-webkit-scrollbar-track,
+.insights-content::-webkit-scrollbar-track {
   background: #f5f5f5;
   border-radius: 10px;
 }
@@ -832,6 +966,9 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 5px;
 }
 .insight-card:hover {
   transform: translateY(-5px);
@@ -842,10 +979,9 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
 .insight-icon {
   font-size: 2.4rem;
   color: var(--primary-green);
-  background-color: rgba(165, 214, 167, 0.2);
   width: 50px;
   height: 50px;
-  border-radius: 50%;
+  border-radius: 23%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1062,4 +1198,74 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
     opacity: 1;
     transform: translateY(0); /* Only reset to neutral position */
   }
+}
+
+/* Fix by separating section styling */
+
+/* Specific Activity Section styling */
+.activity-section {
+  background-color: white;
+  border-radius: 16px;
+  padding: 2.8rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.3s ease;
+  height: auto;
+  min-height: 680px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Specific Insights Section styling */
+.insights-section {
+  background-color: white;
+  border-radius: 16px;
+  padding: 2.8rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+  border: 1px solid rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.3s ease;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Remove the hover transform that affects layout */
+.activity-section:hover,
+.insights-section:hover {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  transform: none; /* Remove the translateY that affects layout */
+}
+
+/* Make sure the insights content fills the container properly */
+.insights-content {
+flex: 1; /* Take remaining space */
+  overflow-y: auto !important; /* Force scrolling */
+  padding-right: 10px;
+  margin-right: -10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.8rem;
+  max-height: calc(690px - 6.6rem - 2px); /* Container height minus padding and title */
+  scroll-behavior: smooth;
+}
+
+/* Make sure the activity list scrolls independently */
+.activity-list {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 10px;
+  margin-right: -10px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Fix the dashboard columns to prevent stretching */
+.dashboard-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  margin-top: 3.5rem;
+  margin-bottom: 3.5rem;
+  align-items: start; /* Critical fix - don't stretch children */
 }
