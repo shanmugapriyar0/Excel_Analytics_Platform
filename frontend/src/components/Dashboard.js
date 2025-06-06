@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { logout, reset } from "../redux/authSlice";
@@ -66,7 +66,11 @@ const Dashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [notifications, setNotifications] = useState([]);
   // eslint-disable-next-line no-unused-vars
-  const [popularContent, setPopularContent] = useState(null);
+  const [popularContent, setPopularContent] = useState({
+    fileId: null,
+    filename: null,
+    accessCount: 0
+  });
   
   // Set initial sidebar state based on screen width
   const [sidebarOpen, setSidebarOpen] = useState(() => {
@@ -96,85 +100,88 @@ const Dashboard = () => {
   }, [isAuthenticated, navigate]);
 
   // Fetch user files and stats
-  useEffect(() => {
-    if (!isAuthenticated || !user?.token) return;
-
-    const fetchUserData = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        // Get user's Excel files
-        const filesResponse = await axios.get('http://localhost:5000/api/excel/files', {
-          headers: {
-            Authorization: `Bearer ${user.token}`
-          }
-        });
-        
-        setFiles(filesResponse.data);
-        
-        // Calculate statistics
-        const totalFiles = filesResponse.data.length;
-        const totalRows = filesResponse.data.reduce((acc, file) => 
-          acc + (file.metadata?.rowCount || 0), 0);
-        const recentUploads = filesResponse.data.filter(
-          file => new Date(file.uploadDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-        ).length;
-        
-        // Generate mock recent views based on files (in a real app, you'd track this data)
-        const recentViews = Math.min(
-          Math.floor(totalFiles * 2.5 + Math.random() * 5),
-          totalFiles * 10
-        );
-        
-        setStats({
-          totalFiles,
-          totalRows,
-          recentUploads,
-          recentViews
-        });
-        
-        // Generate activity log based on user's files
-        generateActivityLog(filesResponse.data);
-        
-        // Generate sample notifications
-        generateSampleNotifications(totalFiles);
-        
-      } catch (err) {
-        console.error("Error fetching user data:", err);
-        setError(err.response?.data?.message || "Failed to fetch user data");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    fetchUserData();
-  }, [isAuthenticated, user]);
+  const fetchUserData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      // Get user's Excel files
+      const filesResponse = await axios.get('http://localhost:5000/api/excel/files', {
+        headers: {
+          Authorization: `Bearer ${user?.token}`
+        }
+      });
+      
+      setFiles(filesResponse.data);
+      
+      // Calculate statistics
+      const totalFiles = filesResponse.data.length;
+      const totalRows = filesResponse.data.reduce((acc, file) => 
+        acc + (file.metadata?.rowCount || 0), 0);
+      const recentUploads = filesResponse.data.filter(
+        file => new Date(file.uploadDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      ).length;
+      
+      // Generate mock recent views based on files (in a real app, you'd track this data)
+      const recentViews = Math.min(
+        Math.floor(totalFiles * 2.5 + Math.random() * 5),
+        totalFiles * 10
+      );
+      
+      setStats({
+        totalFiles,
+        totalRows,
+        recentUploads,
+        recentViews
+      });
+      
+      // Generate activity log based on user's files
+      generateActivityLog(filesResponse.data);
+      
+      // Generate sample notifications
+      generateSampleNotifications(totalFiles);
+      
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setError(err.response?.data?.message || "Failed to fetch user data");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user]); // Add user as dependency
 
   // Fetch popular content for user
-  useEffect(() => {
-    const fetchPopularContent = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/api/users/popular-file', {
-          headers: { Authorization: `Bearer ${user.token}` }
-        });
-        
-        // If there's popular content, update the state
-        if (response.data.fileId) {
-          setPopularContent({
-            fileId: response.data.fileId,
-            filename: response.data.filename,
-            accessCount: response.data.accessCount
-          });
+  const fetchPopularContent = useCallback(async () => {
+    try {
+      const token = user?.token || user?.accessToken || localStorage.getItem('token');
+      const response = await axios.get('http://localhost:5000/api/users/popular-file', {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      } catch (error) {
-        console.error('Error fetching popular content:', error);
+      });
+      
+      // Update state with popular content
+      if (response.data.filename) {
+        setPopularContent({
+          fileId: response.data.fileId,
+          filename: response.data.filename,
+          accessCount: response.data.accessCount
+        });
       }
-    };
-
-    if (isAuthenticated && user?.token) {
-      fetchPopularContent();
+    } catch (error) {
+      console.error('Error fetching popular content:', error);
     }
-  }, [isAuthenticated, user]);
+  }, [user]); // Add user as dependency
+
+  // Call this in your useEffect along with other data fetching
+  useEffect(() => {
+    if (user && isAuthenticated) {
+      const loadData = async () => {
+        await fetchUserData();
+        await fetchPopularContent();
+      };
+      
+      loadData();
+    }
+  }, [user, isAuthenticated, fetchUserData, fetchPopularContent]); // Now properly memoized
 
   // Generate activity log from files
   const generateActivityLog = (filesData) => {

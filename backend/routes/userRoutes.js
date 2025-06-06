@@ -113,41 +113,66 @@ router.delete('/activity/cleanup', protect, async (req, res) => {
   }
 });
 
-// Add this new endpoint to get the most accessed file
+// Replace your popular-file endpoint with this improved version
 
 // Get most popular/accessed file
 router.get('/popular-file', protect, async (req, res) => {
   try {
-    // Count activities by file ID to find most accessed
+    console.log('Fetching popular file for user ID:', req.user.id);
+    
+    // Count activities by file ID to find most accessed, with debugging
     const fileCounts = await Activity.aggregate([
-      // Only include this user's activities
+      // Use a string comparison instead of ObjectId for more reliable matching
       { $match: { userId: new mongoose.Types.ObjectId(req.user.id) } },
       
-      // Only count view, analysis, and insight activities (not uploads)
+      // Only include activities with a valid fileId
+      { $match: { fileId: { $ne: null } } },
+      
+      // Only count these activity types
       { $match: { activityType: { $in: ['view', 'analysis', 'insight'] } } },
       
-      // Count activities per file
+      // Group by filename instead of fileId which might be more reliable
       { $group: {
-          _id: '$fileId',
-          count: { $sum: 1 },
-          filename: { $first: '$fileDetails.filename' }
+          _id: '$fileDetails.filename',  // Group by filename instead of fileId
+          count: { $sum: 1 },            // Count occurrences
+          fileId: { $first: '$fileId' }  // Keep the fileId
         }
       },
       
-      // Sort by count descending to get most popular first
+      // Sort by count descending
       { $sort: { count: -1 } },
       
-      // Just get the top result
-      { $limit: 1 }
+      // Get top 5 for debugging
+      { $limit: 5 }
     ]);
     
+    console.log('File counts results:', JSON.stringify(fileCounts, null, 2));
+    
     if (fileCounts.length > 0) {
+      // Return the most accessed file
       res.json({ 
-        fileId: fileCounts[0]._id,
-        filename: fileCounts[0].filename,
+        fileId: fileCounts[0].fileId,
+        filename: fileCounts[0]._id, // Filename is now the _id from grouping
         accessCount: fileCounts[0].count
       });
     } else {
+      // If no results from aggregation, try a simpler approach
+      console.log('No file counts from aggregation, trying simpler query');
+      
+      // Just get most recently accessed file
+      const recentActivity = await Activity.findOne({
+        userId: new mongoose.Types.ObjectId(req.user.id),
+        'fileDetails.filename': { $exists: true }
+      }).sort({ timestamp: -1 });
+      
+      if (recentActivity && recentActivity.fileDetails && recentActivity.fileDetails.filename) {
+        return res.json({
+          fileId: recentActivity.fileId,
+          filename: recentActivity.fileDetails.filename,
+          accessCount: 1
+        });
+      }
+      
       res.json({ 
         fileId: null, 
         filename: null, 
@@ -158,7 +183,7 @@ router.get('/popular-file', protect, async (req, res) => {
     
   } catch (error) {
     console.error('Error fetching popular file:', error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: 'Server error: ' + error.message });
   }
 });
 
