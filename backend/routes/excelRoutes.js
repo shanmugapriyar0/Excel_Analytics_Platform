@@ -7,6 +7,7 @@ const { GridFSBucket, ObjectId } = require('mongodb');
 const XLSX = require('xlsx');
 const fs = require('fs');
 const ExcelFile = require('../models/ExcelFile');
+const Activity = require('../models/Activity'); // <--- ADD THIS LINE
 const path = require('path');
 const jwt = require('jsonwebtoken'); // <--- ADD THIS LINE
 const geminiService = require('../services/geminiService');
@@ -143,6 +144,18 @@ router.post('/upload', protect, upload.single('excelFile'), async (req, res) => 
     // Delete temp file
     fs.unlinkSync(req.file.path);
     
+    // Log the activity
+    await Activity.create({
+      userId: req.user.id,
+      fileId: fileId,
+      activityType: 'upload',
+      fileDetails: {
+        filename: req.file.originalname,
+        rowCount: rowCount,
+        columnCount: headers.length
+      }
+    });
+    
     // Return success response
     return res.status(200).json({
       message: existingFile ? 'File updated successfully' : 'File uploaded successfully',
@@ -195,6 +208,16 @@ router.get('/download/:fileId', protect, async (req, res) => {
     
     bucket.openDownloadStream(ObjectId.createFromHexString(req.params.fileId))
       .pipe(res);
+    
+    // Log the download activity
+    await Activity.create({
+      userId: req.user.id,
+      fileId: ObjectId.createFromHexString(req.params.fileId),
+      activityType: 'download',
+      fileDetails: {
+        filename: file.filename
+      }
+    });
   } catch (error) {
     console.error('Error downloading file:', error);
     res.status(500).json({ message: 'Server error' });
@@ -243,6 +266,16 @@ router.get('/data/:fileId', protect, async (req, res) => {
     
     // Clean up temp file
     fs.unlinkSync(tempFilePath);
+    
+    // Log the view activity
+    await Activity.create({
+      userId: req.user.id,
+      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      activityType: 'view',
+      fileDetails: {
+        filename: file.filename
+      }
+    });
     
     // Ensure proper content type for handling UTF-8
     res.setHeader('Content-Type', 'application/json; charset=utf-8');
@@ -349,6 +382,19 @@ router.post('/insights/:fileId', protect, async (req, res) => {
     // Call the Gemini AI service to analyze the data
     const analysisResult = await geminiService.analyzeData(data, columns, questionPrompt);
     
+    // Only create the activity AFTER successfully generating insights
+    // and as a response to a user-initiated action
+    await Activity.create({
+      userId: req.user.id,
+      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      activityType: 'insight',
+      fileDetails: { 
+        filename: file.filename,
+        rowCount: file.metadata?.rowCount, 
+        columnCount: file.metadata?.headers?.length
+      }
+    });
+    
     res.json({
       fileName: file.filename,
       insights: analysisResult.insights,
@@ -359,6 +405,104 @@ router.post('/insights/:fileId', protect, async (req, res) => {
   } catch (error) {
     console.error('Error processing AI insights:', error);
     res.status(500).json({ message: 'Error processing AI insights: ' + error.message });
+  }
+});
+
+// Update your file data route - find where you serve file data for analysis
+router.get('/data/:fileId', protect, async (req, res) => {
+  try {
+    const file = await ExcelFile.findOne({ _id: req.params.fileId });
+    
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+    
+    const bucket = new GridFSBucket(mongoose.connection.db, {
+      bucketName: 'excelFiles'
+    });
+    
+    // Create a temporary file path for downloading
+    const tempFilePath = path.join('./temp-uploads', `${Date.now()}-${file.filename}`);
+    
+    // Download the file from GridFS to the temporary location
+    const downloadStream = bucket.openDownloadStream(file.fileId);
+    const writeStream = fs.createWriteStream(tempFilePath);
+    
+    await new Promise((resolve, reject) => {
+      downloadStream.pipe(writeStream)
+        .on('error', reject)
+        .on('finish', resolve);
+    });
+    
+    // Read the Excel file with proper encoding options
+    const workbook = XLSX.readFile(tempFilePath, {
+      type: 'binary',
+      codepage: 65001, // UTF-8 encoding
+      cellStyles: true
+    });
+    
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = XLSX.utils.sheet_to_json(worksheet, {
+      raw: false, // Convert all values to strings to preserve formatting
+      defval: '' // Default empty cells to empty string
+    });
+    
+    // Clean up temp file
+    fs.unlinkSync(tempFilePath);
+    
+    // Only create view activity, not analysis activity
+    await Activity.create({
+      userId: req.user.id,
+      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      activityType: 'view',
+      fileDetails: { 
+        filename: file.filename,
+        rowCount: file.metadata?.rowCount,
+        columnCount: file.metadata?.headers?.length
+      }
+    });
+    
+    // Ensure proper content type for handling UTF-8
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    
+    // Return data as JSON
+    res.json({ 
+      filename: file.filename, 
+      data: data 
+    });
+    
+  } catch (error) {
+    console.error('Error fetching file data:', error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Add a new endpoint specifically for when analysis is performed
+router.post('/analyze/:fileId', protect, async (req, res) => {
+  try {
+    const file = await ExcelFile.findOne({ fileId: req.params.fileId });
+    if (!file) {
+      return res.status(404).json({ message: 'File not found' });
+    }
+    
+    // Create analysis activity ONLY when user actively performs analysis
+    await Activity.create({
+      userId: req.user.id,
+      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      activityType: 'analysis',
+      fileDetails: { 
+        filename: file.filename,
+        rowCount: file.metadata?.rowCount,
+        columnCount: file.metadata?.headers?.length
+      }
+    });
+    
+    // Return success response
+    res.json({ message: 'Analysis activity recorded successfully' });
+  } catch (error) {
+    console.error('Error recording analysis activity:', error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

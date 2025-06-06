@@ -1005,15 +1005,6 @@
   color: #333;
   margin-bottom: 0.8rem;
 }
-
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 2.5rem;
-  margin-bottom: 3.5rem;
-}
-
 /* File Upload Styles */
 .upload-section, .preview-section {
   background-color: rgba(255, 255, 255, 0.8);

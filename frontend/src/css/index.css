@@ -1159,14 +1159,14 @@ form button[type="button"]:not(.exclude-global-styles) {
 }
 
 .file-info h3 {
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   font-weight: 500;
   color: #333;
   margin-bottom: 5px;
 }
 
 .file-info p {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   color: #777;
 }
 

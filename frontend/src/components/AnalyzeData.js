@@ -1790,6 +1790,30 @@ const prepare3DChartData = (data, xAxisKey, yAxisKey, chartType) => {
     }
   };
 
+  // Add to your component
+const recordAnalysisActivity = async (fileId) => {
+  try {
+    await axios.post(`http://localhost:5000/api/excel/analyze/${fileId}`, {}, {
+      headers: {
+        Authorization: `Bearer ${user.token}`
+      }
+    });
+  } catch (error) {
+    console.error('Error recording analysis activity:', error);
+    // Non-critical, so continue even if it fails
+  }
+};
+
+// Call this when user performs analysis (e.g., when they generate a chart)
+const handleGenerateChart = () => {
+  // Existing chart generation code...
+  
+  // Record the analysis activity
+  if (selectedFile && selectedFile._id) {
+    recordAnalysisActivity(selectedFile._id);
+  }
+};
+
   return (
     <div className="analyze-data-container">
       <div className="analyze-header">

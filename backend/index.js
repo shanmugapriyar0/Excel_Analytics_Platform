@@ -12,6 +12,7 @@ const authRoutes = require('./routes/authRoutes'); // Import your auth routes
 const cors = require('cors'); // Import cors
 const jwt = require('jsonwebtoken'); // Import jwt here
 const excelRoutes = require('./routes/excelRoutes'); // New: require excelRoutes
+const userRoutes = require('./routes/userRoutes'); // Add user routes
 
 const app = express();
 
@@ -38,6 +39,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/excel', excelRoutes); // New: mount excel routes
+app.use('/api/users', userRoutes); // Mount user routes
 
 // Simple protected route example (requires authentication)
 const protect = (req, res, next) => {

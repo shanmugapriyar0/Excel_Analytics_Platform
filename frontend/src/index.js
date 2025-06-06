@@ -5,7 +5,8 @@ import { store } from './redux/store';
 import App from './App';
 import './css/index.css';
 import './css/responsive.css';
-import './css/AIInsights.css'; // Add this line
+import './css/AIInsights.css';
+import './css/dashboard.css'; // Add this new import
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
