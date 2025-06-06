@@ -386,7 +386,7 @@ router.post('/insights/:fileId', protect, async (req, res) => {
     // and as a response to a user-initiated action
     await Activity.create({
       userId: req.user.id,
-      fileId: mongoose.Types.ObjectId(req.params.fileId),
+      fileId: new ObjectId(req.params.fileId),  // Use 'new' here too
       activityType: 'insight',
       fileDetails: { 
         filename: file.filename,
