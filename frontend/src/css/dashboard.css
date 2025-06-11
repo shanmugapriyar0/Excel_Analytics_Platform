@@ -1121,37 +1121,35 @@ flex: 1; /* Take remaining space */
     font-size: 2.8rem;
   }
 }
-
 @media (max-width: 576px) {
-  .dashboard-overview {
-    padding: 0.5rem;
-  }
-  
+  /* Improve stats grid on mobile */
   .stats-grid {
-    gap: 1.5rem;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
   }
   
   .stat-card {
-    padding: 1.8rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
   }
   
-  .file-card-header {
-    padding: 1.8rem;
-  }
-  
-  .file-icon {
-    min-width: 50px;
+  .stat-icon {
+    width: 50px;
     height: 50px;
-    padding: 1rem;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
   }
   
-  .section-title {
-    font-size: 1.8rem;
+  .stat-value {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
   }
   
-  .activity-icon, .insight-icon {
-    width: 45px;
-    height: 45px;
+  .stat-label {
+    font-size: 1.3rem;
   }
 }
 /* Responsive adjustments */
@@ -1268,4 +1266,261 @@ flex: 1; /* Take remaining space */
   margin-top: 3.5rem;
   margin-bottom: 3.5rem;
   align-items: start; /* Critical fix - don't stretch children */
+}
+@media (max-width: 768px) {
+  /* Force the dashboard columns to stack vertically on mobile */
+  .dashboard-columns {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+  
+  /* Fix height issues with the activity and insights sections */
+  .activity-section, 
+  .insights-section {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin-bottom: 2rem;
+  }
+  
+  /* Make the sections scrollable on their own */
+  .activity-list,
+  .insights-content {
+    max-height: 400px !important;
+    overflow-y: auto !important;
+  }
+}
+@media (max-width: 576px) {
+  /* Improve dashboard header on small screens */
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+  
+  .header-title {
+    margin-bottom: 1rem;
+  }
+  
+  .header-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  /* Make header user section more compact */
+  .header-user {
+    padding: 0.6rem 1rem;
+  }
+  
+  .header-user .user-name {
+    max-width: 100px;
+    font-size: 1.5rem;
+  }
+  
+  .header-user .user-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 1.5rem;
+  }
+}
+@media (max-width: 576px) {
+  /* Improve recent files section */
+  .recent-files-section {
+    padding: 1.8rem 1.5rem;
+  }
+  
+  .file-card {
+    border-radius: 10px;
+  }
+  
+  .file-card-header {
+    padding: 1.5rem;
+    gap: 1.2rem;
+  }
+  
+  .file-icon {
+    padding: 1.5rem;
+    min-width: 50px;
+    height: 50px;
+  }
+  
+  .file-info h3 {
+    font-size: 1.5rem;
+    word-break: break-word;
+  }
+  
+  .file-meta {
+    font-size: 1.2rem;
+  }
+  
+  .file-card-footer {
+    padding: 1.2rem 1.5rem;
+  }
+  
+  .file-date {
+    font-size: 1.1rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .file-actions {
+    gap: 0.8rem;
+  }
+  
+  .file-action-btn {
+    width: 30px;
+    height: 30px;
+    font-size: 1.4rem;
+  }
+}
+@media (max-width: 576px) {
+  /* Improve activity section */
+  .activity-section,
+  .insights-section {
+    padding: 1.8rem 1.5rem;
+  }
+  
+  .section-title {
+    font-size: 1.7rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.8rem;
+  }
+  
+  .activity-item {
+    gap: 1.2rem;
+    padding-bottom: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  
+  .activity-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 1.6rem;
+  }
+  
+  .activity-title {
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .activity-desc {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .activity-time {
+    font-size: 1.1rem;
+  }
+  
+  /* Improve insights cards */
+  .insight-card {
+    padding: 1.2rem;
+    gap: 1.2rem;
+  }
+  
+  .insight-icon {
+    font-size: 1.8rem;
+    width: 38px;
+    height: 38px;
+  }
+  
+  .insight-text h3 {
+    font-size: 1.4rem;
+  }
+  
+  .insight-text p {
+    font-size: 1.2rem;
+  }
+  
+  .insight-metric {
+    margin-top: 0.8rem;
+  }
+  
+  .metric-value {
+    font-size: 2rem;
+  }
+  
+  .metric-label {
+    font-size: 1.1rem;
+  }
+  
+  .insight-action-btn {
+    font-size: 1.2rem;
+    padding: 0.6rem 1.2rem;
+  }
+}
+@media (max-width: 576px) {
+  /* Improve search container */
+  .search-container {
+    width: 100%;
+    max-width: 100%;
+  }
+  
+  .search-input {
+    padding: 1rem 1.2rem 1rem 4rem;
+    font-size: 1.4rem;
+  }
+  
+  .search-icon {
+    left: 15px;
+    font-size: 1.6rem;
+  }
+  
+  .section-header.with-action {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Improve dashboard content area */
+  .dashboard-content {
+    padding: 1rem;
+  }
+  
+  .dashboard-overview {
+    padding: 0;
+  }
+  
+  /* Section header adjustments */
+  .section-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+  }
+  
+  .section-header h2 {
+    font-size: 1.8rem;
+    padding-left: 1rem;
+  }
+  
+  .section-header h2::before {
+    width: 3px;
+  }
+  
+  .section-header h4 {
+    font-size: 1.4rem;
+  }
+  
+  /* Improve empty state messages */
+  .empty-files-message {
+    padding: 3rem 1.5rem;
+  }
+  
+  .empty-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 3rem;
+  }
+  
+  .empty-files-message h3 {
+    font-size: 1.6rem;
+  }
+  
+  .empty-files-message p {
+    font-size: 1.3rem;
+  }
+  
+  .upload-now-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1.3rem;
+  }
 }

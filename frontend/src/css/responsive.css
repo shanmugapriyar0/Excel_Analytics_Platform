@@ -1351,21 +1351,46 @@
 }
 
 .data-preview-container {
-  background-color: white;
+  width: 100%;
+  overflow-x: auto;
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .data-preview-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eaeaea;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 1rem;
+}
+.data-preview-title {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: #333;
+}
+.data-preview-filename {
+  font-size: 2rem;
+  font-weight: 500;
+  color: var(--primary-green);
+}
+.data-preview-stats {
+  display: flex;
+  gap: 1.5rem;
+  margin: 1.5rem 0;
+  flex-wrap: wrap;
 }
 
+.data-stat {
+  background-color: #f5f5f5;
+  padding: 0.8rem 1.5rem;
+  border-radius: 2rem;
+  font-size: 1.4rem;
+  color: #555;
+}
 .data-preview-header h3 {
   font-size: 1.8rem;
   font-weight: 500;
@@ -1415,23 +1440,25 @@
 }
 
 .data-table th {
-  font-size: 1.4rem;
-  background-color: #f5f5f5;
-  padding: 12px;
-  text-align: left;
+  background-color: #f0f7f0;
+  color: #333;
   font-weight: 600;
+  text-align: left;
+  padding: 1.2rem 1.5rem;
+  white-space: nowrap;
   border-bottom: 2px solid #e0e0e0;
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .data-table td {
-  padding: 12px 16px;
-  border-bottom: 1px solid #e0e0e0;
-  min-width: 100px; /* Ensure columns have reasonable minimum width */
-  max-width: 300px; /* Prevent extremely wide columns */
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #eaeaea;
+  white-space: nowrap;
+  max-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
-  text-align: left;
 }
 .data-table td:hover {
   background-color: rgba(76, 175, 80, 0.08);
@@ -2156,21 +2183,21 @@ chart-wrapper canvas {
 /* Fix legend text sizes */
 [data-charttype="pie"] .chartjs-legend-wrap ul li span,
 [data-charttype="doughnut"] .chartjs-legend-wrap ul li span {
-  font-size: 14px !important; /* Much larger font size */
+  font-size: 14px !important; 
   line-height: 1.4 !important;
 }
 
 /* Better spacing for legend items */
 [data-charttype="pie"] .chartjs-legend-wrap ul li,
 [data-charttype="doughnut"] .chartjs-legend-wrap ul li {
-  margin-bottom: 12px !important; /* More vertical space between items */
+  margin-bottom: 12px !important; 
   padding: 4px 0 !important;
 }
 
-/* Fix legend item color boxes */
+
 [data-charttype="pie"] .chartjs-legend-wrap ul li span:first-child,
 [data-charttype="doughnut"] .chartjs-legend-wrap ul li span:first-child {
-  width: 16px !important;  /* Larger color boxes */
+  width: 16px !important; 
   height: 16px !important;
   margin-right: 8px !important;
 }
@@ -2386,4 +2413,499 @@ canvas[data-charttype="bubble"] .chartjs-bubble-point {
 /* Add hover transition effects for scatter points */
 [data-charttype="scatter"] .chart-point {
   transition: all 0.3s ease !important;
+}
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+  .data-preview-header {
+    padding: 1.2rem;
+  }
+  
+  .data-preview-title {
+    font-size: 1.8rem;
+  }
+  
+  .data-preview-filename {
+    font-size: 1.6rem;
+  }
+  
+  .data-stat {
+    padding: 0.6rem 1.2rem;
+    font-size: 1.2rem;
+    flex: 1;
+    text-align: center;
+    min-width: 100px;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 1rem;
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .data-preview-container {
+    border-radius: 6px;
+  }
+  
+  .data-preview-header {
+    padding: 1rem;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .data-preview-title {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .data-preview-filename {
+    font-size: 1.5rem;
+  }
+  
+  .data-preview-stats {
+    width: 100%;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 1rem 0;
+  }
+  
+  .data-stat {
+    padding: 0.5rem 1rem;
+    font-size: 1.1rem;
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .data-table th,
+  .data-table td {
+    padding: 0.8rem;
+    font-size: 1.2rem;
+  }
+  
+  /* Improve horizontal scroll indicators */
+  .data-table-container::-webkit-scrollbar {
+    height: 4px;
+  }
+  
+  .data-table-container::-webkit-scrollbar-thumb {
+    background-color: rgba(46, 125, 50, 0.5);
+    border-radius: 2px;
+  }
+  
+  /* Pagination adjustments */
+  .pagination-controls {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .pagination-info {
+    font-size: 1.2rem;
+    text-align: center;
+    width: 100%;
+  }
+  
+  .pagination-buttons {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .pagination-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 1.2rem;
+    flex: 1;
+    max-width: 80px;
+    text-align: center;
+  }
+  
+  /* Add swipe indication for tables */
+  .data-table-container::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 15px;
+    height: 100%;
+    background: linear-gradient(to right, transparent, rgba(255,255,255,0.7));
+    pointer-events: none;
+    opacity: 0.8;
+  }
+}
+/* Analysis Options Responsive Styling */
+.analysis-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.analysis-option-card {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+}
+
+.analysis-option-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+}
+
+.option-icon-circle {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: #e8f5e9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+}
+
+.option-icon {
+  font-size: 2.8rem;
+  color: var(--primary-green);
+}
+
+.option-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 1rem;
+}
+
+.option-description {
+  font-size: 1.4rem;
+  color: #666;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .analysis-options-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.2rem;
+  }
+  
+  .analysis-option-card {
+    padding: 1.5rem;
+  }
+  
+  .option-icon-circle {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 1.2rem;
+  }
+  
+  .option-icon {
+    font-size: 2.4rem;
+  }
+  
+  .option-title {
+    font-size: 1.6rem;
+  }
+  
+  .option-description {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .analysis-options-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .analysis-option-card {
+    padding: 1.5rem;
+    flex-direction: row;
+    text-align: left;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .option-icon-circle {
+    width: 50px;
+    height: 50px;
+    margin-bottom: 0;
+    margin-right: 1.5rem;
+  }
+  
+  .option-icon {
+    font-size: 2rem;
+  }
+  
+  .option-content {
+    flex: 1;
+  }
+  
+  .option-title {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .option-description {
+    font-size: 1.2rem;
+  }
+}
+/* Enhanced mobile styling for Analyze Data page */
+@media (max-width: 768px) {
+  .analyze-data-container {
+    padding: 1rem;
+    width: 100%;
+    margin: 0;
+  }
+  
+  /* Header improvements */
+  .analyze-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .analyze-title h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .analyze-title p {
+    font-size: 1.3rem;
+  }
+  
+  /* Fix file selection dropdown */
+  .file-selection-section {
+    padding: 1.5rem 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .section-header h3 {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .section-header p {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+  
+  .file-selector {
+    width: 100%;
+  }
+  
+  .file-dropdown {
+    width: 100%;
+  }
+  
+  .dropdown-button {
+    width: 100%;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .selected-file-info {
+    max-width: 85%;
+  }
+  
+  .dropdown-menu {
+    width: 100%;
+    max-height: 60vh;
+  }
+}
+@media (max-width: 576px) {
+  .analyze-data-container {
+    padding: 0.75rem;
+  }
+  
+  /* Improve section headers on small screens */
+  .section-header h3 {
+    font-size: 1.5rem;
+  }
+  
+  .section-header p {
+    font-size: 1.2rem;
+    line-height: 1.4;
+  }
+  
+  /* Better file selection styling */
+  .dropdown-button {
+    padding: 0.4rem;
+    font-size: 1.3rem;
+  }
+  
+  .file-name {
+    max-width: 180px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 1.3rem;
+  }
+  
+  .file-icon {
+    font-size: 1.8rem;
+    margin-right: 0.8rem;
+  }
+  
+  /* Improve analysis options cards */
+  .analysis-options-section {
+    padding: 1.5rem 1rem;
+  }
+  
+  /* Make option cards more touch-friendly */
+  .option-card {
+    padding: 1.2rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .option-icon {
+    font-size: 1.8rem;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .option-details h4 {
+    font-size: 1.4rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .option-details p {
+    font-size: 1.2rem;
+    line-height: 1.3;
+    margin: 0;
+  } 
+  /* Ensure dropdown menu appears properly */
+  .dropdown-menu {
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    max-height: 45vh;
+  }
+  
+  .dropdown-item {
+    padding: 0.8rem 0.8rem;
+  }
+  
+  .file-details {
+    width: 100%;
+  }
+  
+  .file-meta {
+    font-size: 1.1rem;
+  }
+  
+  /* Fix vertical spacing for better touch experience */
+  .analyze-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+}
+
+/* Specific fixes for very small devices */
+@media (max-width: 375px) {
+  .dropdown-button {
+    padding: 0.7rem;
+    font-size: 1.2rem;
+  }
+  
+  .file-name {
+    max-width: 120px;
+    font-size: 1.2rem;
+  }
+  
+  .file-icon {
+    font-size: 1.6rem;
+    margin-right: 0.6rem;
+  }
+  
+  .option-card {
+    padding: 1rem;
+  }
+  
+  .option-icon {
+    font-size: 1.6rem;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+  
+  .option-details h4 {
+    font-size: 1.3rem;
+  }
+  
+  .option-details p {
+    font-size: 1.1rem;
+  }
+  
+  .section-header h3 {
+    font-size: 1.4rem;
+  }
+  
+  /* Improve pagination controls for data tables */
+  .pagination-controls {
+    padding: 0.75rem;
+  }
+  
+  .pagination-info {
+    font-size: 1.1rem;
+  }
+  
+  .pagination-button {
+    padding: 0.5rem 0.8rem;
+    font-size: 1.1rem;
+    max-width: 70px;
+  }
+  
+  /* Better visualization controls on small screens */
+  .axis-selectors {
+    gap: 0.8rem;
+  }
+  
+  .axis-selector label {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .axis-select {
+    padding: 0.8rem;
+    font-size: 1.3rem;
+  }
+  
+  .chart-container {
+    padding: 0;
+  }
+}
+
+/* Fix dropdown icon rotation on toggle */
+.dropdown-icon {
+  transition: transform 0.3s ease;
+}
+
+.dropdown-icon.open {
+  transform: rotate(180deg);
+}
+
+
+.option-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.12);
+}
+
+
+/* Improve data content section spacing */
+.data-content-section {
+  margin-top: 2rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
 }
