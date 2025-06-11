@@ -18,14 +18,14 @@ const userSchema = mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'], // Define possible roles
-    default: 'user', // Default role is user
+    enum: ['user', 'admin'], 
+    default: 'user', 
   },
-  resetPasswordToken: String,       // New field for token
-  resetPasswordExpires: Date,       // New field for token expiration
-  resetTokenId: String,             // Add this new field
+  resetPasswordToken: String,       
+  resetPasswordExpires: Date,       
+  resetTokenId: String,             
 }, {
-  timestamps: true, // Adds createdAt and updatedAt timestamps
+  timestamps: true, 
 });
 
 // Hash password before saving
