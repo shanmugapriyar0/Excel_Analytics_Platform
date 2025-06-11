@@ -32,18 +32,16 @@ import {
   FaCheckCircle,
 } from "react-icons/fa";
 import FileUpload from "./FileUpload";
-import AnalyzeData from './AnalyzeData';
-import CounterAnimation from './CounterAnimation';
+import AnalyzeData from "./AnalyzeData";
+import CounterAnimation from "./CounterAnimation";
 import excelLogo from "../assets/logo.png";
-import { 
-  getMostActiveDay, 
-  getMostActivePeriod, 
+import {
+  getMostActiveDay,
+  getMostActivePeriod,
   generateActivityHeatmap,
-  getMostAccessedFile,
-  handleViewPopularFile,
   calculateDataQualityScore,
-  getQualitySuggestion
-} from '../utils/insightsHelpers';
+  getQualitySuggestion,
+} from "../utils/insightsHelpers";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -51,7 +49,7 @@ const Dashboard = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const { user, isAuthenticated } = useSelector((state) => state.auth);
   const [activeTab, setActiveTab] = useState("dashboard");
-  
+
   // New states for dashboard data
   const [files, setFiles] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -60,23 +58,23 @@ const Dashboard = () => {
     totalFiles: 0,
     totalRows: 0,
     recentUploads: 0,
-    recentViews: 0
+    recentViews: 0,
   });
   const [activityLog, setActivityLog] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [notifications, setNotifications] = useState([]);
   // eslint-disable-next-line no-unused-vars
   const [popularContent, setPopularContent] = useState({
     fileId: null,
     filename: null,
-    accessCount: 0
+    accessCount: 0,
   });
-  
+
   // Set initial sidebar state based on screen width
   const [sidebarOpen, setSidebarOpen] = useState(() => {
     return window.innerWidth >= 992; // Open by default only on larger screens
   });
-  
+
   const [uploadFiles, setUploadFiles] = useState([]);
   const [uploadStatus, setUploadStatus] = useState(null);
   const [uploadProgress, setUploadProgress] = useState({});
@@ -105,41 +103,47 @@ const Dashboard = () => {
     setError(null);
     try {
       // Get user's Excel files
-      const filesResponse = await axios.get('http://localhost:5000/api/excel/files', {
-        headers: {
-          Authorization: `Bearer ${user?.token}`
+      const filesResponse = await axios.get(
+        "http://localhost:5000/api/excel/files",
+        {
+          headers: {
+            Authorization: `Bearer ${user?.token}`,
+          },
         }
-      });
-      
+      );
+
       setFiles(filesResponse.data);
-      
+
       // Calculate statistics
       const totalFiles = filesResponse.data.length;
-      const totalRows = filesResponse.data.reduce((acc, file) => 
-        acc + (file.metadata?.rowCount || 0), 0);
+      const totalRows = filesResponse.data.reduce(
+        (acc, file) => acc + (file.metadata?.rowCount || 0),
+        0
+      );
       const recentUploads = filesResponse.data.filter(
-        file => new Date(file.uploadDate) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+        (file) =>
+          new Date(file.uploadDate) >
+          new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
       ).length;
-      
+
       // Generate mock recent views based on files (in a real app, you'd track this data)
       const recentViews = Math.min(
         Math.floor(totalFiles * 2.5 + Math.random() * 5),
         totalFiles * 10
       );
-      
+
       setStats({
         totalFiles,
         totalRows,
         recentUploads,
-        recentViews
+        recentViews,
       });
-      
+
       // Generate activity log based on user's files
       generateActivityLog(filesResponse.data);
-      
+
       // Generate sample notifications
       generateSampleNotifications(totalFiles);
-      
     } catch (err) {
       console.error("Error fetching user data:", err);
       setError(err.response?.data?.message || "Failed to fetch user data");
@@ -148,28 +152,35 @@ const Dashboard = () => {
     }
   }, [user]); // Add user as dependency
 
-  // Fetch popular content for user
-  const fetchPopularContent = useCallback(async () => {
-    try {
-      const token = user?.token || user?.accessToken || localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/users/popular-file', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      
-      // Update state with popular content
-      if (response.data.filename) {
-        setPopularContent({
-          fileId: response.data.fileId,
-          filename: response.data.filename,
-          accessCount: response.data.accessCount
-        });
+// Update your fetchPopularContent function
+const fetchPopularContent = useCallback(async () => {
+  try {
+    const token = user?.token || user?.accessToken || localStorage.getItem('token');
+    const response = await axios.get('http://localhost:5000/api/users/popular-file', {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    } catch (error) {
-      console.error('Error fetching popular content:', error);
+    });
+    
+    // API returns _id as the filename
+    if (response.data && response.data._id) {
+      setPopularContent({
+        fileId: response.data.fileId,
+        filename: response.data._id, // This contains the filename
+        accessCount: response.data.count
+      });
+    } else if (response.data && response.data.filename) {
+      // For backward compatibility with any API changes
+      setPopularContent({
+        fileId: response.data.fileId,
+        filename: response.data.filename,
+        accessCount: response.data.accessCount
+      });
     }
-  }, [user]); // Add user as dependency
+  } catch (error) {
+    console.error('Error fetching popular content:', error);
+  }
+}, [user]);
 
   // Call this in your useEffect along with other data fetching
   useEffect(() => {
@@ -178,7 +189,7 @@ const Dashboard = () => {
         await fetchUserData();
         await fetchPopularContent();
       };
-      
+
       loadData();
     }
   }, [user, isAuthenticated, fetchUserData, fetchPopularContent]); // Now properly memoized
@@ -186,116 +197,128 @@ const Dashboard = () => {
   // Generate activity log from files
   const generateActivityLog = (filesData) => {
     const activities = [];
-    
+
     // Add file upload activities
-    filesData.slice(0, 10).forEach(file => {
+    filesData.slice(0, 10).forEach((file) => {
       activities.push({
         id: `upload-${file._id}`,
-        type: 'upload',
+        type: "upload",
         title: `Uploaded ${file.filename}`,
-        description: `File with ${file.metadata?.rowCount || 0} rows and ${file.metadata?.headers?.length || 0} columns`,
+        description: `File with ${file.metadata?.rowCount || 0} rows and ${
+          file.metadata?.headers?.length || 0
+        } columns`,
         date: new Date(file.uploadDate || file.createdAt),
-        icon: file.filename.toLowerCase().endsWith('.csv') ? <FaFileCsv /> : <FaFileExcel />
+        icon: file.filename.toLowerCase().endsWith(".csv") ? (
+          <FaFileCsv />
+        ) : (
+          <FaFileExcel />
+        ),
       });
     });
-    
+
     // Add some analysis activities if applicable
     if (filesData.length > 0) {
-      const randomFiles = [...filesData].sort(() => 0.5 - Math.random()).slice(0, Math.min(3, filesData.length));
-      
+      const randomFiles = [...filesData]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, Math.min(3, filesData.length));
+
       randomFiles.forEach((file, index) => {
         const date = new Date();
         date.setDate(date.getDate() - Math.floor(Math.random() * 5)); // Random date within past 5 days
-        
+
         activities.push({
           id: `analysis-${index}`,
-          type: 'analysis',
+          type: "analysis",
           title: `Analyzed ${file.filename}`,
-          description: 'Performed data analysis and visualization',
+          description: "Performed data analysis and visualization",
           date: date,
-          icon: <FaChartPie />
+          icon: <FaChartPie />,
         });
       });
     }
-    
+
     // Add AI insight activities
     if (filesData.length > 0) {
-      const randomFiles = [...filesData].sort(() => 0.5 - Math.random()).slice(0, Math.min(2, filesData.length));
-      
+      const randomFiles = [...filesData]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, Math.min(2, filesData.length));
+
       randomFiles.forEach((file, index) => {
         const date = new Date();
         date.setDate(date.getDate() - Math.floor(Math.random() * 3)); // Random date within past 3 days
-        
+
         activities.push({
           id: `insight-${index}`,
-          type: 'insight',
+          type: "insight",
           title: `Generated AI insights for ${file.filename}`,
-          description: 'Explored data patterns using AI analysis',
+          description: "Explored data patterns using AI analysis",
           date: date,
-          icon: <FaBrain />
+          icon: <FaBrain />,
         });
       });
     }
-    
+
     // Add view activities
     if (filesData.length > 0) {
-      const randomFiles = [...filesData].sort(() => 0.5 - Math.random()).slice(0, Math.min(4, filesData.length));
-      
+      const randomFiles = [...filesData]
+        .sort(() => 0.5 - Math.random())
+        .slice(0, Math.min(4, filesData.length));
+
       randomFiles.forEach((file, index) => {
         const date = new Date();
         date.setDate(date.getDate() - Math.floor(Math.random() * 7)); // Random date within past 7 days
-        
+
         activities.push({
           id: `view-${index}`,
-          type: 'view',
+          type: "view",
           title: `Viewed ${file.filename}`,
-          description: 'Reviewed file data and structure',
+          description: "Reviewed file data and structure",
           date: date,
-          icon: <FaEye />
+          icon: <FaEye />,
         });
       });
     }
-    
+
     // Sort by date (newest first) and limit to 10
     activities.sort((a, b) => b.date - a.date);
     setActivityLog(activities.slice(0, 10));
   };
-  
+
   // Generate sample notifications
   const generateSampleNotifications = (fileCount) => {
     const notifs = [];
-    
+
     // Only add notifications if there are files
     if (fileCount > 0) {
       notifs.push({
-        id: 'notif-1',
-        title: 'Analysis completed',
-        message: 'Your recent data analysis is ready to view',
-        time: '10 min ago',
+        id: "notif-1",
+        title: "Analysis completed",
+        message: "Your recent data analysis is ready to view",
+        time: "10 min ago",
         read: false,
-        type: 'success'
+        type: "success",
       });
-      
+
       notifs.push({
-        id: 'notif-2',
-        title: 'AI Insights available',
-        message: 'New AI-powered insights for your recent upload',
-        time: '1 hour ago',
+        id: "notif-2",
+        title: "AI Insights available",
+        message: "New AI-powered insights for your recent upload",
+        time: "1 hour ago",
         read: false,
-        type: 'info'
+        type: "info",
       });
     }
-    
+
     // Add system notifications
     notifs.push({
-      id: 'notif-3',
-      title: 'Platform update',
-      message: 'New features available in the latest update',
-      time: '1 day ago',
+      id: "notif-3",
+      title: "Platform update",
+      message: "New features available in the latest update",
+      time: "1 day ago",
       read: true,
-      type: 'system'
+      type: "system",
     });
-    
+
     setNotifications(notifs);
   };
 
@@ -325,38 +348,38 @@ const Dashboard = () => {
   // Time ago formatter
   const timeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
-    
+
     let interval = seconds / 31536000;
-    if (interval > 1) return Math.floor(interval) + ' years ago';
-    
+    if (interval > 1) return Math.floor(interval) + " years ago";
+
     interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + ' months ago';
-    
+    if (interval > 1) return Math.floor(interval) + " months ago";
+
     interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + ' days ago';
-    
+    if (interval > 1) return Math.floor(interval) + " days ago";
+
     interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + ' hours ago';
-    
+    if (interval > 1) return Math.floor(interval) + " hours ago";
+
     interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + ' minutes ago';
-    
-    return Math.floor(seconds) + ' seconds ago';
+    if (interval > 1) return Math.floor(interval) + " minutes ago";
+
+    return Math.floor(seconds) + " seconds ago";
   };
 
   // Format file size
   // eslint-disable-next-line no-unused-vars
   const formatFileSize = (bytes) => {
-    if (!bytes) return '0 Bytes';
+    if (!bytes) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   // Filter files by search term
-  const filteredFiles = searchTerm 
-    ? files.filter(file => 
+  const filteredFiles = searchTerm
+    ? files.filter((file) =>
         file.filename.toLowerCase().includes(searchTerm.toLowerCase())
       )
     : files;
@@ -369,13 +392,13 @@ const Dashboard = () => {
         setSidebarOpen(false);
       }
     };
-    
+
     // Set up event listener
-    window.addEventListener('resize', handleResize);
-    
+    window.addEventListener("resize", handleResize);
+
     // Clean up
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -383,14 +406,14 @@ const Dashboard = () => {
   useEffect(() => {
     if (dropdownOpen) {
       const handleClickOutside = (e) => {
-        if (!e.target.closest('.header-user')) {
+        if (!e.target.closest(".header-user")) {
           setDropdownOpen(false);
         }
       };
-      
-      document.addEventListener('mousedown', handleClickOutside);
+
+      document.addEventListener("mousedown", handleClickOutside);
       return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener("mousedown", handleClickOutside);
       };
     }
   }, [dropdownOpen]);
@@ -400,33 +423,32 @@ const Dashboard = () => {
     try {
       const response = await axios({
         url: `http://localhost:5000/api/excel/download/${fileId}`,
-        method: 'GET',
-        responseType: 'blob',
+        method: "GET",
+        responseType: "blob",
         headers: {
-          Authorization: `Bearer ${user.token}`
-        }
+          Authorization: `Bearer ${user.token}`,
+        },
       });
-      
+
       // Create a URL for the blob
       const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      
+
       // Get the filename from the file object
-      const file = files.find(f => f.fileId === fileId);
-      link.setAttribute('download', file ? file.filename : 'excel-file.xlsx');
-      
+      const file = files.find((f) => f.fileId === fileId);
+      link.setAttribute("download", file ? file.filename : "excel-file.xlsx");
+
       // Append link to body and trigger download
       document.body.appendChild(link);
       link.click();
-      
+
       // Clean up
       link.parentNode.removeChild(link);
       window.URL.revokeObjectURL(url);
-      
     } catch (error) {
-      console.error('Error downloading file:', error);
-      setError('Failed to download file. Please try again later.');
+      console.error("Error downloading file:", error);
+      setError("Failed to download file. Please try again later.");
     }
   };
 
@@ -435,8 +457,22 @@ const Dashboard = () => {
     window.location.reload();
   };
 
+  // Add this function to handle clicking "View File"
+  const handleViewFile = (fileId) => {
+    // First set the active tab to analyze
+    setActiveTab('analyze');
+    
+    // Then store the selected file ID in localStorage
+    // so the analyze tab can load it
+    if (fileId) {
+      localStorage.setItem('selectedFileId', fileId);
+    }
+  };
+
   return (
-    <div className={`dashboard-layout ${!sidebarOpen ? '' : 'sidebar-expanded'}`}>
+    <div
+      className={`dashboard-layout ${!sidebarOpen ? "" : "sidebar-expanded"}`}
+    >
       {/* Sidebar */}
       <div className={`dashboard-sidebar ${!sidebarOpen ? "collapsed" : ""}`}>
         <div className="sidebar-header">
@@ -449,7 +485,7 @@ const Dashboard = () => {
             </div>
           ) : (
             <div className="app-logo-collapsed">
-              <FaBars 
+              <FaBars
                 onClick={() => setSidebarOpen(!sidebarOpen)}
                 className="sidebar-hamburger"
               />
@@ -506,7 +542,7 @@ const Dashboard = () => {
             {sidebarOpen && (
               <div className="user-details">
                 <div className="user-name">{user.username}</div>
-                <div className="user-role">{user.role || 'User'}</div>
+                <div className="user-role">{user.role || "User"}</div>
               </div>
             )}
           </div>
@@ -527,13 +563,19 @@ const Dashboard = () => {
           <div className="header-actions">
             <button className="action-button notification">
               <FaBell />
-              <span className="badge">{notifications.filter(n => !n.read).length}</span>
+              <span className="badge">
+                {notifications.filter((n) => !n.read).length}
+              </span>
             </button>
-            <div 
-              className={`header-user ${dropdownOpen ? 'dropdown-active' : ''}`} 
+            <div
+              className={`header-user ${dropdownOpen ? "dropdown-active" : ""}`}
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              onMouseEnter={() => window.innerWidth >= 992 && setDropdownOpen(true)}
-              onMouseLeave={() => window.innerWidth >= 992 && setDropdownOpen(false)}
+              onMouseEnter={() =>
+                window.innerWidth >= 992 && setDropdownOpen(true)
+              }
+              onMouseLeave={() =>
+                window.innerWidth >= 992 && setDropdownOpen(false)
+              }
             >
               <div className="user-avatar">
                 <FaUser />
@@ -596,12 +638,16 @@ const Dashboard = () => {
                   </button>
                 </div>
               )}
-              
+
               {/* Statistics Cards */}
               <section className="stats-section">
                 <div className="section-header">
                   <h2>Dashboard Overview</h2>
-                  <h4>{isLoading ? 'Loading stats...' : `Welcome back, ${user.username}!`}</h4>
+                  <h4>
+                    {isLoading
+                      ? "Loading stats..."
+                      : `Welcome back, ${user.username}!`}
+                  </h4>
                 </div>
                 <div className="stats-grid">
                   <div className="stat-card">
@@ -609,7 +655,11 @@ const Dashboard = () => {
                       <FaFileExcel />
                     </div>
                     <div className="stat-value">
-                      {isLoading ? '...' : <CounterAnimation end={stats.totalFiles} />}
+                      {isLoading ? (
+                        "..."
+                      ) : (
+                        <CounterAnimation end={stats.totalFiles} />
+                      )}
                     </div>
                     <div className="stat-label">Total Files</div>
                   </div>
@@ -618,7 +668,11 @@ const Dashboard = () => {
                       <FaChartBar />
                     </div>
                     <div className="stat-value">
-                      {isLoading ? '...' : <CounterAnimation end={stats.totalRows} />}
+                      {isLoading ? (
+                        "..."
+                      ) : (
+                        <CounterAnimation end={stats.totalRows} />
+                      )}
                     </div>
                     <div className="stat-label">Total Rows</div>
                   </div>
@@ -627,7 +681,11 @@ const Dashboard = () => {
                       <FaFileUpload />
                     </div>
                     <div className="stat-value">
-                      {isLoading ? '...' : <CounterAnimation end={stats.recentUploads} />}
+                      {isLoading ? (
+                        "..."
+                      ) : (
+                        <CounterAnimation end={stats.recentUploads} />
+                      )}
                     </div>
                     <div className="stat-label">Recent Uploads</div>
                   </div>
@@ -636,29 +694,33 @@ const Dashboard = () => {
                       <FaEye />
                     </div>
                     <div className="stat-value">
-                      {isLoading ? '...' : <CounterAnimation end={stats.recentViews} />}
+                      {isLoading ? (
+                        "..."
+                      ) : (
+                        <CounterAnimation end={stats.recentViews} />
+                      )}
                     </div>
                     <div className="stat-label">Recent Views</div>
                   </div>
                 </div>
               </section>
-              
+
               {/* Recent Files with Search */}
               <section className="recent-files-section">
                 <div className="section-header with-action">
                   <h2>Recent Files</h2>
                   <div className="search-container">
                     <FaSearch className="search-icon" />
-                    <input 
-                      type="text" 
-                      placeholder="Search files..." 
+                    <input
+                      type="text"
+                      placeholder="Search files..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="search-input"
                     />
                   </div>
                 </div>
-                
+
                 <div className="files-grid">
                   {isLoading ? (
                     <div className="loading-message">
@@ -666,33 +728,39 @@ const Dashboard = () => {
                       <p>Loading your files...</p>
                     </div>
                   ) : filteredFiles.length > 0 ? (
-                    filteredFiles.slice(0, 6).map(file => (
+                    filteredFiles.slice(0, 6).map((file) => (
                       <div className="file-card" key={file._id}>
                         <div className="file-card-header">
                           <div className="file-icon">
-                            {file.filename.toLowerCase().endsWith('.csv') ? 
-                              <FaFileCsv className="csv-icon" /> : 
+                            {file.filename.toLowerCase().endsWith(".csv") ? (
+                              <FaFileCsv className="csv-icon" />
+                            ) : (
                               <FaFileExcel className="excel-icon" />
-                            }
+                            )}
                           </div>
                           <div className="file-info">
                             <h3 className="file-name">{file.filename}</h3>
-                            <p className="file-meta">{file.metadata?.rowCount || 0} rows • {file.metadata?.headers?.length || 0} columns</p>
+                            <p className="file-meta">
+                              {file.metadata?.rowCount || 0} rows •{" "}
+                              {file.metadata?.headers?.length || 0} columns
+                            </p>
                           </div>
                         </div>
                         <div className="file-card-footer">
                           <div className="file-date">
                             <FaClock />
-                            <span>{timeAgo(file.uploadDate || file.createdAt)}</span>
+                            <span>
+                              {timeAgo(file.uploadDate || file.createdAt)}
+                            </span>
                           </div>
                           <div className="file-actions">
-                            <button 
+                            <button
                               className="file-action-btn"
-                              onClick={() => setActiveTab('analyze')}
+                              onClick={() => setActiveTab("analyze")}
                             >
                               <FaChartPie />
                             </button>
-                            <button 
+                            <button
                               className="file-action-btn"
                               onClick={() => handleDownload(file.fileId)}
                             >
@@ -711,47 +779,53 @@ const Dashboard = () => {
                       ) : (
                         <p>Upload your first Excel file to get started!</p>
                       )}
-                      <button 
+                      <button
                         className="upload-now-btn"
-                        onClick={() => setActiveTab('upload')}
+                        onClick={() => setActiveTab("upload")}
                       >
                         <FaFileUpload /> Upload Now
                       </button>
                     </div>
                   )}
                 </div>
-                
+
                 {filteredFiles.length > 0 && (
                   <div className="view-all-container">
-                    <button 
+                    <button
                       className="view-all-btn"
-                      onClick={() => setActiveTab('analyze')}
+                      onClick={() => setActiveTab("analyze")}
                     >
                       View All Files
                     </button>
                   </div>
                 )}
               </section>
-              
+
               {/* Two-column layout for Activity and Insights */}
               <div className="dashboard-columns">
                 {/* Activity Log */}
                 <section className="activity-section dashboard-section-base">
                   <h2 className="section-title">Recent Activity</h2>
-                  
+
                   {isLoading ? (
-                    <div className="loading-activity">Loading activities...</div>
+                    <div className="loading-activity">
+                      Loading activities...
+                    </div>
                   ) : activityLog.length > 0 ? (
                     <div className="activity-list">
-                      {activityLog.map(activity => (
+                      {activityLog.map((activity) => (
                         <div className="activity-item" key={activity.id}>
                           <div className={`activity-icon ${activity.type}`}>
                             {activity.icon}
                           </div>
                           <div className="activity-content">
                             <h3 className="activity-title">{activity.title}</h3>
-                            <p className="activity-desc">{activity.description}</p>
-                            <span className="activity-time">{timeAgo(activity.date)}</span>
+                            <p className="activity-desc">
+                              {activity.description}
+                            </p>
+                            <span className="activity-time">
+                              {timeAgo(activity.date)}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -762,11 +836,11 @@ const Dashboard = () => {
                     </div>
                   )}
                 </section>
-                
+
                 {/* Quick Insights */}
                 <section className="insights-section dashboard-section-base">
                   <h2 className="section-title">Quick Insights</h2>
-                  
+
                   {isLoading ? (
                     <div className="loading-insights">Loading insights...</div>
                   ) : files.length > 0 ? (
@@ -777,58 +851,98 @@ const Dashboard = () => {
                         <div className="insight-text">
                           <h3>Data Growth</h3>
                           <p>
-                            Your data collection has grown by {Math.floor(stats.recentUploads / Math.max(1, stats.totalFiles) * 100)}% recently.
-                            {stats.recentUploads > 5 && " You're uploading files at a higher rate than 75% of users."}
+                            Your data collection has grown by{" "}
+                            {Math.floor(
+                              (stats.recentUploads /
+                                Math.max(1, stats.totalFiles)) *
+                                100
+                            )}
+                            % recently.
+                            {stats.recentUploads > 5 &&
+                              " You're uploading files at a higher rate than 75% of users."}
                           </p>
                           <div className="insight-metric">
-                            <span className="metric-value">{stats.totalFiles}</span>
+                            <span className="metric-value">
+                              {stats.totalFiles}
+                            </span>
                             <span className="metric-label">total files</span>
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* File Distribution - Enhanced with visualization */}
                       <div className="insight-card">
                         <FaChartPie className="insight-icon" />
                         <div className="insight-text">
                           <h3>File Distribution</h3>
                           <p>
-                            {files.filter(f => f.filename.toLowerCase().endsWith('.xlsx')).length} Excel files,{" "}
-                            {files.filter(f => f.filename.toLowerCase().endsWith('.csv')).length} CSV files
+                            {
+                              files.filter((f) =>
+                                f.filename.toLowerCase().endsWith(".xlsx")
+                              ).length
+                            }{" "}
+                            Excel files,{" "}
+                            {
+                              files.filter((f) =>
+                                f.filename.toLowerCase().endsWith(".csv")
+                              ).length
+                            }{" "}
+                            CSV files
                           </p>
                           <div className="distribution-visual">
-                            <div 
-                              className="excel-bar" 
-                              style={{ 
-                                width: `${(files.filter(f => f.filename.toLowerCase().endsWith('.xlsx')).length / Math.max(1, files.length)) * 100}%` 
+                            <div
+                              className="excel-bar"
+                              style={{
+                                width: `${
+                                  (files.filter((f) =>
+                                    f.filename.toLowerCase().endsWith(".xlsx")
+                                  ).length /
+                                    Math.max(1, files.length)) *
+                                  100
+                                }%`,
                               }}
                             />
-                            <div 
-                              className="csv-bar" 
-                              style={{ 
-                                width: `${(files.filter(f => f.filename.toLowerCase().endsWith('.csv')).length / Math.max(1, files.length)) * 100}%` 
+                            <div
+                              className="csv-bar"
+                              style={{
+                                width: `${
+                                  (files.filter((f) =>
+                                    f.filename.toLowerCase().endsWith(".csv")
+                                  ).length /
+                                    Math.max(1, files.length)) *
+                                  100
+                                }%`,
                               }}
                             />
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* NEW: Data Volume Analysis */}
                       <div className="insight-card">
                         <FaDatabase className="insight-icon" />
                         <div className="insight-text">
                           <h3>Data Volume</h3>
                           <p>
-                            Your datasets contain approximately {stats.totalRows.toLocaleString()} data points
-                            {stats.totalRows > 10000 ? ", making this a substantial dataset collection." : "."}
+                            Your datasets contain approximately{" "}
+                            {stats.totalRows.toLocaleString()} data points
+                            {stats.totalRows > 10000
+                              ? ", making this a substantial dataset collection."
+                              : "."}
                           </p>
                           <div className="insight-metric">
-                            <span className="metric-value">{Math.round(stats.totalRows / Math.max(1, stats.totalFiles)).toLocaleString()}</span>
-                            <span className="metric-label">avg rows per file</span>
+                            <span className="metric-value">
+                              {Math.round(
+                                stats.totalRows / Math.max(1, stats.totalFiles)
+                              ).toLocaleString()}
+                            </span>
+                            <span className="metric-label">
+                              avg rows per file
+                            </span>
                           </div>
                         </div>
                       </div>
-                      
+
                       {/* NEW: Activity Patterns */}
                       {activityLog && activityLog.length > 0 && (
                         <div className="insight-card">
@@ -837,7 +951,8 @@ const Dashboard = () => {
                             <h3>Activity Patterns</h3>
                             <p>
                               Most of your activity happens on{" "}
-                              {getMostActiveDay(activityLog)}. You tend to analyze data most frequently in the{" "}
+                              {getMostActiveDay(activityLog)}. You tend to
+                              analyze data most frequently in the{" "}
                               {getMostActivePeriod(activityLog)}.
                             </p>
                             <div className="activity-heatmap">
@@ -846,35 +961,57 @@ const Dashboard = () => {
                           </div>
                         </div>
                       )}
-                      
+
                       {/* NEW: Most Accessed File */}
-                      {files.length >= 3 && (
-                        <div className="insight-card">
-                          <FaStar className="insight-icon" />
-                          <div className="insight-text">
-                            <h3>Popular Content</h3>
-                            <p>Your most frequently accessed file is <strong>{getMostAccessedFile(files, activityLog)}</strong></p>
-                            <button className="insight-action-btn" onClick={() => handleViewPopularFile(files, activityLog)}>
-                              <FaEye /> View File
-                            </button>
-                          </div>
+                      <div className="insight-card">
+                        <FaStar className="insight-icon" />
+                        <div className="insight-text">
+                          <h3>Popular Content</h3>
+                          {popularContent && popularContent.filename ? (
+                            <>
+                              <p>
+                                Your most frequently accessed file is{" "}
+                                <strong>{popularContent.filename}</strong>
+                              </p>
+                              <button
+                                className="insight-action-btn"
+                                onClick={() =>
+                                  handleViewFile(popularContent.fileId)
+                                }
+                              >
+                                <FaEye /> View File
+                              </button>
+                            </>
+                          ) : (
+                            <p>
+                              Your most frequently accessed file is{" "}
+                              <strong>None yet</strong>
+                            </p>
+                          )}
                         </div>
-                      )}
-                      
+                      </div>
+
                       {/* NEW: Data Quality Score */}
                       <div className="insight-card">
                         <FaCheckCircle className="insight-icon" />
                         <div className="insight-text">
                           <h3>Data Quality</h3>
-                          <p>Overall data quality score: <strong>{calculateDataQualityScore(files)}%</strong></p>
+                          <p>
+                            Overall data quality score:{" "}
+                            <strong>{calculateDataQualityScore(files)}%</strong>
+                          </p>
                           <div className="quality-meter">
-                            <div 
-                              className="quality-fill" 
-                              style={{ width: `${calculateDataQualityScore(files)}%` }}
+                            <div
+                              className="quality-fill"
+                              style={{
+                                width: `${calculateDataQualityScore(files)}%`,
+                              }}
                             />
                           </div>
                           <p className="quality-suggestion">
-                            {getQualitySuggestion(calculateDataQualityScore(files))}
+                            {getQualitySuggestion(
+                              calculateDataQualityScore(files)
+                            )}
                           </p>
                         </div>
                       </div>
@@ -882,9 +1019,9 @@ const Dashboard = () => {
                   ) : (
                     <div className="empty-insights">
                       <p>Upload files to get AI-powered insights</p>
-                      <button 
+                      <button
                         className="upload-now-btn"
-                        onClick={() => setActiveTab('upload')}
+                        onClick={() => setActiveTab("upload")}
                       >
                         <FaFileUpload /> Upload Files
                       </button>
@@ -892,7 +1029,7 @@ const Dashboard = () => {
                   )}
                 </section>
               </div>
-              
+
               {/* Admin section - only show for admin users */}
               {user.role === "admin" && (
                 <section className="admin-section">
@@ -923,7 +1060,7 @@ const Dashboard = () => {
 
           {/* File Upload Tab Content */}
           {activeTab === "upload" && (
-            <FileUpload 
+            <FileUpload
               files={uploadFiles}
               setFiles={setUploadFiles}
               uploadStatus={uploadStatus}
@@ -939,22 +1076,21 @@ const Dashboard = () => {
           )}
 
           {/* Analyze Data Tab Content */}
-          {activeTab === "analyze" && (
-            <AnalyzeData />
-          )}
+          {activeTab === "analyze" && <AnalyzeData />}
 
           {/* Placeholder for other tabs */}
-          {activeTab !== "dashboard" && 
-           activeTab !== "upload" && 
-           activeTab !== "analyze" && 
-           activeTab !== "insights" && (
-            <div className="placeholder-content">
-              <h2>
-                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Content
-              </h2>
-              <p>This feature is coming soon.</p>
-            </div>
-          )}
+          {activeTab !== "dashboard" &&
+            activeTab !== "upload" &&
+            activeTab !== "analyze" &&
+            activeTab !== "insights" && (
+              <div className="placeholder-content">
+                <h2>
+                  {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
+                  Content
+                </h2>
+                <p>This feature is coming soon.</p>
+              </div>
+            )}
         </main>
 
         <footer className="dashboard-footer">

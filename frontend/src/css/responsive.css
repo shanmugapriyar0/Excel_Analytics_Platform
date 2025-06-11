@@ -425,7 +425,7 @@
 
 /* Ensure consistent sizing */
 .file-icon {
-  font-size: 2rem;
+  font-size: 3rem;
   flex-shrink: 0;
 }
 

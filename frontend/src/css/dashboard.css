@@ -748,8 +748,8 @@ background: linear-gradient(145deg, #ffffff, #f9fcf9);
 }
 
 .file-icon {
-  padding: 1.3rem;
-  border-radius: 14px;
+  padding: 2.0rem;
+  border-radius: 69px;
   background: linear-gradient(145deg, rgba(46, 125, 50, 0.07), rgba(165, 214, 167, 0.15));
   color: var(--primary-green);
   min-width: 65px;
