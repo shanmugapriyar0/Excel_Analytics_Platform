@@ -5,6 +5,14 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Function to analyze Excel data and generate insights
 async function analyzeData(data, columns, questionPrompt = null) {
+  // Add this at the beginning of your analyzeData function
+  if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY.trim() === '') {
+    throw new Error('Missing or invalid Gemini API key');
+  }
+
+  // Log the API key length for debugging (don't log the actual key)
+  console.log(`Using Gemini API key (length: ${process.env.GEMINI_API_KEY.length})`);
+
   try {
     // First, handle basic validation for the user's question
     if (questionPrompt) {
@@ -118,25 +126,47 @@ Use this consistent formatting for your response:
 5. Use consistent green color headings throughout
 6. Maintain the same heading size and style throughout the entire response`;
 
-    // Try the correct model name - use "gemini-pro" instead of "gemini-1.0-pro"
+    // Update to use the latest Gemini model version
     const model = genAI.getGenerativeModel({ 
-      model: "gemini-pro", // This is the correct model name
+      model: "gemini-2.5-flash", // Updated to the latest model as of July 2025
       generationConfig: {
-        temperature: 0.1,   // Lower temperature for more factual responses
-        topP: 0.9,          // Slightly increased for better coverage
+        temperature: 0.1,   
+        topP: 0.9,         
         topK: 40,
-        maxOutputTokens: 2048 // Increased for more comprehensive responses
+        maxOutputTokens: 2048 
       }
     });
 
-    // Add retry logic with exponential backoff
+    // Add retry logic with improved fallback options
     let retries = 0;
     const maxRetries = 3;
     let lastError = null;
     
-    while (retries <= maxRetries) {
+    // Create an array of models to try in order of preference
+    const modelOptions = [
+      "gemini-2.5-pro",
+      "gemini-2.5-flash",
+      "gemini-1.5-pro",
+      "gemini-1.5-flash",
+      "gemini-1.0-pro"  // Very old fallback, likely won't be needed
+    ];
+    
+    let currentModelIndex = 0;
+    
+    while (retries <= maxRetries && currentModelIndex < modelOptions.length) {
       try {
-        const result = await model.generateContent(prompt);
+        const currentModel = genAI.getGenerativeModel({
+          model: modelOptions[currentModelIndex],
+          generationConfig: {
+            temperature: 0.1,
+            topP: 0.9,
+            topK: 40,
+            maxOutputTokens: 2048
+          }
+        });
+        
+        console.log(`Trying model: ${modelOptions[currentModelIndex]}`);
+        const result = await currentModel.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
         
@@ -147,11 +177,12 @@ Use this consistent formatting for your response:
         
         return {
           insights: text,
-          columnStats
+          columnStats,
+          modelUsed: modelOptions[currentModelIndex]  // Include which model was used
         };
       } catch (error) {
         lastError = error;
-        console.error('API error:', error.message);
+        console.error(`API error with model ${modelOptions[currentModelIndex]}:`, error.message);
         
         // Check if it's a rate limit error
         if (error.message.includes('429') || error.message.includes('Too Many Requests')) {
@@ -159,47 +190,51 @@ Use this consistent formatting for your response:
           console.log(`Rate limit hit. Retrying in ${delay}ms...`);
           await new Promise(resolve => setTimeout(resolve, delay));
           retries++;
-        } else if (error.message.includes('404') || error.message.includes('not found')) {
-          // If model not found, try a fallback model
-          try {
-            console.log("Trying fallback model gemini-1.5-flash...");
-            const fallbackModel = genAI.getGenerativeModel({
-              model: "gemini-1.5-flash",
-              generationConfig: {
-                temperature: 0.1,
-                topP: 0.9,
-                topK: 40,
-                maxOutputTokens: 2048
-              }
-            });
-            
-            const result = await fallbackModel.generateContent(prompt);
-            const response = await result.response;
-            const text = response.text();
-            
-            // Validate the response quality
-            if (text.length < 100) {
-              throw new Error("Response too short, retrying...");
-            }
-            
-            return {
-              insights: text,
-              columnStats
-            };
-          } catch (fallbackError) {
-            console.error('Fallback model error:', fallbackError.message);
-            lastError = fallbackError;
-            break;
-          }
+        } else if (error.message.includes('404') || error.message.includes('not found') || 
+                  error.message.includes('503') || error.message.includes('Service Unavailable')) {
+          // Try the next model in our list
+          currentModelIndex++;
+          console.log(`Switching to next model option: ${modelOptions[currentModelIndex]}`);
         } else {
-          // For other errors, don't retry
-          break;
+          // For other errors, try next model
+          currentModelIndex++;
+        }
+        
+        // If we've tried all models, increment retry counter
+        if (currentModelIndex >= modelOptions.length) {
+          currentModelIndex = 0; // Start over with first model
+          retries++;
+          const delay = Math.pow(2, retries) * 1000;
+          console.log(`All models attempted. Waiting ${delay}ms before retry cycle...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
         }
       }
     }
     
-    // If we got here, all retries failed
-    throw new Error(lastError || 'AI analysis failed after multiple attempts');
+    // Create a graceful fallback response when AI analysis fails
+    const fallbackResponse = {
+      insights: `# Data Analysis Summary
+  
+## Unable to Generate AI Analysis
+
+I apologize, but I couldn't generate an AI analysis of your data at this time.
+
+### Basic Statistics Instead:
+
+${Object.entries(columnStats).map(([column, stats]) => `
+- **${column}**: ${stats.type === 'numeric' ? 
+  `Range: ${stats.min} to ${stats.max}, Average: ${stats.avg.toFixed(2)}` : 
+  `${stats.uniqueValues} unique values`}
+`).join('')}
+
+### Try Again Later
+
+The AI service is currently experiencing high demand. Please try your analysis again in a few minutes.`,
+      columnStats,
+      isError: true
+    };
+
+    return fallbackResponse;
   } catch (error) {
     console.error('Gemini AI analysis error:', error);
     throw new Error(`AI analysis failed: ${error.message}`);
