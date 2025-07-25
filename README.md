@@ -374,13 +374,11 @@ GET  /api/user/activity        # Get user activity log
 ### Backend Scripts
 ```bash
 npm start          # Start production server
-npm run dev        # Start development server with nodemon
-npm run test       # Run backend tests (if available)
 ```
 
 ### Frontend Scripts
 ```bash
-npm run dev        # Start Vite development server
+npm start        # Start Vite development server
 npm run build      # Build for production
 npm run preview    # Preview production build
 npm run lint       # Run ESLint
